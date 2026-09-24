@@ -42,7 +42,9 @@ export default function AppHeader({ eyebrow, title, backHref, dark = false, deco
         }
         .head--dark { background: var(--teal-900); }
         .head-top { display: flex; margin-bottom: 8px; min-height: 28px; }
-        .back {
+        /* next/link は "use client" コンポーネントなので、直接付けたclassNameには
+           styled-jsxのスコープ用ハッシュが注入されない。:global にして確実に効かせる */
+        :global(.back) {
           display: inline-flex;
           text-decoration: none;
           color: var(--white);

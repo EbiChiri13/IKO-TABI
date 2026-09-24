@@ -45,12 +45,14 @@ export default function GroupListItem({ groupId, name, dateLabel, note, memberNa
       <AvatarStack names={memberNames} max={2} />
       <span className="chev" aria-hidden="true"><ChevronRightIcon /></span>
       <style jsx>{`
-        .item {
+        /* next/link は "use client" コンポーネントなので、直接付けたclassNameには
+           styled-jsxのスコープ用ハッシュが注入されない。:global にして確実に効かせる */
+        :global(.item) {
           display: flex; align-items: center; gap: 10px;
           padding: 12px 0; text-decoration: none; color: inherit;
           border-top: 1px solid var(--line);
         }
-        .item:first-child { border-top: 0; }
+        :global(.item:first-child) { border-top: 0; }
         .avatar {
           width: 40px; height: 40px; border-radius: 12px; flex: none;
           background: var(--cream-100); color: var(--ink-400);

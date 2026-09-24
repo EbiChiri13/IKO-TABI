@@ -96,7 +96,9 @@ export default function HomePage() {
         </Link>
       </main>
       <style jsx>{`
-        .plain-link { text-decoration: none; color: inherit; display: block; }
+        /* next/link は "use client" コンポーネントなので、直接付けたclassNameには
+           styled-jsxのスコープ用ハッシュが注入されない。:global にして確実に効かせる */
+        :global(.plain-link) { text-decoration: none; color: inherit; display: block; }
         .brand {
           background: var(--teal-600); color: var(--white);
           text-align: center; padding: 14px 0;
