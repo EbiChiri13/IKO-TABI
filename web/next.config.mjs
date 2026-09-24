@@ -7,6 +7,9 @@ const nextConfig = {
     // 本番では両方を同じオリジンで配信するか、リバースプロキシで束ねる想定。
     return [{ source: "/api/:path*", destination: `${API_ORIGIN}/api/:path*` }];
   },
+  // ngrok/cloudflared 等のトンネル経由で開発サーバーに触るときは、
+  // そのホスト名をここに追加しないと CSS/フォント/HMR がブロックされ、UI が崩れて見える。
+  allowedDevOrigins: (process.env.IKOTABI_DEV_ORIGINS || "").split(",").filter(Boolean),
 };
 
 export default nextConfig;
