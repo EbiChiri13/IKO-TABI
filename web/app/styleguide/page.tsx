@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import Button from "@/components/ui/Button";
 import TextField from "@/components/ui/TextField";
 import DateRangeField from "@/components/ui/DateRangeField";
@@ -29,7 +30,7 @@ export default function StyleguidePage() {
   const [end, setEnd] = useState("2026-11-02");
   const [toastOn, setToastOn] = useState(false);
 
-  function toggleChip(label) {
+  function toggleChip(label: string) {
     setSelectedChips((prev) => {
       const next = new Set(prev);
       next.has(label) ? next.delete(label) : next.add(label);
@@ -50,14 +51,14 @@ export default function StyleguidePage() {
 
       <Section title="カラートークン">
         <div className="swatches">
-          {[
+          {([
             ["--teal-900", "濃色ヘッダー"],
             ["--teal-600", "メインカラー"],
             ["--mint-400", "差し色"],
             ["--cream-200", "画面背景"],
             ["--ink-900", "文字色"],
             ["--line", "枠線"],
-          ].map(([token, label]) => (
+          ] as const).map(([token, label]) => (
             <div className="swatch" key={token}>
               <span className="chip-color" style={{ background: `var(${token})` }} />
               <code>{token}</code>
@@ -184,7 +185,7 @@ export default function StyleguidePage() {
   );
 }
 
-function Section({ title, children }) {
+function Section({ title, children }: { readonly title: string; readonly children: ReactNode }) {
   return (
     <section className="section">
       <h2>{title}</h2>
@@ -200,7 +201,7 @@ function Section({ title, children }) {
   );
 }
 
-function Row({ children, style }) {
+function Row({ children, style }: { readonly children: ReactNode; readonly style?: CSSProperties }) {
   return (
     <div className="row" style={style}>
       {children}

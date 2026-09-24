@@ -1,4 +1,5 @@
 import { Zen_Maru_Gothic, Yomogi } from "next/font/google";
+import type { ReactNode } from "react";
 import "./globals.css";
 
 // 本文用の丸ゴシック
@@ -28,7 +29,7 @@ export const viewport = {
   themeColor: "#2e9b84",
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { readonly children: ReactNode }) {
   return (
     <html lang="ja" className={`${body.variable} ${logo.variable}`}>
       <body>{children}</body>

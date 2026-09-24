@@ -10,14 +10,15 @@ import Spinner from "@/components/ui/Spinner";
 import PlaceList from "@/components/summary/PlaceList";
 import MemberWinsList from "@/components/summary/MemberWinsList";
 import { api, tokenFor } from "@/lib/api";
+import type { GroupSummary } from "@/lib/api";
 
 /** 決定まとめ画面（仕様書B 4.2）。旅の内容と、全員の希望がかなったかを確認する */
 export default function SummaryPage() {
-  const { id: groupId } = useParams();
+  const { id: groupId } = useParams<{ id: string }>();
   const router = useRouter();
   const token = tokenFor(groupId);
-  const [summary, setSummary] = useState(null);
-  const [error, setError] = useState(null);
+  const [summary, setSummary] = useState<GroupSummary | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -30,7 +31,7 @@ export default function SummaryPage() {
           setSummary(s);
         }
       })
-      .catch((e) => setError(e.message));
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : "読み込みに失敗しました"));
   }, [groupId, token, router]);
 
   if (error) return <p style={{ padding: 24, color: "var(--danger)" }}>{error}</p>;

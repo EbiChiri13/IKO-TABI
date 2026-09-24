@@ -8,22 +8,24 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Spinner from "@/components/ui/Spinner";
 import { api, saveMembership } from "@/lib/api";
+import type { FormEvent } from "react";
+import type { InviteInfo } from "@/lib/api";
 
 /** 招待参加画面（仕様書B 4.2）。アカウントは不要、ニックネームだけで参加する【Q3】 */
 export default function JoinPage() {
-  const { token: inviteToken } = useParams();
+  const { token: inviteToken } = useParams<{ token: string }>();
   const router = useRouter();
 
-  const [info, setInfo] = useState(null);
-  const [error, setError] = useState(null);
+  const [info, setInfo] = useState<InviteInfo | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [nickname, setNickname] = useState("");
   const [joining, setJoining] = useState(false);
 
   useEffect(() => {
-    api.getInvite(inviteToken).then(setInfo).catch((e) => setError(e.message));
+    api.getInvite(inviteToken).then(setInfo).catch((e: unknown) => setError(e instanceof Error ? e.message : "招待情報を読み込めませんでした"));
   }, [inviteToken]);
 
-  async function join(e) {
+  async function join(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setJoining(true);
     setError(null);
@@ -32,7 +34,7 @@ export default function JoinPage() {
       saveMembership(res.group_id, res.token, nickname);
       router.push(`/groups/${res.group_id}/tags`);
     } catch (e) {
-      setError(e.message || "参加できませんでした");
+      setError(e instanceof Error ? e.message || "参加できませんでした" : "参加できませんでした");
     } finally {
       setJoining(false);
     }

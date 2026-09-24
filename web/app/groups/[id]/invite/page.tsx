@@ -10,26 +10,28 @@ import Toast from "@/components/ui/Toast";
 import InviteHero from "@/components/invite/InviteHero";
 import InviteLinkBox from "@/components/invite/InviteLinkBox";
 import { api, tokenFor } from "@/lib/api";
+import type { GroupView } from "@/lib/api";
 
 /** 招待画面（design 9,14,16,18）。友達ごとにリンクを作る【Q15】 */
 export default function InvitePage() {
-  const { id: groupId } = useParams();
+  const { id: groupId } = useParams<{ id: string }>();
   const router = useRouter();
   const token = tokenFor(groupId);
 
-  const [group, setGroup] = useState(null);
-  const [links, setLinks] = useState([]); // このセッションで作った招待URL
-  const [error, setError] = useState(null);
+  const [group, setGroup] = useState<GroupView | null>(null);
+  const [links, setLinks] = useState<string[]>([]); // このセッションで作った招待URL
+  const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     if (!token) return;
-    api.getGroup(groupId, token).then(setGroup).catch((e) => setError(e.message));
+    api.getGroup(groupId, token).then(setGroup).catch((e: unknown) => setError(e instanceof Error ? e.message : "読み込みに失敗しました"));
   }, [groupId, token]);
 
   const openSlots = group ? group.member_limit - group.members.length - links.length : 0;
 
   async function createLink() {
+    if (!token) return;
     setCreating(true);
     setError(null);
     try {
@@ -37,13 +39,13 @@ export default function InvitePage() {
       const url = `${window.location.origin}/join/${inviteToken}`;
       setLinks((prev) => [...prev, url]);
     } catch (e) {
-      setError(e.message || "招待リンクを作れませんでした");
+      setError(e instanceof Error ? e.message || "招待リンクを作れませんでした" : "招待リンクを作れませんでした");
     } finally {
       setCreating(false);
     }
   }
 
-  async function share(url) {
+  async function share(url: string) {
     if (navigator.share) {
       try {
         await navigator.share({ title: "いこたび", text: `${group?.name} に招待されました`, url });

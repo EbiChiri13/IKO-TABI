@@ -15,11 +15,11 @@ import { useLiveGroup } from "@/lib/useLiveGroup";
 
 /** 回答待ち画面（仕様書B 4.2）。全員回答で自動遷移、幹事は2人以上で先へ進める【Q8】 */
 export default function WaitingPage() {
-  const { id: groupId } = useParams();
+  const { id: groupId } = useParams<{ id: string }>();
   const router = useRouter();
   const { group, token, loading, error, refresh } = useLiveGroup(groupId);
   const [starting, setStarting] = useState(false);
-  const [startError, setStartError] = useState(null);
+  const [startError, setStartError] = useState<string | null>(null);
 
   useEffect(() => {
     if (group && group.status !== "collecting") {
@@ -28,13 +28,14 @@ export default function WaitingPage() {
   }, [group, groupId, router]);
 
   async function startNow() {
+    if (!token) return;
     setStarting(true);
     setStartError(null);
     try {
       await api.start(groupId, token);
       await refresh();
     } catch (e) {
-      setStartError(e.message || "まだ開始できません");
+      setStartError(e instanceof Error ? e.message || "まだ開始できません" : "まだ開始できません");
     } finally {
       setStarting(false);
     }
@@ -74,7 +75,7 @@ export default function WaitingPage() {
           </Button>
         </BottomBar>
       )}
-      <Toast message={error?.message || startError} />
+      <Toast message={(error instanceof Error ? error.message : null) || startError} />
       <style jsx>{`
         .body { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
         .lead { font-weight: 700; margin-bottom: 6px; }

@@ -12,18 +12,19 @@ import Button from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
 import Toast from "@/components/ui/Toast";
 import { api, tokenFor } from "@/lib/api";
+import type { Tag, TagCategory as TagCategoryData } from "@/lib/api";
 
 /** ハッシュタグ選択画面（仕様書B 4.2・5.1）。自由入力はなく、用意された65語から選ぶ【Q6】 */
 export default function TagsPage() {
-  const { id: groupId } = useParams();
+  const { id: groupId } = useParams<{ id: string }>();
   const router = useRouter();
   const token = tokenFor(groupId);
 
-  const [categories, setCategories] = useState(null);
-  const [selected, setSelected] = useState(new Set());
+  const [categories, setCategories] = useState<TagCategoryData[] | null>(null);
+  const [selected, setSelected] = useState<Set<Tag["id"]>>(new Set());
   const [share, setShare] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -32,10 +33,10 @@ export default function TagsPage() {
       setCategories(cats);
       setSelected(new Set(mine.tag_ids));
       setShare(mine.share_answers);
-    })().catch((e) => setError(e.message));
+    })().catch((e: unknown) => setError(e instanceof Error ? e.message : "読み込みに失敗しました"));
   }, [groupId, token]);
 
-  function toggle(id) {
+  function toggle(id: Tag["id"]) {
     setSelected((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
@@ -49,13 +50,14 @@ export default function TagsPage() {
   );
 
   async function submit() {
+    if (!token) return;
     setSaving(true);
     setError(null);
     try {
       const res = await api.saveMySelections(groupId, token, [...selected], share);
       router.push(res.started ? `/groups/${groupId}/vote/destination` : `/groups/${groupId}/waiting`);
     } catch (e) {
-      setError(e.message || "保存に失敗しました");
+      setError(e instanceof Error ? e.message || "保存に失敗しました" : "保存に失敗しました");
     } finally {
       setSaving(false);
     }

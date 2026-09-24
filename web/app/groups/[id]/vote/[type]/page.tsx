@@ -10,29 +10,35 @@ import Button from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
 import Toast from "@/components/ui/Toast";
 import { api, connectRealtime, tokenFor } from "@/lib/api";
+import type { CandidatesView, CandidateItem, GroupStatus, MemberRole, TargetType } from "@/lib/api";
 
 const META = {
   destination: { title: "行き先を選ぼう", eyebrow: "候補は3件" },
   lodging: { title: "宿を選ぼう", eyebrow: "1つに投票" },
   food: { title: "ごはんを選ぼう", eyebrow: "2つまで投票" },
   spot: { title: "スポットを選ぼう", eyebrow: "3つまで投票" },
-};
+} satisfies Record<TargetType, { readonly title: string; readonly eyebrow: string }>;
 
-const NEXT = { destination: "lodging", lodging: "food", food: "spot", spot: "summary" };
+const NEXT = { destination: "lodging", lodging: "food", food: "spot", spot: "summary" } as const;
+
+function isTargetType(value: string): value is TargetType {
+  return value === "destination" || value === "lodging" || value === "food" || value === "spot";
+}
 
 export default function VoteTypePage() {
-  const { id: groupId, type } = useParams();
+  const { id: groupId, type: routeType } = useParams<{ id: string; type: string }>();
   const router = useRouter();
+  const type = isTargetType(routeType) ? routeType : null;
   const token = tokenFor(groupId);
 
-  const [data, setData] = useState(null);
-  const [role, setRole] = useState(null); // "host" | "member"
-  const [selected, setSelected] = useState(new Set());
-  const [error, setError] = useState(null);
+  const [data, setData] = useState<CandidatesView | null>(null);
+  const [role, setRole] = useState<MemberRole | null>(null);
+  const [selected, setSelected] = useState<Set<CandidateItem["id"]>>(new Set());
+  const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    if (!token) return;
+    if (!token || !type) return;
     const [group, candidates] = await Promise.all([api.getGroup(groupId, token), api.candidates(groupId, token, type)]);
     setRole(group.me.role);
     setData(candidates);
@@ -45,19 +51,22 @@ export default function VoteTypePage() {
   }, [groupId, token, type, router]);
 
   useEffect(() => {
-    load().catch((e) => setError(e.message));
+    load().catch((e: unknown) => setError(e instanceof Error ? e.message : "読み込みに失敗しました"));
   }, [load]);
 
   useEffect(() => {
-    if (!token) return;
+    if (!token || !type) return;
     return connectRealtime(groupId, token, (msg) => {
-      if (msg.changed?.some((k) => ["votes", "status"].includes(k))) load().catch(() => {});
+      if (msg.changed?.some((k) => ["votes", "status"].includes(k))) {
+        load().catch((e: unknown) => setError(e instanceof Error ? e.message : "読み込みに失敗しました"));
+      }
     });
-  }, [groupId, token, load]);
+  }, [groupId, token, type, load]);
 
-  function toggle(id) {
+  function toggle(id: CandidateItem["id"]) {
     setSelected((prev) => {
       const next = new Set(prev);
+      if (!data) return next;
       if (next.has(id)) {
         next.delete(id);
       } else if (next.size < data.vote_limit) {
@@ -68,31 +77,34 @@ export default function VoteTypePage() {
   }
 
   async function submit() {
+    if (!token || !type) return;
     setBusy(true);
     setError(null);
     try {
       await api.vote(groupId, token, type, [...selected]);
       await load();
     } catch (e) {
-      setError(e.message || "投票できませんでした");
+      setError(e instanceof Error ? e.message || "投票できませんでした" : "投票できませんでした");
     } finally {
       setBusy(false);
     }
   }
 
   async function decideNow() {
+    if (!token || !type) return;
     setBusy(true);
     setError(null);
     try {
       await api.decide(groupId, token);
       router.push(`/groups/${groupId}/${NEXT[type] === "summary" ? "summary" : `vote/${NEXT[type]}`}`);
     } catch (e) {
-      setError(e.message || "締め切れませんでした");
+      setError(e instanceof Error ? e.message || "締め切れませんでした" : "締め切れませんでした");
     } finally {
       setBusy(false);
     }
   }
 
+  if (!type) return <Spinner label="投票の種類が正しくありません" />;
   if (!data) return <Spinner />;
 
   const meta = META[type];

@@ -8,15 +8,18 @@ import HeroCarousel from "@/components/home/HeroCarousel";
 import GroupListItem from "@/components/home/GroupListItem";
 import TripCard from "@/components/home/TripCard";
 import { api, myGroups } from "@/lib/api";
+import type { GroupView } from "@/lib/api";
 
 const RECOMMENDATIONS = [
   { caption: "夜景が人気：兵庫・神戸", photoUrl: null },
   { caption: "海と鳥居の絶景：広島・宮島", photoUrl: null },
-];
+] as const;
+
+type GroupEntry = { readonly id: string; readonly g: GroupView };
 
 /** ホーム画面（design 25-28）。この端末で参加中のグループ一覧と、直近の旅行を表示する。 */
 export default function HomePage() {
-  const [groups, setGroups] = useState(null); // null = 読み込み中
+  const [groups, setGroups] = useState<GroupEntry[] | null>(null); // null = 読み込み中
 
   useEffect(() => {
     let cancelled = false;
@@ -33,7 +36,7 @@ export default function HomePage() {
           }
         })
       );
-      if (!cancelled) setGroups(results.filter(Boolean));
+      if (!cancelled) setGroups(results.filter((result): result is GroupEntry => result !== null));
     })();
     return () => {
       cancelled = true;
