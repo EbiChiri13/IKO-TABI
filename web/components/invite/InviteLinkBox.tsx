@@ -2,8 +2,12 @@
 
 import { useState } from "react";
 
+type InviteLinkBoxProps = {
+  readonly url: string;
+};
+
 /** 招待リンクの表示＋コピー（design: https://konosaitonolinkdesu の入力欄） */
-export default function InviteLinkBox({ url }) {
+export default function InviteLinkBox({ url }: InviteLinkBoxProps) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {

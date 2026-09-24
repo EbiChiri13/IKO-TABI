@@ -1,5 +1,14 @@
+import type { CandidateItem, TargetType } from "@/lib/api";
+
+type CandidateCardProps = {
+  readonly item: CandidateItem;
+  readonly type: TargetType;
+  readonly onToggle: (id: CandidateItem["id"]) => void;
+  readonly locked: boolean;
+};
+
 /** 行き先・宿・ごはん・スポットに共通の候補カード（仕様書B 4.2・5.2・5.4） */
-export default function CandidateCard({ item, type, onToggle, locked }) {
+export default function CandidateCard({ item, type, onToggle, locked }: CandidateCardProps) {
   const selectable = !locked && !item.decided;
   return (
     <button
@@ -39,7 +48,7 @@ export default function CandidateCard({ item, type, onToggle, locked }) {
       </p>
 
       <div className="meta">
-        {"price" in item && <span>{item.price > 0 ? `1人あたり ${item.price.toLocaleString()}円〜` : "無料"}</span>}
+        {item.price !== undefined && <span>{item.price > 0 ? `1人あたり ${item.price.toLocaleString()}円〜` : "無料"}</span>}
         {item.ticket && <span>チケット必要</span>}
         <span className="votes">{item.votes}票</span>
       </div>

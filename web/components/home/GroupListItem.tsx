@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import AvatarStack from "@/components/ui/AvatarStack";
+import type { GroupStatus } from "@/lib/api";
 
 const STATUS_LABEL = {
   collecting: "希望集め中",
@@ -9,10 +10,19 @@ const STATUS_LABEL = {
   food: "ごはんを投票中",
   spot: "スポットを投票中",
   done: "決定ずみ",
+} satisfies Record<GroupStatus, string>;
+
+type GroupListItemProps = {
+  readonly groupId: string;
+  readonly name: string;
+  readonly dateLabel: string;
+  readonly note?: string;
+  readonly memberNames?: readonly string[];
+  readonly status: keyof typeof STATUS_LABEL;
 };
 
 /** ホーム画面「所属グループ」の1行（design: エビチリ / 同期仲良しグル） */
-export default function GroupListItem({ groupId, name, dateLabel, note, memberNames = [], status }) {
+export default function GroupListItem({ groupId, name, dateLabel, note, memberNames = [], status }: GroupListItemProps) {
   return (
     <Link href={`/groups/${groupId}`} className="item">
       <span className="avatar" aria-hidden="true">

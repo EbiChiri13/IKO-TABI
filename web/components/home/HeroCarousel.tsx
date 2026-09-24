@@ -2,8 +2,17 @@
 
 import { useState } from "react";
 
+type HeroSlide = {
+  readonly caption: string;
+  readonly photoUrl: string | null;
+};
+
+type HeroCarouselProps = {
+  readonly slides?: readonly HeroSlide[];
+};
+
 /** ホーム画面いちばん上の「上半期おすすめ旅行先TOP5」カルーセル */
-export default function HeroCarousel({ slides = [] }) {
+export default function HeroCarousel({ slides = [] }: HeroCarouselProps) {
   const [i, setI] = useState(0);
   if (slides.length === 0) return null;
   const slide = slides[i];

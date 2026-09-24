@@ -1,7 +1,12 @@
 import PlaneTrail from "@/components/layout/PlaneTrail";
 
+type InviteHeroProps = {
+  readonly backHref: string;
+  readonly groupName: string;
+};
+
 /** 招待画面のヒーロー部分（design 9,14,16,18:「〇〇が結成されました！」） */
-export default function InviteHero({ backHref, groupName }) {
+export default function InviteHero({ backHref, groupName }: InviteHeroProps) {
   return (
     <header className="hero">
       <PlaneTrail />

@@ -1,5 +1,7 @@
+type WelcomeIllustrationProps = Record<string, never>;
+
 /** スプラッシュ画面のイラスト（悩む人 × 提案する人）を簡易な線画で表現 */
-export default function WelcomeIllustration() {
+export default function WelcomeIllustration({}: WelcomeIllustrationProps = {}) {
   return (
     <svg className="illust" viewBox="0 0 300 180" fill="none" aria-hidden="true">
       <ellipse cx="150" cy="170" rx="130" ry="10" fill="var(--teal-500)" opacity="0.35" />

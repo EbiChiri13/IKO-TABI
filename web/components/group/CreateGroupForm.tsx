@@ -5,9 +5,16 @@ import TextField from "@/components/ui/TextField";
 import DateRangeField from "@/components/ui/DateRangeField";
 import Stepper from "@/components/ui/Stepper";
 import Button from "@/components/ui/Button";
+import type { CreateGroupInput } from "@/lib/api";
+
+type CreateGroupFormProps = {
+  readonly onSubmit: (values: CreateGroupInput) => void;
+  readonly submitting: boolean;
+  readonly error: string | null;
+};
 
 /** グループ作成フォーム本体（design: 部屋の名前 / 日程 / 人数）。仕様書B F-01 */
-export default function CreateGroupForm({ onSubmit, submitting, error }) {
+export default function CreateGroupForm({ onSubmit, submitting, error }: CreateGroupFormProps) {
   const [name, setName] = useState("");
   const [nickname, setNickname] = useState("");
   const [start, setStart] = useState("");

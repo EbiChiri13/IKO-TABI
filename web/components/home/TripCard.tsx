@@ -1,7 +1,17 @@
 import AvatarStack from "@/components/ui/AvatarStack";
 
+type TripCardProps = {
+  readonly photoUrl?: string | null;
+  readonly name: string;
+  readonly place: string;
+  readonly nights: string;
+  readonly dateLabel: string;
+  readonly note?: string;
+  readonly memberNames?: readonly string[];
+};
+
 /** ホーム画面「直近の旅行」カード */
-export default function TripCard({ photoUrl, name, place, nights, dateLabel, note, memberNames = [] }) {
+export default function TripCard({ photoUrl, name, place, nights, dateLabel, note, memberNames = [] }: TripCardProps) {
   return (
     <div className="trip">
       <div className="photo" style={photoUrl ? { backgroundImage: `url(${photoUrl})` } : undefined} />
