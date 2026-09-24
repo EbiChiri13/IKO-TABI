@@ -68,7 +68,19 @@ app.add_middleware(
 
 Name = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=20)]
 Token = Annotated[str | None, Header(alias="X-Member-Token")]
+UserToken = Annotated[str | None, Header(alias="X-User-Token")]
 TargetType = Literal["destination", "lodging", "food", "spot"]
+
+
+class RegisterIn(BaseModel):
+    display_name: Name
+    email: str
+    password: str = Field(min_length=8, max_length=100)
+
+
+class LoginIn(BaseModel):
+    email: str
+    password: str = Field(min_length=1, max_length=100)
 
 
 class GroupIn(BaseModel):
@@ -98,6 +110,25 @@ class VoteIn(BaseModel):
 
 
 # ───────── REST ─────────
+
+@app.post("/api/auth/register")
+def register(body: RegisterIn):
+    with db.tx() as conn:
+        return service.register_user(conn, body.display_name, body.email, body.password)
+
+
+@app.post("/api/auth/login")
+def login(body: LoginIn):
+    with db.tx() as conn:
+        return service.login_user(conn, body.email, body.password)
+
+
+@app.get("/api/auth/me")
+def me(token: UserToken = None):
+    with db.tx() as conn:
+        user = service.auth_user(conn, token)
+        return {"display_name": user["display_name"], "email": user["email"]}
+
 
 @app.post("/api/groups")
 def create_group(body: GroupIn):

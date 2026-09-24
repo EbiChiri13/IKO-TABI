@@ -5,6 +5,7 @@
 """
 
 import hashlib
+import re
 import secrets
 from datetime import date
 
@@ -38,6 +39,61 @@ def hash_token(token: str) -> str:
 
 def _fail(status: int, message: str):
     raise HTTPException(status_code=status, detail=message)
+
+
+# ───────── アカウント（メール＋パスワード） ─────────
+
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+_PBKDF2_ITERATIONS = 200_000
+
+
+def hash_password(password: str) -> str:
+    salt = secrets.token_hex(16)
+    digest = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), _PBKDF2_ITERATIONS).hex()
+    return f"{salt}${digest}"
+
+
+def verify_password(password: str, stored: str) -> bool:
+    salt, _, digest = stored.partition("$")
+    if not digest:
+        return False
+    check = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), _PBKDF2_ITERATIONS).hex()
+    return secrets.compare_digest(check, digest)
+
+
+def register_user(conn, display_name: str, email: str, password: str) -> dict:
+    email = email.strip().lower()
+    if not _EMAIL_RE.match(email):
+        _fail(400, "メールアドレスの形式が正しくありません")
+    if len(password) < 8:
+        _fail(400, "パスワードは8文字以上にしてください")
+    if conn.execute("SELECT id FROM users WHERE email = %s", (email,)).fetchone():
+        _fail(409, "このメールアドレスは既に登録されています")
+    token = new_token()
+    conn.execute(
+        "INSERT INTO users (display_name, email, password_hash, token_hash) VALUES (%s, %s, %s, %s)",
+        (display_name, email, hash_password(password), hash_token(token)),
+    )
+    return {"token": token, "display_name": display_name}
+
+
+def login_user(conn, email: str, password: str) -> dict:
+    email = email.strip().lower()
+    user = conn.execute("SELECT * FROM users WHERE email = %s", (email,)).fetchone()
+    if user is None or not verify_password(password, user["password_hash"]):
+        _fail(401, "メールアドレスまたはパスワードが違います")
+    token = new_token()
+    conn.execute("UPDATE users SET token_hash = %s WHERE id = %s", (hash_token(token), user["id"]))
+    return {"token": token, "display_name": user["display_name"]}
+
+
+def auth_user(conn, token: str | None) -> dict:
+    if not token:
+        _fail(401, "ログインしていません")
+    user = conn.execute("SELECT * FROM users WHERE token_hash = %s", (hash_token(token),)).fetchone()
+    if user is None:
+        _fail(403, "ログインしていません")
+    return user
 
 
 # ───────── 本人確認・権限 ─────────

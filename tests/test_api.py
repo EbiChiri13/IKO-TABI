@@ -50,6 +50,33 @@ def test_tags(client):
     assert sum(len(c["tags"]) for c in cats) == 65
 
 
+def test_account_register_and_login(client):
+    body = {"display_name": "テスター", "email": "tester@example.com", "password": "hunter2222"}
+    r = client.post("/api/auth/register", json=body)
+    assert r.status_code == 200, r.text
+    token = r.json()["token"]
+    assert r.json()["display_name"] == "テスター"
+
+    # 同じメールアドレスでは登録できない
+    assert client.post("/api/auth/register", json=body).status_code == 409
+
+    # パスワードが短すぎると登録できない
+    short = {**body, "email": "short@example.com", "password": "abc"}
+    assert client.post("/api/auth/register", json=short).status_code == 422
+
+    me = client.get("/api/auth/me", headers={"X-User-Token": token})
+    assert me.status_code == 200 and me.json()["email"] == "tester@example.com"
+
+    # 間違ったパスワードではログインできない
+    assert client.post("/api/auth/login", json={"email": "tester@example.com", "password": "wrong"}).status_code == 401
+
+    r2 = client.post("/api/auth/login", json={"email": "tester@example.com", "password": "hunter2222"})
+    assert r2.status_code == 200
+    assert client.get("/api/auth/me", headers={"X-User-Token": r2.json()["token"]}).status_code == 200
+    # ログインし直すと古いトークンは無効になる
+    assert client.get("/api/auth/me", headers={"X-User-Token": token}).status_code == 403
+
+
 def test_full_flow(client):
     r = client.post("/api/groups", json={"name": "卒業旅行", "start_date": "2026-11-01",
                                          "end_date": "2026-11-02", "member_limit": 3, "nickname": "えび"})

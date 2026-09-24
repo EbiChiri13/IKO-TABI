@@ -72,6 +72,36 @@ export function saveInviteLink(groupId: string, url: string) {
   }
 }
 
+const USER_SESSION_KEY = "ikotabi.user"; // { token, displayName }（アカウント機能。グループ参加のトークンとは別物）
+
+export interface UserSession {
+  token: string;
+  displayName: string;
+}
+
+export function userSession(): UserSession | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return JSON.parse(window.localStorage.getItem(USER_SESSION_KEY) || "null") as UserSession | null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveUserSession(session: UserSession) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(USER_SESSION_KEY, JSON.stringify(session));
+  } catch {
+    // プライベートブラウジング等で保存できなくても致命的ではない
+  }
+}
+
+export function clearUserSession() {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(USER_SESSION_KEY);
+}
+
 export class ApiError extends Error {
   status: number;
 
@@ -107,6 +137,27 @@ async function request<T>(path: string, { method = "GET", token, body }: Request
     throw new ApiError(res.status, message);
   }
   if (res.status === 204) return null as T;
+  return (await res.json()) as T;
+}
+
+async function authRequest<T>(path: string, body: unknown, token?: string | null): Promise<T> {
+  const res = await fetch(path, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { "X-User-Token": token } : {}),
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    let message = res.statusText;
+    try {
+      message = ((await res.json()) as { detail?: string }).detail ?? message;
+    } catch {
+      /* ignore */
+    }
+    throw new ApiError(res.status, message);
+  }
   return (await res.json()) as T;
 }
 
@@ -305,6 +356,14 @@ export interface TagSummary {
 }
 
 export const api = {
+  register: (displayName: string, email: string, password: string) =>
+    authRequest<{ token: string; display_name: string }>("/api/auth/register", {
+      display_name: displayName,
+      email,
+      password,
+    }),
+  login: (email: string, password: string) =>
+    authRequest<{ token: string; display_name: string }>("/api/auth/login", { email, password }),
   createGroup: (body: CreateGroupInput) => request<CreateGroupResult>("/api/groups", { method: "POST", body }),
   getGroup: (groupId: string, token: string) => request<GroupView>(`/api/groups/${groupId}`, { token }),
   createInvite: (groupId: string, token: string) =>

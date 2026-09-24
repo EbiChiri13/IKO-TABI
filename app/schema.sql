@@ -107,6 +107,17 @@ CREATE TABLE IF NOT EXISTS votes (
     UNIQUE (member_id, target_type, target_id)
 );
 
+-- アカウント（メール＋パスワード）。グループ参加自体は引き続きアカウント不要【Q3】で、
+-- こちらは将来「自分のグループ一覧をどの端末からでも見る」等のための土台。
+CREATE TABLE IF NOT EXISTS users (
+    id             SERIAL PRIMARY KEY,
+    display_name   VARCHAR(20) NOT NULL,
+    email          TEXT NOT NULL UNIQUE,
+    password_hash  TEXT NOT NULL,
+    token_hash     TEXT UNIQUE,                            -- ログイン中のセッショントークンのハッシュ
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS decisions (
     id           SERIAL PRIMARY KEY,
     group_id     TEXT NOT NULL REFERENCES groups(id) ON DELETE CASCADE,

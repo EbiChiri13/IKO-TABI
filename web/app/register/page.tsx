@@ -8,9 +8,10 @@ import Button from "@/components/ui/Button";
 import Toast from "@/components/ui/Toast";
 import { api, saveUserSession, ApiError } from "@/lib/api";
 
-/** ログイン画面（Figma完成版）。送信すると /api/auth/login を呼び、成功すればホーム導線（/home）へ遷移する。 */
-export default function LoginPage() {
+/** アカウント新規登録画面。ログイン画面と同じ見た目で、表示名・メール・パスワードを受け付ける。 */
+export default function RegisterPage() {
   const router = useRouter();
+  const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -21,11 +22,11 @@ export default function LoginPage() {
     setBusy(true);
     setError(null);
     try {
-      const { token, display_name } = await api.login(email, password);
+      const { token, display_name } = await api.register(displayName, email, password);
       saveUserSession({ token, displayName: display_name });
       router.push("/home");
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "ログインできませんでした");
+      setError(e instanceof ApiError ? e.message : "登録できませんでした");
     } finally {
       setBusy(false);
     }
@@ -42,6 +43,14 @@ export default function LoginPage() {
 
       <form className="form" onSubmit={handleSubmit}>
         <TextField
+          type="text"
+          placeholder="表示名"
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+          required
+          maxLength={20}
+        />
+        <TextField
           type="email"
           placeholder="メールアドレス"
           value={email}
@@ -50,21 +59,19 @@ export default function LoginPage() {
         />
         <TextField
           type="password"
-          placeholder="パスワード"
+          placeholder="パスワード（8文字以上）"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          minLength={8}
         />
-        <Link href="#" className="forgot-link">
-          パスワードをお忘れですか？
-        </Link>
 
         <Button type="submit" variant="primary" block disabled={busy}>
-          {busy ? "ログインしています…" : "ログイン"}
+          {busy ? "登録しています…" : "登録する"}
         </Button>
 
         <p className="signup-hint">
-          アカウントの新規登録は<Link href="/register">こちら</Link>
+          アカウントをお持ちの方は<Link href="/login">こちら</Link>
         </p>
       </form>
       <Toast message={error} />
@@ -96,13 +103,6 @@ export default function LoginPage() {
         }
         .form :global(.field) {
           margin-bottom: 16px;
-        }
-        .forgot-link {
-          display: block;
-          margin: -8px 0 24px;
-          font-size: 0.85rem;
-          color: var(--ink-600);
-          text-decoration: none;
         }
         .signup-hint {
           margin-top: 16px;
