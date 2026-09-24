@@ -1,13 +1,23 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import PlaneTrail from "./PlaneTrail";
+
+type AppHeaderProps = {
+  readonly eyebrow?: string;
+  readonly title: string;
+  readonly backHref?: string;
+  readonly dark?: boolean;
+  readonly decorate?: boolean;
+  readonly children?: ReactNode;
+};
 
 /**
  * グループ作成・招待・回答待ちなどで使う、ティール地の見出しヘッダー。
  * dark にすると「決定まとめ」などで使う濃紺のチケット風ヘッダーになる。
  */
-export default function AppHeader({ eyebrow, title, backHref, dark = false, decorate = true, children }) {
+export default function AppHeader({ eyebrow, title, backHref, dark = false, decorate = true, children }: AppHeaderProps) {
   return (
     <header className={`head ${dark ? "head--dark" : ""}`}>
       {decorate && <PlaneTrail />}

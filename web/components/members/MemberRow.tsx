@@ -1,7 +1,8 @@
 import Badge from "@/components/ui/Badge";
+import type { GroupMember } from "@/lib/api";
 
 /** メンバー1人分の行（回答待ち画面）。公開を選んだ人だけタグが見える【Q16】 */
-export default function MemberRow({ nickname, role, answered, isMe, tags }) {
+export default function MemberRow({ nickname, role, answered, is_me: isMe, tags }: GroupMember) {
   return (
     <li className="row">
       <div className="head">

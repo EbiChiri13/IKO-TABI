@@ -1,7 +1,13 @@
 import Chip from "@/components/ui/Chip";
+import type { Tag, TagCategory as ApiTagCategory } from "@/lib/api";
+
+type TagCategoryProps = Pick<ApiTagCategory, "label" | "tags"> & {
+  readonly selectedIds: ReadonlySet<Tag["id"]>;
+  readonly onToggle: (id: Tag["id"]) => void;
+};
 
 /** 4つの質問のうち1つぶん（例：どこ行きたい？）。1つ以上選ぶと ok 表示になる【F-04】 */
-export default function TagCategory({ label, tags, selectedIds, onToggle }) {
+export default function TagCategory({ label, tags, selectedIds, onToggle }: TagCategoryProps) {
   const count = tags.filter((t) => selectedIds.has(t.id)).length;
   return (
     <section className="q">

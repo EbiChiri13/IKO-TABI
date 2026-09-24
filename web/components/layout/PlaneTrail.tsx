@@ -1,5 +1,7 @@
 /** ヘッダーの奥に薄く見える飛行機雲の飾り（デザインの「行きたい」系ヘッダーに共通） */
-export default function PlaneTrail() {
+type PlaneTrailProps = Record<string, never>;
+
+export default function PlaneTrail(_props: PlaneTrailProps = {}) {
   return (
     <svg className="plane-trail" viewBox="0 0 200 120" fill="none" aria-hidden="true">
       <path

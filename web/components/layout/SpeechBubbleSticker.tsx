@@ -1,5 +1,9 @@
 /** 「行きたい」の吹き出しシール（グループ作成ヘッダーの飾り） */
-export default function SpeechBubbleSticker({ text = "行きたい" }) {
+type SpeechBubbleStickerProps = {
+  readonly text?: string;
+};
+
+export default function SpeechBubbleSticker({ text = "行きたい" }: SpeechBubbleStickerProps) {
   return (
     <span className="sticker">
       {text}

@@ -1,5 +1,12 @@
+import type { PlaceSummary } from "@/lib/api";
+
+type PlaceListProps = {
+  readonly title: string;
+  readonly places: readonly PlaceSummary[];
+};
+
 /** 決定まとめ：宿・ごはん・スポットの決定内容 */
-export default function PlaceList({ title, places }) {
+export default function PlaceList({ title, places }: PlaceListProps) {
   if (!places || places.length === 0) return null;
   return (
     <section className="section">

@@ -1,4 +1,4 @@
-const STEPS = ["希望", "行き先", "宿・ごはん", "スポット"];
+const STEPS = ["希望", "行き先", "宿・ごはん", "スポット"] as const;
 
 // グループの status を、4段の進み具合の何段目にあたるかへ変換
 const STEP_INDEX = {
@@ -8,10 +8,14 @@ const STEP_INDEX = {
   food: 2,
   spot: 3,
   done: 3,
+} as const;
+
+type ProgressStepsProps = {
+  readonly status: keyof typeof STEP_INDEX;
 };
 
 /** 全画面の上部に出す4段の進み具合バー */
-export default function ProgressSteps({ status }) {
+export default function ProgressSteps({ status }: ProgressStepsProps) {
   const current = STEP_INDEX[status] ?? 0;
   return (
     <ol className="steps" aria-label="旅行を決める進み具合">

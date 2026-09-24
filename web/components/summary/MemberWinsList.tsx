@@ -1,5 +1,11 @@
+import type { SummaryMemberWin } from "@/lib/api";
+
+type MemberWinsListProps = {
+  readonly members: readonly SummaryMemberWin[];
+};
+
 /** 決定まとめ：メンバーごとに、かなった希望の数を表示する【Q2】 */
-export default function MemberWinsList({ members }) {
+export default function MemberWinsList({ members }: MemberWinsListProps) {
   return (
     <ul className="list">
       {members.map((m) => (
