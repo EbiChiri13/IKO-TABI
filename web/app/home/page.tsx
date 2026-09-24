@@ -4,20 +4,19 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
-import HeroCarousel from "@/components/home/HeroCarousel";
 import GroupListItem from "@/components/home/GroupListItem";
-import TripCard from "@/components/home/TripCard";
+import TicketCard from "@/components/invite/TicketCard";
 import { api, myGroups } from "@/lib/api";
 import type { GroupView } from "@/lib/api";
 
-const RECOMMENDATIONS = [
-  { caption: "夜景が人気：兵庫・神戸", photoUrl: null },
-  { caption: "海と鳥居の絶景：広島・宮島", photoUrl: null },
-] as const;
-
 type GroupEntry = { readonly id: string; readonly g: GroupView };
 
-/** ホーム画面（design 25-28）。この端末で参加中のグループ一覧と、直近の旅行を表示する。 */
+function formatDate(iso: string): string {
+  const [y, m, d] = iso.split("-");
+  return `${y}.${m}/${d}`;
+}
+
+/** ホーム画面（design: 完成版 node 473:5133）。参加中のグループをチケット風カードの横スクロールで見せる。 */
 export default function HomePage() {
   const [groups, setGroups] = useState<GroupEntry[] | null>(null); // null = 読み込み中
 
@@ -45,34 +44,36 @@ export default function HomePage() {
 
   if (groups === null) return <Spinner />;
 
-  const nearest = groups[0];
-
   return (
     <div className="screen">
-      <HeroCarousel slides={RECOMMENDATIONS} />
       <header className="brand">
-        <h1 className="ikotabi-logo">いこたび</h1>
+        <img className="wordmark" src="/splash/wordmark.svg" alt="いこ！たび" />
       </header>
 
-      <main className="body">
-        {nearest && (
-          <section>
-            <h2 className="section-title">🗓 直近の旅行</h2>
-            <Link href={`/groups/${nearest.id}`} className="plain-link">
-              <TripCard
-                name={nearest.g.name}
-                place=""
-                nights=""
-                dateLabel={`${nearest.g.start_date} 〜 ${nearest.g.end_date}`}
-                note="続きから見る"
-                memberNames={nearest.g.members.map((m) => m.nickname)}
+      {groups.length > 0 && (
+        <div className="carousel" role="list">
+          {groups.map(({ id, g }) => (
+            <Link key={id} href={`/groups/${id}`} className="carousel-item" role="listitem">
+              <TicketCard
+                size="lg"
+                width={279}
+                groupId={id}
+                name={g.name}
+                start={formatDate(g.start_date)}
+                end={formatDate(g.end_date)}
+                photoUrl={`https://picsum.photos/seed/ikotabi-group-${id}/640/480`}
               />
             </Link>
-          </section>
-        )}
+          ))}
+        </div>
+      )}
 
+      <main className="body">
         <section>
-          <h2 className="section-title">🧑‍🤝‍🧑 所属グループ</h2>
+          <h2 className="section-title">
+            <img className="pin" src="/home/pin.svg" alt="" aria-hidden="true" />
+            所属グループ
+          </h2>
           {groups.length === 0 ? (
             <p className="empty">まだ参加しているグループがありません。招待リンクを開くか、新しくグループを作ってみましょう。</p>
           ) : (
@@ -98,14 +99,29 @@ export default function HomePage() {
       <style jsx>{`
         /* next/link は "use client" コンポーネントなので、直接付けたclassNameには
            styled-jsxのスコープ用ハッシュが注入されない。:global にして確実に効かせる */
-        :global(.plain-link) { text-decoration: none; color: inherit; display: block; }
+        :global(.carousel-item) { text-decoration: none; color: inherit; display: block; }
+        .screen { background: var(--white); }
         .brand {
-          background: var(--teal-600); color: var(--white);
-          text-align: center; padding: 14px 0;
+          padding: 26px 0 18px;
+          display: flex; justify-content: center;
         }
-        .brand h1 { font-size: 1.3rem; }
-        .body { flex: 1; padding: 20px 20px calc(24px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 22px; }
-        .section-title { font-size: 1rem; margin-bottom: 10px; border-bottom: 2px solid var(--line); padding-bottom: 8px; }
+        .wordmark { width: 43%; height: auto; }
+        .carousel {
+          display: flex; gap: 20px;
+          overflow-x: auto; overflow-y: hidden;
+          scroll-snap-type: x proximity;
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior-x: contain;
+          padding: 0 20px 8px;
+          scrollbar-width: none;
+        }
+        .carousel::-webkit-scrollbar { display: none; }
+        .body { flex: 1; padding: 24px 20px calc(24px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 22px; }
+        .section-title {
+          display: flex; align-items: center; gap: 8px;
+          font-size: 1rem; margin-bottom: 10px; border-bottom: 2px solid var(--line); padding-bottom: 8px;
+        }
+        .pin { width: 20px; height: 20px; flex: none; }
         .list { display: flex; flex-direction: column; }
         .empty { color: var(--ink-400); font-size: 0.9rem; }
       `}</style>
