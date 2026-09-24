@@ -95,10 +95,16 @@ export default function InvitePage() {
       </main>
 
       <BottomBar note="あとから追加で招待することもできます">
-        <Button variant="primary" block onClick={share}>
-          <ShareIcon size={16} />
-          リンクを共有する
-        </Button>
+        {links.length > 0 ? (
+          <Button variant="primary" block onClick={share}>
+            <ShareIcon size={16} />
+            リンクを共有する
+          </Button>
+        ) : (
+          <Button variant="quiet" block onClick={() => router.push("/home")}>
+            あとで
+          </Button>
+        )}
       </BottomBar>
       <div className="next">
         <Button variant="quiet" block onClick={() => router.push(`/groups/${groupId}/tags`)}>

@@ -38,7 +38,7 @@ export default function WelcomePage() {
         <Link href="/groups/new" className="btn-link">
           <span className="btn btn--fill">新規登録</span>
         </Link>
-        <Link href="/home" className="btn-link">
+        <Link href={hasGroups ? "/home" : "/login"} className="btn-link">
           <span className="btn btn--outline">{hasGroups ? "参加中のグループを見る" : "ログイン"}</span>
         </Link>
       </div>
