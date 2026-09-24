@@ -1,87 +1,121 @@
-/** 行き先・宿・ごはん・スポットに共通の候補カード（仕様書B 4.2・5.2・5.4） */
-export default function CandidateCard({ item, type, onToggle, locked }) {
+/** 行き先・宿・ごはん・スポットに共通の候補カード（design: 行き先選定＝写真＋番号バッジ＋大きなボタン） */
+export default function CandidateCard({ item, type, rankLabel, onToggle, locked }) {
   const selectable = !locked && !item.decided;
   return (
-    <button
-      type="button"
-      className={`pick ${item.decided ? "pick--decided" : ""}`}
-      aria-pressed={item.my_vote}
-      onClick={() => selectable && onToggle(item.id)}
-      disabled={!selectable}
-    >
-      <span className="rank">
-        {item.rank}位候補
+    <div className={`card ${item.my_vote ? "card--picked" : ""} ${item.decided ? "card--decided" : ""}`}>
+      <div className="handle" aria-hidden="true" />
+      <div className="photo" style={{ backgroundImage: `url(${item.image})` }}>
+        <span className="badge">{item.rank}</span>
         {item.decided && <span className="chosen">決定！</span>}
-      </span>
-      <h3>
-        {item.name}
-        {type === "destination" && <span className="area">（{item.area}）</span>}
-      </h3>
-
-      <span className="match">
-        <b>
-          {item.match}
-          <small>%</small>
-        </b>
-        <span className="who">
-          {item.member_count}人中{item.matched_count}人の希望にマッチ
-        </span>
-      </span>
-
-      <p className="reason">{item.reason}</p>
-
-      <p className="tags">
-        {item.tags.slice(0, 6).map((t) => (
-          <span key={t} className="tag">
-            #{t}
-          </span>
-        ))}
-      </p>
-
-      <div className="meta">
-        {"price" in item && <span>{item.price > 0 ? `1人あたり ${item.price.toLocaleString()}円〜` : "無料"}</span>}
-        {item.ticket && <span>チケット必要</span>}
-        <span className="votes">{item.votes}票</span>
       </div>
+      <div className="info">
+        <div className="head">
+          <h3>
+            {item.name}
+            {type === "destination" && <span className="area">（{item.area}）</span>}
+          </h3>
+          <span className="match">
+            {item.match}
+            <small>%</small>
+          </span>
+        </div>
 
-      <span className="check" aria-hidden="true">✓</span>
+        <p className="tags">
+          {item.tags.slice(0, 4).map((t) => (
+            <span key={t} className="tag">
+              #{t}
+            </span>
+          ))}
+        </p>
+
+        <p className="reason">{item.reason}</p>
+
+        <div className="meta">
+          <span className="who">
+            {item.member_count}人中{item.matched_count}人の希望にマッチ
+          </span>
+          {"price" in item && (
+            <span>{item.price > 0 ? `1人あたり ${item.price.toLocaleString()}円〜` : "無料"}</span>
+          )}
+          {item.ticket && <span>チケット必要</span>}
+        </div>
+
+        <button
+          type="button"
+          className="vote-btn"
+          aria-pressed={item.my_vote}
+          disabled={!selectable}
+          onClick={() => selectable && onToggle(item.id)}
+        >
+          {item.decided ? "この候補に決定しました" : item.my_vote ? "投票済み（タップで取り消す）" : "この行き先に投票する"}
+          <span className="votes">{item.votes}票</span>
+        </button>
+      </div>
       <style jsx>{`
-        .pick {
-          position: relative; text-align: left; cursor: pointer; width: 100%;
-          background: var(--white); border: 1.5px solid var(--line); border-radius: var(--radius-md);
-          padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow-card);
-          transition: border-color 0.12s, background 0.12s;
-          font: inherit; color: inherit;
+        .card {
+          background: var(--white);
+          border-radius: var(--radius-lg);
+          overflow: hidden;
+          box-shadow: var(--shadow-card);
+          margin-bottom: 16px;
+          border: 2px solid transparent;
         }
-        .pick:disabled { cursor: default; }
-        .pick[aria-pressed="true"] {
-          border-color: var(--teal-600); border-width: 2px; padding: 15px;
-          background: color-mix(in srgb, var(--mint-400) 20%, var(--white));
+        .card--picked { border-color: var(--teal-600); }
+        .card--decided { border-color: var(--teal-600); }
+        .handle {
+          width: 36px; height: 4px; border-radius: 2px; background: var(--line);
+          margin: 10px auto 0;
         }
-        .pick--decided { border-color: var(--teal-600); }
-        .rank { font-size: 0.78rem; color: var(--ink-400); font-weight: 700; display: block; margin-bottom: 2px; }
+        .photo {
+          position: relative;
+          height: 170px;
+          margin-top: 8px;
+          background: var(--line) center/cover no-repeat;
+        }
+        .badge {
+          position: absolute; top: 12px; left: 12px;
+          width: 28px; height: 28px; border-radius: 50%;
+          background: var(--white); color: var(--teal-700);
+          display: grid; place-items: center;
+          font-weight: 900; font-size: 0.85rem;
+          box-shadow: var(--shadow-card);
+        }
         .chosen {
-          display: inline-block; margin-left: 8px; background: var(--teal-600); color: var(--white);
-          font-size: 0.72rem; padding: 1px 10px; border-radius: var(--radius-pill);
+          position: absolute; top: 12px; right: 12px;
+          background: var(--teal-600); color: var(--white);
+          font-size: 0.72rem; font-weight: 800; padding: 3px 12px; border-radius: var(--radius-pill);
         }
-        h3 { font-size: 1.1rem; padding-right: 36px; }
-        .area { font-size: 0.85rem; color: var(--ink-400); font-weight: 500; }
-        .match { display: flex; align-items: baseline; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
-        .match b { font-size: 1.6rem; color: var(--teal-700); font-weight: 900; line-height: 1; }
-        .match b small { font-size: 0.8rem; }
-        .who { font-size: 0.8rem; background: color-mix(in srgb, var(--mint-400) 45%, white); color: var(--teal-700); padding: 2px 10px; border-radius: var(--radius-pill); font-weight: 700; }
-        .reason { font-size: 0.88rem; background: var(--cream-100); border-radius: 12px; padding: 10px 12px; margin: 6px 0 10px; }
-        .tags { margin: 0 0 10px; }
-        .tag { display: inline-block; font-size: 0.72rem; padding: 2px 9px; border-radius: var(--radius-pill); background: var(--cream-100); color: var(--ink-400); margin: 0 4px 4px 0; }
-        .meta { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.82rem; color: var(--ink-400); }
-        .votes { font-weight: 800; color: var(--ink-900); }
-        .check {
-          position: absolute; top: 14px; right: 14px; width: 26px; height: 26px; border-radius: 50%;
-          border: 2px solid var(--line); background: var(--white);
-          display: grid; place-items: center; font-size: 0.85rem; color: transparent;
+        .info { padding: 14px 18px 18px; }
+        .head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+        h3 { font-size: 1.25rem; }
+        .area { font-size: 0.82rem; color: var(--ink-400); font-weight: 500; }
+        .match { font-size: 1.3rem; font-weight: 900; color: var(--teal-700); flex: none; }
+        .match small { font-size: 0.7rem; }
+        .tags { margin: 8px 0 0; }
+        .tag {
+          display: inline-block; font-size: 0.75rem; padding: 2px 10px; border-radius: var(--radius-pill);
+          background: var(--cream-100); color: var(--ink-600); margin: 0 6px 4px 0;
         }
-        .pick[aria-pressed="true"] .check { background: var(--teal-600); border-color: var(--teal-600); color: var(--white); }
+        .reason { font-size: 0.85rem; color: var(--ink-600); margin: 8px 0 0; }
+        .meta {
+          display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+          margin: 10px 0 14px; font-size: 0.78rem; color: var(--ink-400);
+        }
+        .who {
+          background: color-mix(in srgb, var(--mint-400) 45%, white); color: var(--teal-700);
+          padding: 2px 10px; border-radius: var(--radius-pill); font-weight: 700;
+        }
+        .vote-btn {
+          appearance: none; cursor: pointer; width: 100%;
+          display: flex; align-items: center; justify-content: center; gap: 8px;
+          min-height: 52px; border: 0; border-radius: var(--radius-pill);
+          background: var(--teal-600); color: var(--white);
+          font-weight: 800; font-size: 0.98rem;
+        }
+        .vote-btn:disabled { opacity: 0.6; cursor: default; }
+        .vote-btn[aria-pressed="true"] { background: var(--teal-900); }
+        .votes { font-weight: 700; font-size: 0.82rem; opacity: 0.85; }
       `}</style>
-    </button>
+    </div>
   );
 }

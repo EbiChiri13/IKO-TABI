@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CheckIcon, CopyIcon } from "@/components/icons";
 
 /** 招待リンクの表示＋コピー（design: https://konosaitonolinkdesu の入力欄） */
 export default function InviteLinkBox({ url }) {
@@ -20,7 +21,7 @@ export default function InviteLinkBox({ url }) {
     <div className="box">
       <input readOnly value={url} onFocus={(e) => e.target.select()} aria-label="招待リンク" />
       <button type="button" onClick={copy} aria-label="リンクをコピー">
-        {copied ? "✓" : "⧉"}
+        {copied ? <CheckIcon /> : <CopyIcon />}
       </button>
       <style jsx>{`
         .box {
@@ -33,8 +34,8 @@ export default function InviteLinkBox({ url }) {
           color: var(--ink-600); min-width: 0;
         }
         button {
-          border: 0; background: transparent; cursor: pointer;
-          font-size: 1.1rem; color: var(--teal-600); flex: none;
+          display: inline-flex; border: 0; background: transparent; cursor: pointer;
+          color: var(--teal-600); flex: none;
         }
       `}</style>
     </div>

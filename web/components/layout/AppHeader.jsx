@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BackIcon } from "@/components/icons";
 import PlaneTrail from "./PlaneTrail";
 
 /**
@@ -13,7 +14,7 @@ export default function AppHeader({ eyebrow, title, backHref, dark = false, deco
       {decorate && <PlaneTrail />}
       <div className="head-top">
         {backHref ? (
-          <Link href={backHref} className="back" aria-label="戻る">‹</Link>
+          <Link href={backHref} className="back" aria-label="戻る"><BackIcon /></Link>
         ) : (
           <span />
         )}
@@ -32,11 +33,9 @@ export default function AppHeader({ eyebrow, title, backHref, dark = false, deco
         .head--dark { background: var(--teal-900); }
         .head-top { display: flex; margin-bottom: 8px; min-height: 28px; }
         .back {
+          display: inline-flex;
           text-decoration: none;
           color: var(--white);
-          font-size: 1.6rem;
-          line-height: 1;
-          font-weight: 700;
         }
         .eyebrow { font-size: 0.85rem; font-weight: 700; opacity: 0.9; margin-bottom: 4px; }
         .title { font-size: 1.5rem; position: relative; z-index: 1; white-space: pre-line; }

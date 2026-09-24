@@ -83,6 +83,12 @@ export const api = {
       token,
       body: { tag_ids: tagIds, share_answers: shareAnswers },
     }),
+  saveMustHave: (groupId, token, tagId) =>
+    request(`/api/groups/${groupId}/selections/me/must-have`, {
+      method: "PUT",
+      token,
+      body: { tag_id: tagId },
+    }),
   start: (groupId, token) => request(`/api/groups/${groupId}/start`, { method: "POST", token }),
   candidates: (groupId, token, type) => request(`/api/groups/${groupId}/candidates?type=${type}`, { token }),
   vote: (groupId, token, type, targetIds) =>

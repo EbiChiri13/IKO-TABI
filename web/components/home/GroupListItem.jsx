@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import AvatarStack from "@/components/ui/AvatarStack";
+import { CalendarIcon, ChevronRightIcon } from "@/components/icons";
 
 const STATUS_LABEL = {
   collecting: "希望集め中",
@@ -24,12 +25,15 @@ export default function GroupListItem({ groupId, name, dateLabel, note, memberNa
             {STATUS_LABEL[status] ?? "未定"}
           </Badge>
           <span className="name">{name}</span>
-          <span className="date">{dateLabel}</span>
+          <span className="date">
+            <CalendarIcon size={13} />
+            {dateLabel}
+          </span>
         </span>
         {note && <span className="note">{note}</span>}
       </span>
       <AvatarStack names={memberNames} max={2} />
-      <span className="chev" aria-hidden="true">›</span>
+      <span className="chev" aria-hidden="true"><ChevronRightIcon /></span>
       <style jsx>{`
         .item {
           display: flex; align-items: center; gap: 10px;
@@ -45,9 +49,9 @@ export default function GroupListItem({ groupId, name, dateLabel, note, memberNa
         .body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
         .row1 { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
         .name { font-weight: 800; }
-        .date { font-size: 0.78rem; color: var(--ink-400); }
+        .date { display: inline-flex; align-items: center; gap: 4px; font-size: 0.78rem; color: var(--ink-400); }
         .note { font-size: 0.8rem; color: var(--ink-400); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .chev { color: var(--ink-400); font-size: 1.3rem; }
+        .chev { display: inline-flex; color: var(--ink-400); }
       `}</style>
     </Link>
   );

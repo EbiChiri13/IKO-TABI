@@ -19,6 +19,7 @@ const META = {
 };
 
 const NEXT = { destination: "lodging", lodging: "food", food: "spot", spot: "summary" };
+const STEP_OF = { destination: 3, lodging: 4, food: 5, spot: 6 };
 
 export default function VoteTypePage() {
   const { id: groupId, type } = useParams();
@@ -101,7 +102,7 @@ export default function VoteTypePage() {
   return (
     <div className="screen">
       <AppHeader eyebrow={meta.eyebrow} title={meta.title} backHref={`/groups/${groupId}`} />
-      <ProgressSteps status={type} />
+      <ProgressSteps step={STEP_OF[type]} />
       <main className="body">
         {data.relaxed && type === "destination" && (
           <p className="notice">選んだ地域だけでは3件そろわなかったので、地域の条件を外して選んでいます。</p>

@@ -12,6 +12,8 @@ W_MEAN, W_MIN, W_SPREAD = 0.5, 0.3, 0.2
 EXACT_SCORE = 1.0      # 候補に同じタグが付いている
 SEMANTIC_MAX = 0.7     # 付いていないときの上限（意味の近さに比例）
 TOP_K = 3              # タグをたくさん選んだ人が不利にならないよう、近い順に上位3つで平均する
+MUST_HAVE_PENALTY = 0.5      # 「絶対に譲れない」タグが外れている候補への掛け目
+MUST_HAVE_SEMANTIC_OK = 0.6  # これ以上意味が近ければ「かなっている」とみなす
 
 # (タグ, 候補の種類, 候補の id) -> コサイン類似度
 Similarity = Callable[[str, str, int], float]
@@ -23,6 +25,7 @@ class MemberPrefs:
     semantic: dict[str, list[str]]           # 質問の key -> 選んだ semantic タグ
     regions: set[str] = field(default_factory=set)   # 地域名 と "near"
     budgets: set[int] = field(default_factory=set)   # 予算帯 0〜3
+    must_have: str | None = None             # 「今回の旅行で譲れないこと」（選んだタグの中から1つ）
 
     def tags_for(self, target_type: str) -> list[str]:
         return [t for key in CATEGORIES_FOR_TARGET[target_type] for t in self.semantic.get(key, [])]
@@ -71,10 +74,20 @@ def budget_fit(member: MemberPrefs, c: Candidate) -> float:
     return {0: 1.0, 1: 0.5}.get(gap, 0.0)
 
 
+def must_have_fit(member: MemberPrefs, c: Candidate, sim: Similarity) -> float:
+    """「今回の旅行で譲れないこと」が候補にないと、適合度を大きく下げる。"""
+    if not member.must_have:
+        return 1.0
+    if member.must_have in c.tags:
+        return 1.0
+    return 1.0 if sim(member.must_have, c.type, c.id) >= MUST_HAVE_SEMANTIC_OK else MUST_HAVE_PENALTY
+
+
 def member_fit(member: MemberPrefs, c: Candidate, sim: Similarity) -> float:
-    return (W_TAG * tag_closeness(member, c, sim)
+    base = (W_TAG * tag_closeness(member, c, sim)
             + W_REGION * region_fit(member, c)
             + W_BUDGET * budget_fit(member, c))
+    return base * must_have_fit(member, c, sim)
 
 
 def group_score(fits: list[float]) -> float:
@@ -84,10 +97,11 @@ def group_score(fits: list[float]) -> float:
 
 
 def is_matched(member: MemberPrefs, c: Candidate) -> bool:
-    """選んだタグが候補にそのまま付いていて、地域と予算も外れていない。"""
+    """選んだタグが候補にそのまま付いていて、地域と予算も外れていない。譲れないタグがある場合はそれも必須。"""
     return (any(t in c.tags for t in member.tags_for(c.type))
             and region_fit(member, c) == 1.0
-            and budget_fit(member, c) > 0.0)
+            and budget_fit(member, c) > 0.0
+            and (not member.must_have or member.must_have in c.tags))
 
 
 def rank(candidates: list[Candidate], members: list[MemberPrefs], sim: Similarity) -> list[Ranked]:

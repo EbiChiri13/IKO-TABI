@@ -69,6 +69,10 @@ class SelectionsIn(BaseModel):
     share_answers: bool = False
 
 
+class MustHaveIn(BaseModel):
+    tag_id: int
+
+
 class VoteIn(BaseModel):
     type: TargetType
     target_ids: list[int] = Field(max_length=3)
@@ -134,7 +138,17 @@ def get_selections(group_id: str, token: Token = None):
 def put_selections(group_id: str, body: SelectionsIn, token: Token = None):
     with db.tx() as conn:
         me = service.auth_member(conn, group_id, token)
-        result, events = service.save_my_selections(conn, group_id, me, body.tag_ids, body.share_answers)
+        result = service.save_my_selections(conn, group_id, me, body.tag_ids, body.share_answers)
+    hub.notify(group_id, ["answers"])
+    return result
+
+
+@app.put("/api/groups/{group_id}/selections/me/must-have")
+def put_must_have(group_id: str, body: MustHaveIn, token: Token = None):
+    """お気に入り選定：選んだタグの中から「今回の旅行で譲れないこと」を1つ確定する。"""
+    with db.tx() as conn:
+        me = service.auth_member(conn, group_id, token)
+        result, events = service.save_must_have(conn, group_id, me, body.tag_id)
     hub.notify(group_id, events)
     return result
 

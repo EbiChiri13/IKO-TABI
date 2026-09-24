@@ -52,8 +52,8 @@ export default function TagsPage() {
     setSaving(true);
     setError(null);
     try {
-      const res = await api.saveMySelections(groupId, token, [...selected], share);
-      router.push(res.started ? `/groups/${groupId}/vote/destination` : `/groups/${groupId}/waiting`);
+      await api.saveMySelections(groupId, token, [...selected], share);
+      router.push(`/groups/${groupId}/favorite`);
     } catch (e) {
       setError(e.message || "保存に失敗しました");
     } finally {
@@ -66,7 +66,7 @@ export default function TagsPage() {
   return (
     <div className="screen">
       <AppHeader eyebrow="希望を教えてください" title="どんな旅にしたい？" backHref={`/groups/${groupId}`} />
-      <ProgressSteps status="collecting" />
+      <ProgressSteps step={1} />
       <main className="body">
         {categories.map((c) => (
           <TagCategory key={c.key} label={c.label} tags={c.tags} selectedIds={selected} onToggle={toggle} />

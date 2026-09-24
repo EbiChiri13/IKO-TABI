@@ -17,6 +17,11 @@ from app.matching import MemberPrefs, is_matched, rank, rank_destinations
 from app.reason import reason_text
 
 TARGETS = ["destination", "lodging", "food", "spot"]
+
+
+def placeholder_image(target_type: str, target_id: int) -> str:
+    """写真素材がまだ無いので、IDから決まるダミー画像を返す（同じ候補なら毎回同じ画像になる）。"""
+    return f"https://picsum.photos/seed/ikotabi-{target_type}-{target_id}/640/480"
 NEXT_STATUS = {"destination": "lodging", "lodging": "food", "food": "spot", "spot": "done"}
 MIN_MEMBERS_TO_START = 2
 
@@ -234,10 +239,17 @@ def list_tags(conn) -> list[dict]:
 
 def get_my_selections(conn, member: dict) -> dict:
     rows = conn.execute("SELECT hashtag_id FROM user_hashtag_selections WHERE member_id = %s", (member["id"],))
-    return {"tag_ids": [r["hashtag_id"] for r in rows], "share_answers": member["share_answers"]}
+    return {
+        "tag_ids": [r["hashtag_id"] for r in rows],
+        "share_answers": member["share_answers"],
+        "must_have_tag_id": member["must_have_hashtag_id"],
+    }
 
 
-def save_my_selections(conn, group_id: str, member: dict, tag_ids: list[int], share: bool) -> tuple[dict, list[str]]:
+def save_my_selections(conn, group_id: str, member: dict, tag_ids: list[int], share: bool) -> dict:
+    """ハッシュタグ選定画面の保存。この時点ではまだ「回答済み」にしない
+    （次の「お気に入り選定」で譲れないタグを1つ選んでもらってから確定する）。
+    """
     group = _lock_group(conn, group_id)
     if group["status"] != "collecting":
         _fail(409, "行き先選びが始まったので、希望はもう変えられません")
@@ -260,9 +272,29 @@ def save_my_selections(conn, group_id: str, member: dict, tag_ids: list[int], sh
             "INSERT INTO user_hashtag_selections (group_id, member_id, hashtag_id) VALUES (%s, %s, %s)",
             [(group_id, member["id"], t) for t in tag_ids],
         )
+    # タグを選び直したら「譲れないこと」も選び直してもらう
     conn.execute(
-        "UPDATE group_members SET share_answers = %s, answered_at = now() WHERE id = %s",
+        "UPDATE group_members SET share_answers = %s, must_have_hashtag_id = NULL, answered_at = NULL WHERE id = %s",
         (share, member["id"]),
+    )
+    return {}
+
+
+def save_must_have(conn, group_id: str, member: dict, tag_id: int) -> tuple[dict, list[str]]:
+    """「お気に入り選定」画面。選んだタグの中から1つを「譲れないこと」として確定し、回答済みにする。"""
+    group = _lock_group(conn, group_id)
+    if group["status"] != "collecting":
+        _fail(409, "行き先選びが始まったので、希望はもう変えられません")
+
+    mine = {r["hashtag_id"] for r in conn.execute(
+        "SELECT hashtag_id FROM user_hashtag_selections WHERE member_id = %s", (member["id"],)
+    )}
+    if tag_id not in mine:
+        _fail(400, "自分が選んだタグの中から選んでください")
+
+    conn.execute(
+        "UPDATE group_members SET must_have_hashtag_id = %s, answered_at = now() WHERE id = %s",
+        (tag_id, member["id"]),
     )
 
     events = ["answers"]
@@ -296,6 +328,17 @@ def _prefs(conn, group_id: str) -> list[MemberPrefs]:
             p.regions.add(r["value"])
         else:
             p.semantic.setdefault(r["key"], []).append(r["label"])
+
+    must_haves = conn.execute(
+        """SELECT m.id AS member_id, h.label
+           FROM group_members m JOIN hashtags h ON h.id = m.must_have_hashtag_id
+           WHERE m.group_id = %s AND m.answered_at IS NOT NULL""",
+        (group_id,),
+    ).fetchall()
+    for r in must_haves:
+        if r["member_id"] in prefs:
+            prefs[r["member_id"]].must_have = r["label"]
+
     return list(prefs.values())
 
 
@@ -383,6 +426,7 @@ def candidates(conn, group_id: str, member: dict, target_type: str) -> dict:
             "votes": r["votes"],
             "my_vote": r["my_vote"],
             "decided": r["decided"],
+            "image": placeholder_image(target_type, r["target_id"]),
         }
         if target_type == "destination":
             d = engine.destinations[r["target_id"]]
@@ -488,12 +532,14 @@ def summary(conn, group_id: str) -> dict:
 
     def place(pid: int) -> dict:
         p = engine.places[pid]
-        return {"id": pid, "name": p["name"], "tags": p["tags"], "price": p["price"], "ticket": p["ticket"]}
+        return {"id": pid, "name": p["name"], "tags": p["tags"], "price": p["price"], "ticket": p["ticket"],
+                "image": placeholder_image(p["type"], pid)}
 
     dest = None
     if decided["destination"]:
         d = engine.destinations[decided["destination"][0]]
-        dest = {"id": d["id"], "name": d["prefecture"], "area": d["area"], "description": d["description"]}
+        dest = {"id": d["id"], "name": d["prefecture"], "area": d["area"], "description": d["description"],
+                "image": placeholder_image("destination", d["id"])}
 
     # メンバーごとに、かなった希望の数を数える【Q2】
     members = conn.execute("SELECT * FROM group_members WHERE group_id = %s ORDER BY id", (group_id,)).fetchall()

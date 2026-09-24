@@ -49,6 +49,8 @@ CREATE TABLE IF NOT EXISTS hashtags (
     value        TEXT,
     sort         SMALLINT NOT NULL
 );
+-- 「今回の旅行で譲れないこと」＝選んだタグの中から1つだけ選ぶ「お気に入り選定」画面用
+ALTER TABLE group_members ADD COLUMN IF NOT EXISTS must_have_hashtag_id INTEGER REFERENCES hashtags(id);
 
 CREATE TABLE IF NOT EXISTS user_hashtag_selections (
     id          SERIAL PRIMARY KEY,

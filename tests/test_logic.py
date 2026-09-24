@@ -1,5 +1,5 @@
 from app.decide import choose
-from app.matching import Candidate, MemberPrefs, group_score, is_matched, member_fit, rank_destinations
+from app.matching import Candidate, MemberPrefs, group_score, is_matched, member_fit, must_have_fit, rank_destinations
 
 
 def no_sim(tag, target_type, target_id):
@@ -50,6 +50,17 @@ def test_near_region():
     nagano = Candidate("destination", 2, frozenset(), band=1, region="中部", near=False)
     assert is_matched(m, Candidate("destination", 3, frozenset({"温泉"}), band=1, region="中部", near=True))
     assert member_fit(m, shizuoka, no_sim) > member_fit(m, nagano, no_sim)
+
+
+def test_must_have_lowers_fit_when_missing():
+    m = MemberPrefs(1, {"what": ["温泉"]}, regions={"関東"}, budgets={1}, must_have="温泉")
+    has_it = Candidate("destination", 1, frozenset({"温泉"}), band=1, region="関東")
+    lacks_it = Candidate("destination", 2, frozenset(), band=1, region="関東")
+    assert must_have_fit(m, has_it, no_sim) == 1.0
+    assert must_have_fit(m, lacks_it, no_sim) < 1.0
+    assert member_fit(m, lacks_it, no_sim) < member_fit(m, has_it, no_sim)
+    assert is_matched(m, has_it)
+    assert not is_matched(m, lacks_it)  # 譲れないタグが無いのでかなっていない
 
 
 def test_rank_destinations_relaxes_region():

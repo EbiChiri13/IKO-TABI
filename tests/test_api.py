@@ -36,6 +36,14 @@ def tag_ids(client, labels):
     return [by_label[l] for l in labels]
 
 
+def answer(client, gid, tok, labels, share=False, must_have=None):
+    """ハッシュタグ選定 → お気に入り選定（譲れないタグ）を1回で済ませるテスト用ヘルパー。"""
+    client.put(f"/api/groups/{gid}/selections/me", headers=h(tok),
+               json={"tag_ids": tag_ids(client, labels), "share_answers": share})
+    tag_id = tag_ids(client, [must_have or labels[0]])[0]
+    return client.put(f"/api/groups/{gid}/selections/me/must-have", headers=h(tok), json={"tag_id": tag_id})
+
+
 def test_tags(client):
     cats = client.get("/api/tags").json()
     assert [c["key"] for c in cats] == ["style", "where", "what", "stay"]
@@ -76,9 +84,13 @@ def test_full_flow(client):
         a: (["節約", "アクティブ", "近場", "食べ歩き", "夜景", "コスパ重視"], False),
     }
     for tok, (labels, share) in prefs.items():
-        r = client.put(f"/api/groups/{gid}/selections/me", headers=h(tok),
-                       json={"tag_ids": tag_ids(client, labels), "share_answers": share})
+        r = answer(client, gid, tok, labels, share)
         assert r.status_code == 200 and r.json()["started"] is False
+
+    # お気に入り選定：自分が選んでいないタグは指定できない
+    other_tag = tag_ids(client, ["雪遊び"])[0]
+    assert client.put(f"/api/groups/{gid}/selections/me/must-have", headers=h(host),
+                      json={"tag_id": other_tag}).status_code == 400
 
     # 公開を選んだ人のタグだけ見える【Q16】
     view = client.get(f"/api/groups/{gid}", headers=h(b)).json()
@@ -88,8 +100,7 @@ def test_full_flow(client):
     assert view["answered_count"] == 2
 
     # 最後の1人が回答すると自動で開始【Q8】
-    r = client.put(f"/api/groups/{gid}/selections/me", headers=h(b),
-                   json={"tag_ids": tag_ids(client, ["6〜8万円", "エモい", "中部", "写真映え", "旅館"])})
+    r = answer(client, gid, b, ["6〜8万円", "エモい", "中部", "写真映え", "旅館"])
     assert r.json()["started"] is True
     assert client.get(f"/api/groups/{gid}", headers=h(b)).json()["status"] == "destination"
 
@@ -156,9 +167,9 @@ def test_host_can_start_early_and_invites_expire(client):
     kid = client.post(f"/api/invites/{inv}/join", json={"nickname": "子"}).json()["token"]
 
     labels = ["沖縄", "のんびり", "マリンスポーツ", "オーシャンビュー"]
-    client.put(f"/api/groups/{gid}/selections/me", headers=h(host), json={"tag_ids": tag_ids(client, labels)})
+    answer(client, gid, host, labels)
     assert client.post(f"/api/groups/{gid}/start", headers=h(host)).status_code == 409  # 1人だけ
-    client.put(f"/api/groups/{gid}/selections/me", headers=h(kid), json={"tag_ids": tag_ids(client, labels)})
+    answer(client, gid, kid, labels)
     assert client.post(f"/api/groups/{gid}/start", headers=h(kid)).status_code == 403
     assert client.post(f"/api/groups/{gid}/start", headers=h(host)).status_code == 200
 

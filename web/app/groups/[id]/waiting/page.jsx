@@ -10,6 +10,7 @@ import BottomBar from "@/components/ui/BottomBar";
 import Spinner from "@/components/ui/Spinner";
 import Toast from "@/components/ui/Toast";
 import MemberRow from "@/components/members/MemberRow";
+import TicketButton from "@/components/invite/TicketButton";
 import { api } from "@/lib/api";
 import { useLiveGroup } from "@/lib/useLiveGroup";
 
@@ -47,7 +48,7 @@ export default function WaitingPage() {
   return (
     <div className="screen">
       <AppHeader eyebrow="回答待ち" title={group.name} backHref={`/groups/${groupId}`} />
-      <ProgressSteps status={group.status} />
+      <ProgressSteps status={group.status} step={group.status === "collecting" ? 2 : undefined} />
       <main className="body">
         <Card>
           <p className="lead">
@@ -69,9 +70,9 @@ export default function WaitingPage() {
       </main>
       {canStart && (
         <BottomBar note="全員そろわなくても、今いるメンバーだけで探せます">
-          <Button variant="primary" block onClick={startNow} disabled={starting}>
-            {starting ? "探しています…" : "今いるメンバーの希望で行き先を探す"}
-          </Button>
+          <TicketButton onClick={startNow} busy={starting}>
+            チケットを切って出発する
+          </TicketButton>
         </BottomBar>
       )}
       <Toast message={error?.message || startError} />
