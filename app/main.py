@@ -127,6 +127,14 @@ def tags():
         return service.list_tags(conn)
 
 
+@app.get("/api/groups/{group_id}/tag-summary")
+def tag_summary(group_id: str, token: Token = None):
+    """投票結果画面：カテゴリごとにどのタグが何人に選ばれたかの集計。"""
+    with db.tx() as conn:
+        service.auth_member(conn, group_id, token)
+        return service.tag_summary(conn, group_id)
+
+
 @app.get("/api/groups/{group_id}/selections/me")
 def get_selections(group_id: str, token: Token = None):
     with db.tx() as conn:

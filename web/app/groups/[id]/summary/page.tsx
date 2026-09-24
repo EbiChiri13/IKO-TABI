@@ -3,16 +3,17 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import AppHeader from "@/components/layout/AppHeader";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
-import PlaceList from "@/components/summary/PlaceList";
+import TicketCard from "@/components/invite/TicketCard";
+import PlaneTrail from "@/components/layout/PlaneTrail";
+import PlaceTimeline from "@/components/summary/PlaceTimeline";
 import MemberWinsList from "@/components/summary/MemberWinsList";
 import { api, tokenFor } from "@/lib/api";
 import type { GroupSummary } from "@/lib/api";
 
-/** 決定まとめ画面（仕様書B 4.2）。旅の内容と、全員の希望がかなったかを確認する */
+/** 決定まとめ画面（design: 完成版 計画確定）。旅の内容と、全員の希望がかなったかを確認する */
 export default function SummaryPage() {
   const { id: groupId } = useParams<{ id: string }>();
   const router = useRouter();
@@ -39,21 +40,27 @@ export default function SummaryPage() {
 
   return (
     <div className="screen">
-      <AppHeader dark eyebrow={`${summary.start_date} 〜 ${summary.end_date}`} title={summary.name} />
+      <header className="hero">
+        <PlaneTrail />
+        <p className="eyebrow">旅の計画が確定しました</p>
+      </header>
       <main className="body">
         {summary.destination && (
-          <div className="dest">
-            <p className="label">行き先</p>
-            <p className="pref">{summary.destination.name}</p>
-            <p className="area">{summary.destination.area}</p>
-          </div>
+          <TicketCard
+            groupId={groupId}
+            name={`${summary.name}（${summary.destination.name}）`}
+            start={summary.start_date}
+            end={summary.end_date}
+            photoUrl={summary.destination.image}
+            tagline="良い旅になりますように"
+          />
         )}
 
-        <Card>
-          <PlaceList title="宿" places={summary.lodging} />
-          <PlaceList title="ごはん" places={summary.food} />
-          <PlaceList title="スポット" places={summary.spot} />
-        </Card>
+        <div className="timelines">
+          <PlaceTimeline label="観光地" places={summary.spot} />
+          <PlaceTimeline label="食事先" places={summary.food} />
+          <PlaceTimeline label="宿泊先" places={summary.lodging} />
+        </div>
 
         <Card>
           <h2 className="section-title">みんなの希望、かなったかな？</h2>
@@ -61,15 +68,18 @@ export default function SummaryPage() {
         </Card>
 
         <Link href="/home">
-          <Button variant="primary" block>ホームへ</Button>
+          <Button variant="primary" block>ホームに戻る</Button>
         </Link>
       </main>
       <style jsx>{`
-        .body { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
-        .dest { text-align: center; padding: 12px 0 4px; }
-        .label { font-size: 0.8rem; color: var(--ink-400); font-weight: 700; }
-        .pref { font-size: 2rem; font-weight: 900; color: var(--teal-700); line-height: 1.2; }
-        .area { color: var(--ink-400); }
+        .hero {
+          position: relative; overflow: hidden;
+          background: var(--teal-900); color: var(--white);
+          padding: 18px 20px 30px; text-align: center;
+        }
+        .eyebrow { font-weight: 700; position: relative; z-index: 1; }
+        .body { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        .timelines { display: flex; flex-direction: column; gap: 18px; margin-top: 8px; }
         .section-title { font-size: 1rem; margin-bottom: 10px; }
       `}</style>
     </div>

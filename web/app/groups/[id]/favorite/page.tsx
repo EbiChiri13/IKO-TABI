@@ -43,7 +43,7 @@ export default function FavoritePage() {
     setError(null);
     try {
       const res = await api.saveMustHave(groupId, token, pickedId);
-      router.push(res.started ? `/groups/${groupId}/vote/destination` : `/groups/${groupId}/waiting`);
+      router.push(res.started ? `/groups/${groupId}/results` : `/groups/${groupId}/waiting`);
     } catch (e) {
       setError(e instanceof Error ? e.message || "保存に失敗しました" : "保存に失敗しました");
     } finally {

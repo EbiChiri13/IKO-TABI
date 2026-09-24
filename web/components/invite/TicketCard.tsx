@@ -9,10 +9,18 @@ type TicketCardProps = {
   readonly start: string;
   readonly end: string;
   readonly photoUrl?: string;
+  readonly tagline?: string;
 };
 
-/** 搭乗券風の招待チケット（design: グループ結成画面）。写真は無いのでダミー画像を使う。 */
-export default function TicketCard({ groupId, name, start, end, photoUrl }: TicketCardProps) {
+/** 搭乗券風のチケット（design: グループ結成／計画確定画面）。写真は無いのでダミー画像を使う。 */
+export default function TicketCard({
+  groupId,
+  name,
+  start,
+  end,
+  photoUrl,
+  tagline = "Let's invite someone to go with you.",
+}: TicketCardProps) {
   const [copied, setCopied] = useState(false);
 
   async function copyId() {
@@ -44,7 +52,7 @@ export default function TicketCard({ groupId, name, start, end, photoUrl }: Tick
       </div>
       <div className="perforation" aria-hidden="true" />
       <div className="stub">
-        <p className="tagline">Let&apos;s invite someone to go with you.</p>
+        <p className="tagline">{tagline}</p>
         <div className="barcode" aria-hidden="true" />
       </div>
       <style jsx>{`

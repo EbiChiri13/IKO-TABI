@@ -265,6 +265,22 @@ export interface RealtimeMessage {
   changed: string[];
 }
 
+export interface TagSummaryEntry {
+  label: string;
+  count: number;
+}
+
+export interface TagSummaryCategory {
+  key: string;
+  label: string;
+  tags: TagSummaryEntry[];
+}
+
+export interface TagSummary {
+  member_count: number;
+  categories: TagSummaryCategory[];
+}
+
 export const api = {
   createGroup: (body: CreateGroupInput) => request<CreateGroupResult>("/api/groups", { method: "POST", body }),
   getGroup: (groupId: string, token: string) => request<GroupView>(`/api/groups/${groupId}`, { token }),
@@ -276,6 +292,8 @@ export const api = {
   join: (inviteToken: string, nickname: string) =>
     request<JoinResult>(`/api/invites/${inviteToken}/join`, { method: "POST", body: { nickname } }),
   listTags: () => request<TagCategory[]>("/api/tags"),
+  tagSummary: (groupId: string, token: string) =>
+    request<TagSummary>(`/api/groups/${groupId}/tag-summary`, { token }),
   getMySelections: (groupId: string, token: string) =>
     request<MySelections>(`/api/groups/${groupId}/selections/me`, { token }),
   saveMySelections: (groupId: string, token: string, tagIds: number[], shareAnswers: boolean) =>

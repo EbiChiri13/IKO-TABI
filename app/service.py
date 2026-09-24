@@ -237,6 +237,30 @@ def list_tags(conn) -> list[dict]:
     ]
 
 
+def tag_summary(conn, group_id: str) -> dict:
+    """カテゴリごとの集計（投票結果画面）。誰が選んだかは出さず、件数だけを見せる【Q16】。"""
+    rows = conn.execute(
+        """SELECT c.key, c.label AS category_label, h.label AS tag_label, count(*) AS n
+           FROM user_hashtag_selections s
+           JOIN hashtags h ON h.id = s.hashtag_id
+           JOIN hashtag_categories c ON c.id = h.category_id
+           JOIN group_members m ON m.id = s.member_id AND m.answered_at IS NOT NULL
+           WHERE s.group_id = %s
+           GROUP BY c.sort, c.key, c.label, h.sort, h.label
+           ORDER BY c.sort, n DESC, h.sort""",
+        (group_id,),
+    ).fetchall()
+    answered = conn.execute(
+        "SELECT count(*) AS n FROM group_members WHERE group_id = %s AND answered_at IS NOT NULL", (group_id,)
+    ).fetchone()["n"]
+
+    categories: dict[str, dict] = {}
+    for r in rows:
+        cat = categories.setdefault(r["key"], {"key": r["key"], "label": r["category_label"], "tags": []})
+        cat["tags"].append({"label": r["tag_label"], "count": r["n"]})
+    return {"member_count": answered, "categories": list(categories.values())}
+
+
 def get_my_selections(conn, member: dict) -> dict:
     rows = conn.execute("SELECT hashtag_id FROM user_hashtag_selections WHERE member_id = %s", (member["id"],))
     return {
