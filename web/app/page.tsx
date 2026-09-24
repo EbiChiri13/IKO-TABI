@@ -5,9 +5,9 @@ import Link from "next/link";
 import { myGroups } from "@/lib/api";
 
 /**
- * スプラッシュ画面（起動画面）。Figma「サマーハッカソン2026」完成版のトプ画（node 321:1186）を
+ * スプラッシュ画面（起動画面）。Figma「サマーハッカソン2026」完成版のトプ画（node 473:4356）を
  * そのまま実装したもの。素材（ロゴのリボン・ワードマーク・後光・二人のイラスト）は
- * Figmaから書き出して public/splash に配置している。
+ * Figmaから書き出して public/splash に配置している。二人のイラストは新しいAI生成イラストに更新。
  *
  * 参加中のグループが端末にあれば、そのままホームへ促す。
  * アカウントは使わないので実際のログインフォームはなく、参加はすべて招待リンク経由【Q3】。
@@ -30,8 +30,12 @@ export default function WelcomePage() {
         <img className="wordmark" src="/splash/wordmark.svg" alt="いこ！たび" />
 
         <img className="glow" src="/splash/glow.svg" alt="" aria-hidden="true" />
-        <img className="person person-man" src="/splash/person-man.png" alt="" aria-hidden="true" />
-        <img className="person person-woman" src="/splash/person-woman.png" alt="" aria-hidden="true" />
+        <span className="person person-man" aria-hidden="true">
+          <img src="/splash/person-man.png" alt="" />
+        </span>
+        <span className="person person-woman" aria-hidden="true">
+          <img src="/splash/person-woman.png" alt="" />
+        </span>
       </div>
 
       <div className="cta">
@@ -81,10 +85,13 @@ export default function WelcomePage() {
           position: absolute; left: -26.1%; top: 55.7%; width: 155%; height: auto;
         }
         .person {
-          position: absolute; height: auto;
+          position: absolute; display: block; overflow: hidden;
         }
-        .person-man { left: 8.5%; top: 56.9%; width: 31.8%; }
-        .person-woman { left: 55.5%; top: 60.1%; width: 33.8%; }
+        .person img {
+          display: block; width: 100%; height: 100%; object-fit: cover;
+        }
+        .person-man { left: 10.7%; top: 55.72%; width: 29.6%; aspect-ratio: 119 / 325; }
+        .person-woman { left: 56.97%; top: 58.76%; width: 38.06%; aspect-ratio: 153 / 304; }
 
         .cta {
           background: var(--cream-200, #fffaf0);
