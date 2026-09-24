@@ -83,3 +83,28 @@ def seed() -> None:
                        VALUES (%s, %s, %s, %s, %s, %s)""",
                     place_rows,
                 )
+
+
+def backfill_destination_images() -> None:
+    """まだ写真の無い行き先に、Wikipediaの都道府県写真を1回だけ取ってきて保存する。
+
+    宿・ごはん・スポットは架空の名前なので対象外（ダミー画像のまま）。
+    既に image_url が入っている行はスキップするので、再起動のたびに叩き直すことはない。
+    起動を遅くしないよう、47件でも数秒で終わるように並列で取得する。
+    """
+    from concurrent.futures import ThreadPoolExecutor
+
+    from app.wikipedia_images import fetch_thumbnail
+
+    with tx() as conn:
+        rows = conn.execute(
+            "SELECT id, prefecture FROM destinations WHERE image_url IS NULL"
+        ).fetchall()
+        if not rows:
+            return
+        with ThreadPoolExecutor(max_workers=5) as pool:
+            urls = list(pool.map(lambda r: fetch_thumbnail(r["prefecture"]), rows))
+        with conn.cursor() as cur:
+            for r, url in zip(rows, urls):
+                if url:
+                    cur.execute("UPDATE destinations SET image_url = %s WHERE id = %s", (url, r["id"]))

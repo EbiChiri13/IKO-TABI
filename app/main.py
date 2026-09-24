@@ -33,6 +33,7 @@ async def lifespan(app: FastAPI):
     db.init_pool()
     db.create_schema()
     db.seed()
+    await asyncio.to_thread(db.backfill_destination_images)
     embedder = await asyncio.to_thread(Embedder, os.environ.get("BERT_MODEL", "sonoisa/sentence-bert-base-ja-mean-tokens-v2"))
     # BERTのベクトル計算（数十秒かかることがある）はDB接続を閉じてから行う。
     # 開いたまま行うと、リモートDB（Railway等）で接続が切られることがある。

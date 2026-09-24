@@ -450,15 +450,16 @@ def candidates(conn, group_id: str, member: dict, target_type: str) -> dict:
             "votes": r["votes"],
             "my_vote": r["my_vote"],
             "decided": r["decided"],
-            "image": placeholder_image(target_type, r["target_id"]),
         }
         if target_type == "destination":
             d = engine.destinations[r["target_id"]]
             item.update(name=d["prefecture"], area=d["area"], region=d["region"],
-                        description=d["description"], tags=d["tags"])
+                        description=d["description"], tags=d["tags"],
+                        image=d["image_url"] or placeholder_image(target_type, r["target_id"]))
         else:
             p = engine.places[r["target_id"]]
-            item.update(name=p["name"], tags=p["tags"], price=p["price"], ticket=p["ticket"])
+            item.update(name=p["name"], tags=p["tags"], price=p["price"], ticket=p["ticket"],
+                        image=placeholder_image(target_type, r["target_id"]))
         items.append(item)
 
     return {
@@ -563,7 +564,7 @@ def summary(conn, group_id: str) -> dict:
     if decided["destination"]:
         d = engine.destinations[decided["destination"][0]]
         dest = {"id": d["id"], "name": d["prefecture"], "area": d["area"], "description": d["description"],
-                "image": placeholder_image("destination", d["id"])}
+                "image": d["image_url"] or placeholder_image("destination", d["id"])}
 
     # メンバーごとに、かなった希望の数を数える【Q2】
     members = conn.execute("SELECT * FROM group_members WHERE group_id = %s ORDER BY id", (group_id,)).fetchall()

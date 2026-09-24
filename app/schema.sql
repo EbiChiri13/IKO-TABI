@@ -70,6 +70,8 @@ CREATE TABLE IF NOT EXISTS destinations (
     description  TEXT NOT NULL,
     tags         TEXT[] NOT NULL
 );
+-- Wikipediaから取ってきた都道府県の実写真（無ければダミー画像を使う）
+ALTER TABLE destinations ADD COLUMN IF NOT EXISTS image_url TEXT;
 
 CREATE TABLE IF NOT EXISTS places (
     id              SERIAL PRIMARY KEY,
