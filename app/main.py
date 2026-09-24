@@ -13,6 +13,7 @@ from typing import Annotated, Literal
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Header, Query, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, StringConstraints
@@ -47,6 +48,23 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="いこたび", lifespan=lifespan)
+
+# フロントエンド（Vercel／ローカル開発）からのブラウザfetchを許可する。
+# CORS_ORIGINS でカンマ区切りの追加オリジンを environments から足せるようにしておく。
+_default_origins = [
+    "https://ikotabi.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:3100",
+]
+_extra_origins = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=r"https://ikotabi.*\.vercel\.app",
+    allow_origins=_default_origins + _extra_origins,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 Name = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=20)]
 Token = Annotated[str | None, Header(alias="X-Member-Token")]
