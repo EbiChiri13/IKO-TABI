@@ -11,20 +11,26 @@ log = logging.getLogger("ikotabi.engine")
 
 
 class Engine:
-    def __init__(self, conn, embedder: Embedder):
+    def __init__(self, destination_rows: list[dict], place_rows: list[dict], embedder: Embedder):
+        """destination_rows・place_rows は事前に取得しておいた行（DB接続は渡さない）。
+
+        BERTのベクトル計算はCPUで数十秒かかることがあるため、DBのトランザクションを
+        開いたまま行うとリモートDB（Railway等）でロックや接続切れの原因になる。
+        呼び出し側で行を取得してコネクションを閉じてから、このコンストラクタを呼ぶこと。
+        """
         self.destinations: dict[int, dict] = {}
         self.places: dict[int, dict] = {}
         self.candidates: dict[tuple[str, int], Candidate] = {}
         texts: dict[tuple[str, int], str] = {}
 
-        for d in conn.execute("SELECT * FROM destinations ORDER BY id").fetchall():
+        for d in destination_rows:
             self.destinations[d["id"]] = d
             key = ("destination", d["id"])
             self.candidates[key] = Candidate("destination", d["id"], frozenset(d["tags"]), d["band"],
                                              region=d["region"], near=d["near"])
             texts[key] = f"{d['prefecture']}（{d['area']}）。{d['description']}{'、'.join(d['tags'])}"
 
-        for p in conn.execute("SELECT * FROM places ORDER BY id").fetchall():
+        for p in place_rows:
             self.places[p["id"]] = p
             key = (p["type"], p["id"])
             self.candidates[key] = Candidate(p["type"], p["id"], frozenset(p["tags"]),

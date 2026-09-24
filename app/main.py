@@ -34,8 +34,12 @@ async def lifespan(app: FastAPI):
     db.create_schema()
     db.seed()
     embedder = await asyncio.to_thread(Embedder, os.environ.get("BERT_MODEL", "sonoisa/sentence-bert-base-ja-mean-tokens-v2"))
+    # BERTのベクトル計算（数十秒かかることがある）はDB接続を閉じてから行う。
+    # 開いたまま行うと、リモートDB（Railway等）で接続が切られることがある。
     with db.tx() as conn:
-        service.engine = await asyncio.to_thread(Engine, conn, embedder)
+        destination_rows = conn.execute("SELECT * FROM destinations ORDER BY id").fetchall()
+        place_rows = conn.execute("SELECT * FROM places ORDER BY id").fetchall()
+    service.engine = await asyncio.to_thread(Engine, destination_rows, place_rows, embedder)
     hub.bind_loop(asyncio.get_running_loop())
     yield
     db.close_pool()

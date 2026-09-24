@@ -43,30 +43,43 @@ def create_schema() -> None:
 
 
 def seed() -> None:
-    """ハッシュタグと行き先データを入れる。すでに入っていれば何もしない。"""
+    """ハッシュタグと行き先データを入れる。すでに入っていれば何もしない。
+
+    リモートのDB（Railway等）はネットワーク越しになるため、1行ずつ INSERT すると
+    往復のたびに遅延が積み重なる。まとめて executemany で送ることで、
+    起動時間を大きく縮める（デプロイ先のヘルスチェック・タイムアウト対策）。
+    """
     with tx() as conn:
         if conn.execute("SELECT count(*) AS n FROM hashtag_categories").fetchone()["n"] == 0:
-            for ci, cat in enumerate(CATEGORIES):
-                cat_id = conn.execute(
-                    "INSERT INTO hashtag_categories (key, label, sort) VALUES (%s, %s, %s) RETURNING id",
-                    (cat["key"], cat["label"], ci),
-                ).fetchone()["id"]
-                for ti, (label, kind, value) in enumerate(cat["tags"]):
-                    conn.execute(
-                        "INSERT INTO hashtags (category_id, label, kind, value, sort) VALUES (%s, %s, %s, %s, %s)",
-                        (cat_id, label, kind, value, ti),
-                    )
+            hashtag_rows = []
+            with conn.cursor() as cur:
+                for ci, cat in enumerate(CATEGORIES):
+                    cat_id = cur.execute(
+                        "INSERT INTO hashtag_categories (key, label, sort) VALUES (%s, %s, %s) RETURNING id",
+                        (cat["key"], cat["label"], ci),
+                    ).fetchone()["id"]
+                    hashtag_rows += [
+                        (cat_id, label, kind, value, ti) for ti, (label, kind, value) in enumerate(cat["tags"])
+                    ]
+                cur.executemany(
+                    "INSERT INTO hashtags (category_id, label, kind, value, sort) VALUES (%s, %s, %s, %s, %s)",
+                    hashtag_rows,
+                )
 
         if conn.execute("SELECT count(*) AS n FROM destinations").fetchone()["n"] == 0:
-            for d in DESTINATIONS:
-                dest_id = conn.execute(
-                    """INSERT INTO destinations (prefecture, area, region, near, band, description, tags)
-                       VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id""",
-                    (d["prefecture"], d["area"], d["region"], d["near"], d["band"], d["description"], d["tags"]),
-                ).fetchone()["id"]
-                for p in d["places"]:
-                    conn.execute(
-                        """INSERT INTO places (destination_id, type, name, tags, price, ticket)
-                           VALUES (%s, %s, %s, %s, %s, %s)""",
-                        (dest_id, p["type"], p["name"], p["tags"], p["price"], p["ticket"]),
-                    )
+            place_rows = []
+            with conn.cursor() as cur:
+                for d in DESTINATIONS:
+                    dest_id = cur.execute(
+                        """INSERT INTO destinations (prefecture, area, region, near, band, description, tags)
+                           VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id""",
+                        (d["prefecture"], d["area"], d["region"], d["near"], d["band"], d["description"], d["tags"]),
+                    ).fetchone()["id"]
+                    place_rows += [
+                        (dest_id, p["type"], p["name"], p["tags"], p["price"], p["ticket"]) for p in d["places"]
+                    ]
+                cur.executemany(
+                    """INSERT INTO places (destination_id, type, name, tags, price, ticket)
+                       VALUES (%s, %s, %s, %s, %s, %s)""",
+                    place_rows,
+                )
