@@ -5,18 +5,29 @@
  * アカウントは使わないので、グループごとのトークンを localStorage に保存する【Q3】。
  */
 
+export type TargetType = "destination" | "lodging" | "food" | "spot";
+export type GroupStatus = "collecting" | TargetType | "done";
+export type MemberRole = "host" | "member";
+
 const STORAGE_KEY = "ikotabi.groups"; // { [groupId]: { token, nickname } }
 
-function loadStore() {
+export interface GroupMembership {
+  token: string;
+  nickname: string;
+}
+
+export type GroupStore = Record<string, GroupMembership>;
+
+function loadStore(): GroupStore {
   if (typeof window === "undefined") return {};
   try {
-    return JSON.parse(window.localStorage.getItem(STORAGE_KEY) || "{}");
+    return JSON.parse(window.localStorage.getItem(STORAGE_KEY) || "{}") as GroupStore;
   } catch {
     return {};
   }
 }
 
-function saveStore(store) {
+function saveStore(store: GroupStore) {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   } catch {
@@ -24,28 +35,37 @@ function saveStore(store) {
   }
 }
 
-export function myGroups() {
+export function myGroups(): GroupStore {
   return loadStore();
 }
 
-export function saveMembership(groupId, token, nickname) {
+export function saveMembership(groupId: string, token: string, nickname: string) {
   const store = loadStore();
   store[groupId] = { token, nickname };
   saveStore(store);
 }
 
-export function tokenFor(groupId) {
+export function tokenFor(groupId: string): string | null {
   return loadStore()[groupId]?.token ?? null;
 }
 
 export class ApiError extends Error {
-  constructor(status, message) {
+  status: number;
+
+  constructor(status: number, message: string) {
     super(message);
+    this.name = "ApiError";
     this.status = status;
   }
 }
 
-async function request(path, { method = "GET", token, body } = {}) {
+interface RequestOptions {
+  method?: "GET" | "POST" | "PUT" | "DELETE";
+  token?: string | null;
+  body?: unknown;
+}
+
+async function request<T>(path: string, { method = "GET", token, body }: RequestOptions = {}): Promise<T> {
   const res = await fetch(path, {
     method,
     headers: {
@@ -57,49 +77,233 @@ async function request(path, { method = "GET", token, body } = {}) {
   if (!res.ok) {
     let message = res.statusText;
     try {
-      message = (await res.json()).detail ?? message;
+      message = ((await res.json()) as { detail?: string }).detail ?? message;
     } catch {
       /* ignore */
     }
     throw new ApiError(res.status, message);
   }
-  if (res.status === 204) return null;
-  return res.json();
+  if (res.status === 204) return null as T;
+  return (await res.json()) as T;
+}
+
+// ───────── API レスポンスの型（app/service.py の戻り値に対応） ─────────
+
+export interface Me {
+  id: number;
+  nickname: string;
+  role: MemberRole;
+  share_answers: boolean;
+  answered: boolean;
+}
+
+export interface GroupMember {
+  id: number;
+  nickname: string;
+  role: MemberRole;
+  answered: boolean;
+  is_me: boolean;
+  /** 本人が公開を選んだときだけ返る【Q16】 */
+  tags: string[] | null;
+}
+
+export interface GroupView {
+  id: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  member_limit: number;
+  status: GroupStatus;
+  me: Me;
+  members: GroupMember[];
+  answered_count: number;
+  /** 幹事にしか返らない */
+  open_invites: number | null;
+  /** 投票フェーズ中のみ返る */
+  voted_count: number | null;
+  min_to_start: number;
+}
+
+export interface Tag {
+  id: number;
+  label: string;
+  kind: string;
+}
+
+export interface TagCategory {
+  key: string;
+  label: string;
+  tags: Tag[];
+}
+
+export interface InviteInfo {
+  group_name: string;
+  start_date: string;
+  end_date: string;
+  members: number;
+  member_limit: number;
+  usable: boolean;
+}
+
+export interface JoinResult {
+  group_id: string;
+  token: string;
+  group_name: string;
+}
+
+export interface CreateGroupResult {
+  group_id: string;
+  token: string;
+}
+
+export interface InviteToken {
+  token: string;
+}
+
+export interface RevokeResult {
+  revoked: number;
+}
+
+export interface MySelections {
+  tag_ids: number[];
+  share_answers: boolean;
+}
+
+export interface SaveSelectionsResult {
+  started: boolean;
+}
+
+export interface CreateGroupInput {
+  name: string;
+  start_date: string;
+  end_date: string;
+  member_limit: number;
+  nickname: string;
+}
+
+export type CandidateItem = CandidateItemBase & CandidateItemDestination & CandidateItemPlace;
+
+interface CandidateItemBase {
+  id: number;
+  rank: number;
+  match: number;
+  matched_count: number;
+  member_count: number;
+  reason: string;
+  votes: number;
+  my_vote: boolean;
+  decided: boolean;
+  name: string;
+  tags: string[];
+}
+
+interface CandidateItemDestination {
+  area?: string;
+  region?: string;
+  description?: string;
+}
+
+interface CandidateItemPlace {
+  price?: number;
+  ticket?: boolean;
+}
+
+export interface CandidatesView {
+  type: TargetType;
+  open: boolean;
+  relaxed: boolean;
+  vote_limit: number;
+  pick_count: number;
+  voted_count: number;
+  member_total: number;
+  items: CandidateItem[];
+}
+
+export interface DecidedDestination {
+  id: number;
+  name: string;
+  area: string;
+  description: string;
+}
+
+export interface PlaceSummary {
+  id: number;
+  name: string;
+  tags: string[];
+  price: number;
+  ticket: boolean;
+}
+
+export interface SummaryMemberWin {
+  nickname: string;
+  wins: number;
+  detail: Record<TargetType, number>;
+}
+
+export interface GroupSummary {
+  name: string;
+  start_date: string;
+  end_date: string;
+  status: GroupStatus;
+  destination: DecidedDestination | null;
+  lodging: PlaceSummary[];
+  food: PlaceSummary[];
+  spot: PlaceSummary[];
+  members: SummaryMemberWin[];
+}
+
+/** 変更通知の WebSocket メッセージ */
+export interface RealtimeMessage {
+  changed: string[];
 }
 
 export const api = {
-  createGroup: (body) => request("/api/groups", { method: "POST", body }),
-  getGroup: (groupId, token) => request(`/api/groups/${groupId}`, { token }),
-  createInvite: (groupId, token) => request(`/api/groups/${groupId}/invites`, { method: "POST", token }),
-  revokeInvites: (groupId, token) => request(`/api/groups/${groupId}/invites`, { method: "DELETE", token }),
-  getInvite: (inviteToken) => request(`/api/invites/${inviteToken}`),
-  join: (inviteToken, nickname) =>
-    request(`/api/invites/${inviteToken}/join`, { method: "POST", body: { nickname } }),
-  listTags: () => request("/api/tags"),
-  getMySelections: (groupId, token) => request(`/api/groups/${groupId}/selections/me`, { token }),
-  saveMySelections: (groupId, token, tagIds, shareAnswers) =>
-    request(`/api/groups/${groupId}/selections/me`, {
+  createGroup: (body: CreateGroupInput) => request<CreateGroupResult>("/api/groups", { method: "POST", body }),
+  getGroup: (groupId: string, token: string) => request<GroupView>(`/api/groups/${groupId}`, { token }),
+  createInvite: (groupId: string, token: string) =>
+    request<InviteToken>(`/api/groups/${groupId}/invites`, { method: "POST", token }),
+  revokeInvites: (groupId: string, token: string) =>
+    request<RevokeResult>(`/api/groups/${groupId}/invites`, { method: "DELETE", token }),
+  getInvite: (inviteToken: string) => request<InviteInfo>(`/api/invites/${inviteToken}`),
+  join: (inviteToken: string, nickname: string) =>
+    request<JoinResult>(`/api/invites/${inviteToken}/join`, { method: "POST", body: { nickname } }),
+  listTags: () => request<TagCategory[]>("/api/tags"),
+  getMySelections: (groupId: string, token: string) =>
+    request<MySelections>(`/api/groups/${groupId}/selections/me`, { token }),
+  saveMySelections: (groupId: string, token: string, tagIds: number[], shareAnswers: boolean) =>
+    request<SaveSelectionsResult>(`/api/groups/${groupId}/selections/me`, {
       method: "PUT",
       token,
       body: { tag_ids: tagIds, share_answers: shareAnswers },
     }),
-  start: (groupId, token) => request(`/api/groups/${groupId}/start`, { method: "POST", token }),
-  candidates: (groupId, token, type) => request(`/api/groups/${groupId}/candidates?type=${type}`, { token }),
-  vote: (groupId, token, type, targetIds) =>
-    request(`/api/groups/${groupId}/votes`, { method: "POST", token, body: { type, target_ids: targetIds } }),
-  decide: (groupId, token) => request(`/api/groups/${groupId}/decide`, { method: "POST", token }),
-  summary: (groupId, token) => request(`/api/groups/${groupId}/summary`, { token }),
+  start: (groupId: string, token: string) =>
+    request<{ ok: boolean }>(`/api/groups/${groupId}/start`, { method: "POST", token }),
+  candidates: (groupId: string, token: string, type: TargetType) =>
+    request<CandidatesView>(`/api/groups/${groupId}/candidates?type=${type}`, { token }),
+  vote: (groupId: string, token: string, type: TargetType, targetIds: number[]) =>
+    request<{ ok: boolean }>(`/api/groups/${groupId}/votes`, {
+      method: "POST",
+      token,
+      body: { type, target_ids: targetIds },
+    }),
+  decide: (groupId: string, token: string) =>
+    request<{ ok: boolean }>(`/api/groups/${groupId}/decide`, { method: "POST", token }),
+  summary: (groupId: string, token: string) => request<GroupSummary>(`/api/groups/${groupId}/summary`, { token }),
 };
 
 /** 変更通知の WebSocket（F-13）。onChange({changed:["votes",...]}) を呼ぶ */
-export function connectRealtime(groupId, token, onChange) {
+export function connectRealtime(
+  groupId: string,
+  token: string,
+  onChange: (msg: RealtimeMessage) => void,
+): () => void {
   if (typeof window === "undefined") return () => {};
   const proto = window.location.protocol === "https:" ? "wss" : "ws";
   const apiHost = process.env.NEXT_PUBLIC_API_WS_HOST || window.location.host;
   const ws = new WebSocket(`${proto}://${apiHost}/ws/groups/${groupId}?token=${encodeURIComponent(token)}`);
   ws.onmessage = (ev) => {
     try {
-      onChange(JSON.parse(ev.data));
+      onChange(JSON.parse(ev.data as string) as RealtimeMessage);
     } catch {
       /* ignore */
     }
