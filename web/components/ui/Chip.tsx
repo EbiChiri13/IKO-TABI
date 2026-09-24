@@ -1,7 +1,16 @@
 "use client";
 
+import type { MouseEventHandler } from "react";
+
+type ChipProps = {
+  readonly label: string;
+  readonly selected?: boolean;
+  readonly onClick?: MouseEventHandler<HTMLButtonElement>;
+  readonly disabled?: boolean;
+};
+
 /** ハッシュタグ選択の丸ピル。#付きで表示する */
-export default function Chip({ label, selected = false, onClick, disabled = false }) {
+export default function Chip({ label, selected = false, onClick, disabled = false }: ChipProps) {
   return (
     <button
       type="button"

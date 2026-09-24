@@ -1,11 +1,20 @@
+import type { ReactNode } from "react";
+
 const TONE = {
   wait: { bg: "var(--cream-100)", fg: "var(--ink-400)", border: "var(--line)" },
   ok: { bg: "color-mix(in srgb, var(--mint-400) 55%, white)", fg: "var(--teal-700)", border: "transparent" },
   host: { bg: "color-mix(in srgb, var(--teal-600) 15%, white)", fg: "var(--teal-700)", border: "transparent" },
 };
 
+type BadgeTone = keyof typeof TONE;
+
+type BadgeProps = {
+  readonly tone?: BadgeTone;
+  readonly children: ReactNode;
+};
+
 /** 「未定」「回答済み」「幹事」などの小さな丸バッジ */
-export default function Badge({ tone = "wait", children }) {
+export default function Badge({ tone = "wait", children }: BadgeProps) {
   const t = TONE[tone] ?? TONE.wait;
   return (
     <span className="badge" style={{ background: t.bg, color: t.fg, borderColor: t.border }}>

@@ -1,7 +1,14 @@
 "use client";
 
+type SwitchProps = {
+  readonly checked: boolean;
+  readonly onChange: (checked: boolean) => void;
+  readonly label: string;
+  readonly sub?: string;
+};
+
 /** 「自分が選んだタグをメンバーに見せる」の切り替え（初期は非公開）【Q16】 */
-export default function Switch({ checked, onChange, label, sub }) {
+export default function Switch({ checked, onChange, label, sub }: SwitchProps) {
   return (
     <label className="switch">
       <span className="switch-text">

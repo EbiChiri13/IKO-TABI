@@ -1,7 +1,16 @@
 "use client";
 
+type DateRangeFieldProps = {
+  readonly label?: string;
+  readonly start: string;
+  readonly end: string;
+  readonly onChangeStart: (value: string) => void;
+  readonly onChangeEnd: (value: string) => void;
+  readonly error?: string;
+};
+
 /** グループ作成画面の「日程」欄：出発日 → 帰る日 */
-export default function DateRangeField({ label = "日程", start, end, onChangeStart, onChangeEnd, error }) {
+export default function DateRangeField({ label = "日程", start, end, onChangeStart, onChangeEnd, error }: DateRangeFieldProps) {
   return (
     <div className="field">
       <span className="field-label">{label}</span>

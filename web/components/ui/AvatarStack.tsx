@@ -1,5 +1,10 @@
 /** メンバーの丸アイコンを少し重ねて並べる（グループ一覧・カードで使用） */
-export default function AvatarStack({ names = [], max = 4 }) {
+type AvatarStackProps = {
+  readonly names?: readonly string[];
+  readonly max?: number;
+};
+
+export default function AvatarStack({ names = [], max = 4 }: AvatarStackProps) {
   const shown = names.slice(0, max);
   const extra = names.length - shown.length;
   return (

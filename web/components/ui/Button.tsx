@@ -1,10 +1,24 @@
 "use client";
 
+import type { ButtonHTMLAttributes, ReactNode } from "react";
+
 const VARIANT_CLASS = {
   primary: "btn btn--primary",
   mint: "btn btn--mint",
   ghost: "btn btn--ghost",
   quiet: "btn btn--quiet",
+};
+
+type ButtonVariant = keyof typeof VARIANT_CLASS;
+
+type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "type" | "disabled" | "onClick" | "children"> & {
+  readonly variant?: ButtonVariant;
+  readonly size?: "sm" | "md";
+  readonly block?: boolean;
+  readonly disabled?: boolean;
+  readonly type?: ButtonHTMLAttributes<HTMLButtonElement>["type"];
+  readonly onClick?: ButtonHTMLAttributes<HTMLButtonElement>["onClick"];
+  readonly children?: ReactNode;
 };
 
 /**
@@ -19,7 +33,7 @@ export default function Button({
   onClick,
   children,
   ...rest
-}) {
+}: ButtonProps) {
   return (
     <button
       type={type}

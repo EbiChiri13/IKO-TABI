@@ -1,4 +1,8 @@
-export default function Spinner({ label = "読み込み中…" }) {
+type SpinnerProps = {
+  readonly label?: string;
+};
+
+export default function Spinner({ label = "読み込み中…" }: SpinnerProps) {
   return (
     <div className="spinner" role="status">
       {label}

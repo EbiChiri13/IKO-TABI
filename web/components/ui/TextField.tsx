@@ -2,7 +2,15 @@
 
 import { useId } from "react";
 
-export default function TextField({ label, hint, error, ...inputProps }) {
+import type { InputHTMLAttributes } from "react";
+
+type TextFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, "label"> & {
+  readonly label?: string;
+  readonly hint?: string;
+  readonly error?: string;
+};
+
+export default function TextField({ label, hint, error, ...inputProps }: TextFieldProps) {
   const id = useId();
   return (
     <label className="field" htmlFor={id}>

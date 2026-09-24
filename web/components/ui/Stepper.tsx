@@ -1,7 +1,15 @@
 "use client";
 
+type StepperProps = {
+  readonly label?: string;
+  readonly value: number;
+  readonly min?: number;
+  readonly max?: number;
+  readonly onChange: (value: number) => void;
+};
+
 /** 人数などの +/- 入力（グループ作成画面：2〜4人） */
-export default function Stepper({ label, value, min = 2, max = 4, onChange }) {
+export default function Stepper({ label, value, min = 2, max = 4, onChange }: StepperProps) {
   return (
     <div className="field">
       {label && <span className="field-label">{label}</span>}

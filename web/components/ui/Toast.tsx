@@ -1,6 +1,10 @@
 "use client";
 
-export default function Toast({ message }) {
+type ToastProps = {
+  readonly message: string | null | undefined;
+};
+
+export default function Toast({ message }: ToastProps) {
   if (!message) return null;
   return (
     <div className="toast" role="status">

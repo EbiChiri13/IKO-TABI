@@ -1,5 +1,12 @@
+import type { ReactNode } from "react";
+
+type BottomBarProps = {
+  readonly children: ReactNode;
+  readonly note?: ReactNode;
+};
+
 /** 画面下に固定される操作バー（決定ボタン＋補足） */
-export default function BottomBar({ children, note }) {
+export default function BottomBar({ children, note }: BottomBarProps) {
   return (
     <div className="bar">
       <div className="bar-inner">{children}</div>
