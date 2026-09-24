@@ -65,29 +65,29 @@ export default function TicketCard({
           margin: -40px 20px 0;
         }
         .photo {
-          height: 140px;
+          height: 96px;
           background: var(--line) center/cover no-repeat;
         }
         .body {
           background: var(--teal-600);
           color: var(--white);
-          padding: 16px 20px 18px;
+          padding: 12px 20px 14px;
           text-align: center;
         }
-        .name { font-size: 1.2rem; font-weight: 800; margin-bottom: 6px; }
+        .name { font-size: 1.05rem; font-weight: 800; margin-bottom: 4px; }
         .dates {
           display: flex; align-items: center; justify-content: center; gap: 8px;
-          font-size: 0.85rem; font-weight: 700; margin-bottom: 8px;
+          font-size: 0.8rem; font-weight: 700; margin-bottom: 4px;
         }
         .dots {
-          flex: 0 0 40px; height: 1px;
+          flex: 0 0 32px; height: 1px;
           background: repeating-linear-gradient(90deg, currentColor 0 4px, transparent 4px 8px);
           opacity: 0.8;
         }
         .id {
           display: inline-flex; align-items: center; gap: 6px;
           background: transparent; border: 0; color: color-mix(in srgb, var(--white) 85%, transparent);
-          font-size: 0.78rem; cursor: pointer; padding: 2px 4px;
+          font-size: 0.74rem; cursor: pointer; padding: 1px 4px;
         }
         .perforation {
           position: relative;
@@ -96,20 +96,20 @@ export default function TicketCard({
         }
         .notch {
           position: absolute; z-index: 2;
-          width: 24px; height: 24px; border-radius: 50%;
+          width: 18px; height: 18px; border-radius: 50%;
           background: var(--cream-200);
-          top: 210px;
+          top: 154px;
         }
-        .notch-left { left: -12px; }
-        .notch-right { right: -12px; }
+        .notch-left { left: -9px; }
+        .notch-right { right: -9px; }
         .stub {
           background: var(--teal-600);
-          padding: 14px 20px 20px;
+          padding: 10px 20px 14px;
           text-align: center;
         }
-        .tagline { color: color-mix(in srgb, var(--white) 85%, transparent); font-size: 0.78rem; margin-bottom: 12px; }
+        .tagline { color: color-mix(in srgb, var(--white) 85%, transparent); font-size: 0.72rem; margin-bottom: 8px; }
         .barcode {
-          height: 34px; margin: 0 auto; max-width: 220px;
+          height: 22px; margin: 0 auto; max-width: 220px;
           background: repeating-linear-gradient(
             90deg, var(--white) 0 2px, transparent 2px 4px, var(--white) 4px 7px, transparent 7px 8px,
             var(--white) 8px 9px, transparent 9px 12px
