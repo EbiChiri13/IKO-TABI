@@ -97,13 +97,14 @@ def _counts(conn, group_id: str) -> dict:
 
 
 def create_invite(conn, group_id: str, member: dict) -> dict:
+    """グループにつき1本の招待リンクを作る。人数分だけ何度でも使い回せる（誰ごとにもリンクは変わらない）。"""
     _require_host(member)
     group = _lock_group(conn, group_id)
     if group["status"] != "collecting":
         _fail(409, "行き先選びが始まったので、もう招待できません")
     n = _counts(conn, group_id)
-    if n["members"] + n["open_invites"] >= group["member_limit"]:
-        _fail(409, "定員に達しています（未使用のリンクも人数に数えます）")
+    if n["members"] >= group["member_limit"]:
+        _fail(409, "定員に達しています")
     token = new_token()
     conn.execute("INSERT INTO invites (group_id, token_hash) VALUES (%s, %s)", (group_id, hash_token(token)))
     return {"token": token}
@@ -131,7 +132,7 @@ def get_invite(conn, token: str) -> dict:
     inv = _invite_row(conn, token)
     group = conn.execute("SELECT * FROM groups WHERE id = %s", (inv["group_id"],)).fetchone()
     n = _counts(conn, group["id"])
-    usable = inv["used_at"] is None and group["status"] == "collecting" and n["members"] < group["member_limit"]
+    usable = group["status"] == "collecting" and n["members"] < group["member_limit"]
     return {
         "group_name": group["name"],
         "start_date": group["start_date"].isoformat(),
@@ -143,10 +144,9 @@ def get_invite(conn, token: str) -> dict:
 
 
 def join(conn, token: str, nickname: str) -> tuple[dict, list[str]]:
+    """招待リンクは1グループにつき1本で、全員が同じリンクから参加する（定員に達するまで何度でも使える）。"""
     inv = _invite_row(conn, token, lock=True)
     group = _lock_group(conn, inv["group_id"])
-    if inv["used_at"] is not None:
-        _fail(409, "この招待リンクはもう使われています。幹事に新しいリンクをもらってください")
     if group["status"] != "collecting":
         _fail(409, "行き先選びが始まったので、もう参加できません")
     if _counts(conn, group["id"])["members"] >= group["member_limit"]:

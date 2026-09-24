@@ -2,11 +2,14 @@
 
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
+const BASE =
+  "appearance-none border-0 cursor-pointer inline-flex items-center justify-center gap-1.5 min-h-[52px] px-6 py-3 rounded-pill font-bold text-base transition-[transform,opacity,box-shadow] duration-150 active:scale-[0.98] disabled:opacity-45 disabled:cursor-not-allowed";
+
 const VARIANT_CLASS = {
-  primary: "btn btn--primary",
-  mint: "btn btn--mint",
-  ghost: "btn btn--ghost",
-  quiet: "btn btn--quiet",
+  primary: "bg-teal-600 text-white shadow-pop",
+  mint: "bg-mint-400 text-ink-900 shadow-pop",
+  ghost: "bg-transparent text-teal-600 border-2 border-teal-600",
+  quiet: "bg-white text-ink-900 border-[1.5px] border-line",
 };
 
 type ButtonVariant = keyof typeof VARIANT_CLASS;
@@ -39,37 +42,12 @@ export default function Button({
       type={type}
       disabled={disabled}
       onClick={onClick}
-      className={`${VARIANT_CLASS[variant] ?? VARIANT_CLASS.primary} ${size === "sm" ? "btn--sm" : ""} ${
-        block ? "btn--block" : ""
-      }`}
+      className={`${BASE} ${VARIANT_CLASS[variant] ?? VARIANT_CLASS.primary} ${
+        size === "sm" ? "min-h-[40px] px-[18px] py-2 text-sm" : ""
+      } ${block ? "w-full" : ""}`}
       {...rest}
     >
       {children}
-      <style jsx>{`
-        .btn {
-          appearance: none;
-          border: 0;
-          cursor: pointer;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
-          min-height: 52px;
-          padding: 12px 24px;
-          border-radius: var(--radius-pill);
-          font-weight: 700;
-          font-size: 1rem;
-          transition: transform 0.06s ease, opacity 0.15s, box-shadow 0.15s;
-        }
-        .btn:active { transform: scale(0.98); }
-        .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-        .btn--sm { min-height: 40px; padding: 8px 18px; font-size: 0.9rem; }
-        .btn--block { width: 100%; }
-        .btn--primary { background: var(--teal-600); color: var(--white); box-shadow: var(--shadow-pop); }
-        .btn--mint { background: var(--mint-400); color: var(--ink-900); box-shadow: var(--shadow-pop); }
-        .btn--ghost { background: transparent; color: var(--teal-600); border: 2px solid var(--teal-600); }
-        .btn--quiet { background: var(--white); color: var(--ink-900); border: 1.5px solid var(--line); }
-      `}</style>
     </button>
   );
 }

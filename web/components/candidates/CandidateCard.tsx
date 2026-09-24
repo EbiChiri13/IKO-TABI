@@ -11,120 +11,58 @@ type CandidateCardProps = {
 export default function CandidateCard({ item, type, onToggle, locked }: CandidateCardProps) {
   const selectable = !locked && !item.decided;
   return (
-    <div className={`card ${item.my_vote ? "card--picked" : ""} ${item.decided ? "card--decided" : ""}`}>
-      <div className="handle" aria-hidden="true" />
-      <div className="photo" style={{ backgroundImage: `url(${item.image})` }}>
-        <span className="badge">{item.rank}</span>
-        {item.decided && <span className="chosen">決定！</span>}
+    <div
+      className={`bg-white rounded-lg overflow-hidden shadow-card mb-4 border-2 ${
+        item.my_vote || item.decided ? "border-teal-600" : "border-transparent"
+      }`}
+    >
+      <div className="w-9 h-1 rounded-full bg-line mx-auto mt-2.5" aria-hidden="true" />
+      <div
+        className="relative h-[170px] mt-2 bg-line bg-cover bg-center"
+        style={{ backgroundImage: `url(${item.image})` }}
+      >
+        <span className="absolute top-3 left-3 w-7 h-7 rounded-full bg-white text-teal-700 grid place-items-center font-black text-[0.85rem] shadow-card">
+          {item.rank}
+        </span>
+        {item.decided && (
+          <span className="absolute top-3 right-3 bg-teal-600 text-white text-[0.72rem] font-extrabold px-3 py-[3px] rounded-pill">
+            決定！
+          </span>
+        )}
       </div>
-      <div className="info">
-        <div className="head">
-          <h3>
+      <div className="px-[18px] pt-3.5 pb-[18px]">
+        <div className="flex items-baseline justify-between gap-2">
+          <h3 className="text-xl">
             {item.name}
-            {type === "destination" && <span className="area">（{item.area}）</span>}
+            {type === "destination" && <span className="text-[0.82rem] text-ink-400 font-medium">（{item.area}）</span>}
           </h3>
-          <span className="match">
+          <span className="text-[1.3rem] font-black text-teal-700 flex-none">
             {item.match}
-            <small>%</small>
+            <small className="text-[0.7rem]">%</small>
           </span>
         </div>
 
-        <p className="tags">
-          {item.tags.slice(0, 4).map((t) => (
-            <span key={t} className="tag">
-              #{t}
+        <p className="mt-2.5 mb-1">
+          {item.tags.slice(0, 3).map((t) => (
+            <span
+              key={t}
+              className="inline-block text-[0.8rem] px-3.5 py-[3px] rounded-pill border border-ink-900 bg-vote-mint/0 text-ink-900 mr-1.5 mb-1.5"
+            >
+              {t}
             </span>
           ))}
         </p>
 
-        <p className="reason">{item.reason}</p>
-
-        <div className="meta">
-          <span className="who">
-            {item.member_count}人中{item.matched_count}人の希望にマッチ
-          </span>
-          {item.price !== undefined && (
-            <span>{item.price > 0 ? `1人あたり ${item.price.toLocaleString()}円〜` : "無料"}</span>
-          )}
-          {item.ticket && <span>チケット必要</span>}
-        </div>
-
         <button
           type="button"
-          className="vote-btn"
+          className="w-full flex items-center justify-center gap-2 min-h-[52px] rounded-pill border border-ink-900 bg-vote-mint text-ink-900 font-black text-[0.98rem] disabled:opacity-60 disabled:cursor-default aria-pressed:bg-white"
           aria-pressed={item.my_vote}
           disabled={!selectable}
           onClick={() => selectable && onToggle(item.id)}
         >
           {item.decided ? "この候補に決定しました" : item.my_vote ? "投票済み（タップで取り消す）" : "この行き先に投票する"}
-          <span className="votes">{item.votes}票</span>
         </button>
       </div>
-      <style jsx>{`
-        .card {
-          background: var(--white);
-          border-radius: var(--radius-lg);
-          overflow: hidden;
-          box-shadow: var(--shadow-card);
-          margin-bottom: 16px;
-          border: 2px solid transparent;
-        }
-        .card--picked { border-color: var(--teal-600); }
-        .card--decided { border-color: var(--teal-600); }
-        .handle {
-          width: 36px; height: 4px; border-radius: 2px; background: var(--line);
-          margin: 10px auto 0;
-        }
-        .photo {
-          position: relative;
-          height: 170px;
-          margin-top: 8px;
-          background: var(--line) center/cover no-repeat;
-        }
-        .badge {
-          position: absolute; top: 12px; left: 12px;
-          width: 28px; height: 28px; border-radius: 50%;
-          background: var(--white); color: var(--teal-700);
-          display: grid; place-items: center;
-          font-weight: 900; font-size: 0.85rem;
-          box-shadow: var(--shadow-card);
-        }
-        .chosen {
-          position: absolute; top: 12px; right: 12px;
-          background: var(--teal-600); color: var(--white);
-          font-size: 0.72rem; font-weight: 800; padding: 3px 12px; border-radius: var(--radius-pill);
-        }
-        .info { padding: 14px 18px 18px; }
-        .head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-        h3 { font-size: 1.25rem; }
-        .area { font-size: 0.82rem; color: var(--ink-400); font-weight: 500; }
-        .match { font-size: 1.3rem; font-weight: 900; color: var(--teal-700); flex: none; }
-        .match small { font-size: 0.7rem; }
-        .tags { margin: 8px 0 0; }
-        .tag {
-          display: inline-block; font-size: 0.75rem; padding: 2px 10px; border-radius: var(--radius-pill);
-          background: var(--cream-100); color: var(--ink-600); margin: 0 6px 4px 0;
-        }
-        .reason { font-size: 0.85rem; color: var(--ink-600); margin: 8px 0 0; }
-        .meta {
-          display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
-          margin: 10px 0 14px; font-size: 0.78rem; color: var(--ink-400);
-        }
-        .who {
-          background: color-mix(in srgb, var(--mint-400) 45%, white); color: var(--teal-700);
-          padding: 2px 10px; border-radius: var(--radius-pill); font-weight: 700;
-        }
-        .vote-btn {
-          appearance: none; cursor: pointer; width: 100%;
-          display: flex; align-items: center; justify-content: center; gap: 8px;
-          min-height: 52px; border: 0; border-radius: var(--radius-pill);
-          background: var(--teal-600); color: var(--white);
-          font-weight: 800; font-size: 0.98rem;
-        }
-        .vote-btn:disabled { opacity: 0.6; cursor: default; }
-        .vote-btn[aria-pressed="true"] { background: var(--teal-900); }
-        .votes { font-weight: 700; font-size: 0.82rem; opacity: 0.85; }
-      `}</style>
     </div>
   );
 }

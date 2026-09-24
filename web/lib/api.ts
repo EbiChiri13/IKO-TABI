@@ -49,6 +49,29 @@ export function tokenFor(groupId: string): string | null {
   return loadStore()[groupId]?.token ?? null;
 }
 
+const INVITE_LINK_KEY = "ikotabi.inviteLinks"; // { [groupId]: url }（全員同じリンクを使い回すためのキャッシュ）
+
+export function inviteLinkFor(groupId: string): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const store = JSON.parse(window.localStorage.getItem(INVITE_LINK_KEY) || "{}") as Record<string, string>;
+    return store[groupId] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveInviteLink(groupId: string, url: string) {
+  if (typeof window === "undefined") return;
+  try {
+    const store = JSON.parse(window.localStorage.getItem(INVITE_LINK_KEY) || "{}") as Record<string, string>;
+    store[groupId] = url;
+    window.localStorage.setItem(INVITE_LINK_KEY, JSON.stringify(store));
+  } catch {
+    // プライベートブラウジング等で保存できなくても致命的ではない
+  }
+}
+
 export class ApiError extends Error {
   status: number;
 

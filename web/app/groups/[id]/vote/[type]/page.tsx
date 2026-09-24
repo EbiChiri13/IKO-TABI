@@ -10,7 +10,7 @@ import Button from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
 import Toast from "@/components/ui/Toast";
 import { api, connectRealtime, tokenFor } from "@/lib/api";
-import type { CandidatesView, CandidateItem, GroupStatus, MemberRole, TargetType } from "@/lib/api";
+import type { CandidatesView, CandidateItem, TargetType } from "@/lib/api";
 
 const META = {
   destination: { title: "行き先を選ぼう", eyebrow: "候補は3件" },
@@ -19,7 +19,6 @@ const META = {
   spot: { title: "スポットを選ぼう", eyebrow: "3つまで投票" },
 } satisfies Record<TargetType, { readonly title: string; readonly eyebrow: string }>;
 
-const NEXT = { destination: "lodging", lodging: "food", food: "spot", spot: "summary" } as const;
 const STEP_OF = { destination: 3, lodging: 4, food: 5, spot: 6 } satisfies Record<TargetType, number>;
 
 function isTargetType(value: string): value is TargetType {
@@ -33,7 +32,6 @@ export default function VoteTypePage() {
   const token = tokenFor(groupId);
 
   const [data, setData] = useState<CandidatesView | null>(null);
-  const [role, setRole] = useState<MemberRole | null>(null);
   const [selected, setSelected] = useState<Set<CandidateItem["id"]>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -41,7 +39,6 @@ export default function VoteTypePage() {
   const load = useCallback(async () => {
     if (!token || !type) return;
     const [group, candidates] = await Promise.all([api.getGroup(groupId, token), api.candidates(groupId, token, type)]);
-    setRole(group.me.role);
     setData(candidates);
     setSelected(new Set(candidates.items.filter((i) => i.my_vote).map((i) => i.id)));
 
@@ -91,20 +88,6 @@ export default function VoteTypePage() {
     }
   }
 
-  async function decideNow() {
-    if (!token || !type) return;
-    setBusy(true);
-    setError(null);
-    try {
-      await api.decide(groupId, token);
-      router.push(`/groups/${groupId}/${NEXT[type] === "summary" ? "summary" : `vote/${NEXT[type]}`}`);
-    } catch (e) {
-      setError(e instanceof Error ? e.message || "締め切れませんでした" : "締め切れませんでした");
-    } finally {
-      setBusy(false);
-    }
-  }
-
   if (!type) return <Spinner label="投票の種類が正しくありません" />;
   if (!data) return <Spinner />;
 
@@ -115,31 +98,23 @@ export default function VoteTypePage() {
     <div className="screen">
       <AppHeader eyebrow={meta.eyebrow} title={meta.title} backHref={`/groups/${groupId}`} />
       <ProgressSteps step={STEP_OF[type]} />
-      <main className="body">
+      <main className="flex-1 p-5">
         {data.relaxed && type === "destination" && (
-          <p className="notice">選んだ地域だけでは3件そろわなかったので、地域の条件を外して選んでいます。</p>
+          <p className="bg-[#fff3cd] text-[#7a5a00] rounded-xl px-3.5 py-2.5 text-[0.85rem] mb-3.5">
+            選んだ地域だけでは3件そろわなかったので、地域の条件を外して選んでいます。
+          </p>
         )}
-        <p className="progress">
+        <p className="text-[0.85rem] text-ink-400 font-bold mb-3">
           投票済み {data.voted_count} / {data.member_total} 人 ・ {selected.size}/{data.vote_limit} 個選択中
         </p>
         <CandidateList items={data.items} type={type} onToggle={toggle} locked={!data.open} />
       </main>
-      <BottomBar note={role === "host" ? "幹事はいつでも今の投票で決められます" : undefined}>
+      <BottomBar>
         <Button variant="primary" block disabled={selected.size === 0 || busy} onClick={submit}>
           {busy ? "送信しています…" : alreadyVoted ? "投票を変更する" : "投票する"}
         </Button>
-        {role === "host" && (
-          <Button variant="ghost" onClick={decideNow} disabled={busy}>
-            今の投票で決める
-          </Button>
-        )}
       </BottomBar>
       <Toast message={error} />
-      <style jsx>{`
-        .body { flex: 1; padding: 20px; }
-        .notice { background: #fff3cd; color: #7a5a00; border-radius: 12px; padding: 10px 14px; font-size: 0.85rem; margin-bottom: 14px; }
-        .progress { font-size: 0.85rem; color: var(--ink-400); font-weight: 700; margin-bottom: 12px; }
-      `}</style>
     </div>
   );
 }

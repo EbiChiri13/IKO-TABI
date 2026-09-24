@@ -82,6 +82,15 @@ export function CopyIcon({ size = 16, ...rest }: IconProps) {
   );
 }
 
+export function HomeIcon({ size = 24, ...rest }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base} {...rest}>
+      <path d="M4 11.5 12 4l8 7.5" />
+      <path d="M6 10v9a1 1 0 0 0 1 1h4v-6h2v6h4a1 1 0 0 0 1-1v-9" />
+    </svg>
+  );
+}
+
 export function CheckIcon({ size = 16, ...rest }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" {...base} {...rest}>

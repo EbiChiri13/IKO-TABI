@@ -8,20 +8,9 @@ type BottomBarProps = {
 /** 画面下に固定される操作バー（決定ボタン＋補足） */
 export default function BottomBar({ children, note }: BottomBarProps) {
   return (
-    <div className="bar">
-      <div className="bar-inner">{children}</div>
-      {note && <p className="bar-note">{note}</p>}
-      <style jsx>{`
-        .bar {
-          position: sticky; bottom: 0; z-index: 10;
-          background: color-mix(in srgb, var(--cream-200) 92%, transparent);
-          backdrop-filter: blur(6px);
-          border-top: 1px solid var(--line);
-          padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
-        }
-        .bar-inner { display: flex; gap: 10px; }
-        .bar-note { margin-top: 8px; text-align: center; font-size: 0.8rem; color: var(--ink-400); }
-      `}</style>
+    <div className="sticky bottom-0 z-10 bg-cream-200/92 backdrop-blur-[6px] border-t border-line px-5 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))]">
+      <div className="flex flex-col gap-2.5">{children}</div>
+      {note && <p className="mt-2 text-center text-[0.8rem] text-ink-400">{note}</p>}
     </div>
   );
 }

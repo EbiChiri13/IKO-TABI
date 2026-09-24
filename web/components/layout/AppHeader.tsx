@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { BackIcon } from "@/components/icons";
+import { BackIcon, HomeIcon } from "@/components/icons";
 import PlaneTrail from "./PlaneTrail";
 
 type AppHeaderProps = {
   readonly eyebrow?: string;
   readonly title: string;
   readonly backHref?: string;
+  readonly homeHref?: string;
   readonly dark?: boolean;
   readonly decorate?: boolean;
   readonly children?: ReactNode;
@@ -17,41 +18,24 @@ type AppHeaderProps = {
 /**
  * グループ作成・招待・回答待ちなどで使う、ティール地の見出しヘッダー。
  * dark にすると「決定まとめ」などで使う濃紺のチケット風ヘッダーになる。
+ * homeHref を指定すると、戻る矢印の代わりにホームアイコンを表示する（design: ハッシュタグ選定＝最初のステップなのでホームへ戻る導線）。
  */
-export default function AppHeader({ eyebrow, title, backHref, dark = false, decorate = true, children }: AppHeaderProps) {
+export default function AppHeader({ eyebrow, title, backHref, homeHref, dark = false, decorate = true, children }: AppHeaderProps) {
   return (
-    <header className={`head ${dark ? "head--dark" : ""}`}>
+    <header className={`relative overflow-hidden px-5 pt-3.5 pb-6 text-white ${dark ? "bg-teal-900" : "bg-teal-600"}`}>
       {decorate && <PlaneTrail />}
-      <div className="head-top">
-        {backHref ? (
-          <Link href={backHref} className="back" aria-label="戻る"><BackIcon /></Link>
+      <div className="flex mb-2 min-h-[28px]">
+        {homeHref ? (
+          <Link href={homeHref} className="inline-flex text-white no-underline" aria-label="ホームへ戻る"><HomeIcon /></Link>
+        ) : backHref ? (
+          <Link href={backHref} className="inline-flex text-white no-underline" aria-label="戻る"><BackIcon /></Link>
         ) : (
           <span />
         )}
       </div>
-      {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-      <h1 className="title">{title}</h1>
+      {eyebrow && <p className="text-[0.85rem] font-bold opacity-90 mb-1">{eyebrow}</p>}
+      <h1 className="relative z-[1] text-2xl whitespace-pre-line">{title}</h1>
       {children}
-      <style jsx>{`
-        .head {
-          position: relative;
-          overflow: hidden;
-          background: var(--teal-600);
-          color: var(--white);
-          padding: 14px 20px 24px;
-        }
-        .head--dark { background: var(--teal-900); }
-        .head-top { display: flex; margin-bottom: 8px; min-height: 28px; }
-        /* next/link は "use client" コンポーネントなので、直接付けたclassNameには
-           styled-jsxのスコープ用ハッシュが注入されない。:global にして確実に効かせる */
-        :global(.back) {
-          display: inline-flex;
-          text-decoration: none;
-          color: var(--white);
-        }
-        .eyebrow { font-size: 0.85rem; font-weight: 700; opacity: 0.9; margin-bottom: 4px; }
-        .title { font-size: 1.5rem; position: relative; z-index: 1; white-space: pre-line; }
-      `}</style>
     </header>
   );
 }

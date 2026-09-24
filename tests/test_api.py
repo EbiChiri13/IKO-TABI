@@ -60,20 +60,20 @@ def test_full_flow(client):
     assert client.get(f"/api/groups/{gid}").status_code == 401
     assert client.get(f"/api/groups/{gid}", headers=h("x")).status_code == 403
 
-    # 招待リンク：未使用リンク＋参加者で定員まで【Q15】
-    inv1 = client.post(f"/api/groups/{gid}/invites", headers=h(host)).json()["token"]
-    inv2 = client.post(f"/api/groups/{gid}/invites", headers=h(host)).json()["token"]
-    assert client.post(f"/api/groups/{gid}/invites", headers=h(host)).status_code == 409
+    # 招待リンク：グループにつき1本で、定員に達するまで全員が同じリンクから参加できる
+    inv = client.post(f"/api/groups/{gid}/invites", headers=h(host)).json()["token"]
 
-    info = client.get(f"/api/invites/{inv1}").json()
+    info = client.get(f"/api/invites/{inv}").json()
     assert info["group_name"] == "卒業旅行" and info["usable"] and info["members"] == 1
 
-    a = client.post(f"/api/invites/{inv1}/join", json={"nickname": "ちり"}).json()["token"]
-    # 1リンク1人
-    assert client.post(f"/api/invites/{inv1}/join", json={"nickname": "だれか"}).status_code == 409
+    a = client.post(f"/api/invites/{inv}/join", json={"nickname": "ちり"}).json()["token"]
     # 幹事以外は招待できない
     assert client.post(f"/api/groups/{gid}/invites", headers=h(a)).status_code == 403
-    b = client.post(f"/api/invites/{inv2}/join", json={"nickname": "たび"}).json()["token"]
+    # 同じリンクのまま、定員に達するまで続けて参加できる
+    b = client.post(f"/api/invites/{inv}/join", json={"nickname": "たび"}).json()["token"]
+    # 定員（3人）に達すると同じリンクでも参加できない
+    assert client.post(f"/api/invites/{inv}/join", json={"nickname": "だれか"}).status_code == 409
+    assert client.post(f"/api/groups/{gid}/invites", headers=h(host)).status_code == 409
 
     # 各質問1つ以上
     bad = client.put(f"/api/groups/{gid}/selections/me", headers=h(host), json={"tag_ids": tag_ids(client, ["温泉"])})

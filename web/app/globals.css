@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 /* いこたび デザイントークン（Figma「緑変えてみた」より） */
 :root {
   --teal-900: #123b34; /* チケット風の濃いヘッダー */
@@ -6,6 +8,7 @@
   --teal-500: #3aab93;
   --mint-400: #a8e6c0; /* 差し色のボタン・スプラッシュ背景 */
   --mint-300: #c3f0d6;
+  --vote-mint: #48bfae; /* Figma「完成版」の投票ボタン色（黒枠つき） */
   --cream-100: #ffffff;
   --cream-200: #ffffff; /* 画面の背景 */
   --ink-900: #3b2a1f; /* 見出し・本文の焦げ茶 */
@@ -20,6 +23,31 @@
   --radius-md: 16px;
   --radius-sm: 12px;
   --radius-pill: 999px;
+}
+
+/* Tailwind v4: 既存のCSS変数（デザイントークン）をそのままユーティリティクラスにマッピングする */
+@theme inline {
+  --color-teal-900: var(--teal-900);
+  --color-teal-700: var(--teal-700);
+  --color-teal-600: var(--teal-600);
+  --color-teal-500: var(--teal-500);
+  --color-mint-400: var(--mint-400);
+  --color-mint-300: var(--mint-300);
+  --color-vote-mint: var(--vote-mint);
+  --color-cream-100: var(--cream-100);
+  --color-cream-200: var(--cream-200);
+  --color-ink-900: var(--ink-900);
+  --color-ink-600: var(--ink-600);
+  --color-ink-400: var(--ink-400);
+  --color-line: var(--line);
+  --color-white: var(--white);
+  --color-danger: var(--danger);
+  --shadow-card: var(--shadow-card);
+  --shadow-pop: var(--shadow-pop);
+  --radius-lg: var(--radius-lg);
+  --radius-md: var(--radius-md);
+  --radius-sm: var(--radius-sm);
+  --radius-pill: var(--radius-pill);
 }
 
 * { box-sizing: border-box; }

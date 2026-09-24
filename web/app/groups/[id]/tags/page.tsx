@@ -67,9 +67,9 @@ export default function TagsPage() {
 
   return (
     <div className="screen">
-      <AppHeader eyebrow="希望を教えてください" title="どんな旅にしたい？" backHref={`/groups/${groupId}`} />
+      <AppHeader eyebrow="希望を教えてください" title="どんな旅にしたい？" homeHref="/home" />
       <ProgressSteps step={1} />
-      <main className="body">
+      <main className="flex-1 p-5">
         {categories.map((c) => (
           <TagCategory key={c.key} label={c.label} tags={c.tags} selectedIds={selected} onToggle={toggle} />
         ))}
@@ -88,9 +88,6 @@ export default function TagsPage() {
         </Button>
       </BottomBar>
       <Toast message={error} />
-      <style jsx>{`
-        .body { flex: 1; padding: 20px; }
-      `}</style>
     </div>
   );
 }
