@@ -11,7 +11,7 @@ type DateRangeFieldProps = {
   readonly error?: string;
 };
 
-const INPUT_CLASS = "h-auto min-h-[52px] rounded-md border-[1.5px] px-4 py-3 text-base font-medium md:text-base";
+const INPUT_CLASS = "h-auto min-h-[47px] rounded-md border-[1.5px] px-4 py-2 text-base font-medium md:text-base";
 
 /** グループ作成画面の「日程」欄：出発日 → 帰る日 */
 export default function DateRangeField({

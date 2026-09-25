@@ -35,6 +35,7 @@ export default function CreateGroupForm({ onSubmit, submitting, error }: CreateG
         label="部屋の名前"
         placeholder="例：卒業旅行メンバー"
         maxLength={20}
+        className="min-h-[47px] py-2"
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
@@ -44,6 +45,7 @@ export default function CreateGroupForm({ onSubmit, submitting, error }: CreateG
         label="あなたのニックネーム"
         placeholder="例：えび"
         maxLength={20}
+        className="min-h-[47px] py-2"
         value={nickname}
         onChange={(e) => setNickname(e.target.value)}
       />
