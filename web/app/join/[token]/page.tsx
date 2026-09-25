@@ -1,17 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import AppHeader from "@/components/layout/AppHeader";
 import TextField from "@/components/ui/TextField";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Spinner from "@/components/ui/Spinner";
-import { api, saveMembership } from "@/lib/api";
+import { api, saveMembership, userSession } from "@/lib/api";
 import type { FormEvent } from "react";
 import type { InviteInfo } from "@/lib/api";
 
-/** 招待参加画面（仕様書B 4.2）。アカウントは不要、ニックネームだけで参加する【Q3】 */
+/**
+ * 招待参加画面（design: 招待チケット node 473:4614）。
+ * リンクを開いた人がアカウント未ログインの場合は、まずログイン／新規登録を促すゲート画面を出し、
+ * ログイン後にこの画面へ戻ってきて参加できるようにする。
+ */
 export default function JoinPage() {
   const { token: inviteToken } = useParams<{ token: string }>();
   const router = useRouter();
@@ -20,10 +25,15 @@ export default function JoinPage() {
   const [error, setError] = useState<string | null>(null);
   const [nickname, setNickname] = useState("");
   const [joining, setJoining] = useState(false);
+  const [session] = useState(() => userSession());
 
   useEffect(() => {
     api.getInvite(inviteToken).then(setInfo).catch((e: unknown) => setError(e instanceof Error ? e.message : "招待情報を読み込めませんでした"));
   }, [inviteToken]);
+
+  useEffect(() => {
+    if (session) setNickname(session.displayName);
+  }, [session]);
 
   async function join(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -51,6 +61,48 @@ export default function JoinPage() {
     );
   }
   if (!info) return <Spinner />;
+
+  const nextUrl = `/join/${inviteToken}`;
+
+  if (!session) {
+    return (
+      <div className="screen">
+        <div className="ticket-header">
+          <p className="ticket-eyebrow">招待チケット</p>
+          <p className="ticket-name">{info.group_name}</p>
+          <p className="ticket-dates">
+            {info.start_date} 〜 {info.end_date}
+          </p>
+        </div>
+        <main className="body">
+          <p className="gate-message">
+            あなたへの招待チケットが届きました。グループに参加して旅行の計画をしましょう。
+          </p>
+          <p className="gate-note">参加するにはログインまたは新規登録が必要です。</p>
+          <Link href={`/login?next=${encodeURIComponent(nextUrl)}`}>
+            <Button variant="primary" block>ログイン</Button>
+          </Link>
+          <Link href={`/register?next=${encodeURIComponent(nextUrl)}`}>
+            <Button variant="quiet" block>アカウントの新規登録はこちら</Button>
+          </Link>
+        </main>
+        <style jsx>{`
+          .ticket-header {
+            background: var(--teal-900);
+            color: var(--white);
+            padding: 32px 24px 28px;
+            text-align: center;
+          }
+          .ticket-eyebrow { font-size: 0.78rem; opacity: 0.8; margin-bottom: 8px; }
+          .ticket-name { font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; }
+          .ticket-dates { font-size: 0.85rem; opacity: 0.85; }
+          .body { flex: 1; padding: 24px 20px; display: flex; flex-direction: column; gap: 12px; }
+          .gate-message { color: var(--ink-900); font-size: 0.95rem; line-height: 1.6; }
+          .gate-note { color: var(--ink-600); font-size: 0.82rem; margin-bottom: 8px; }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
     <div className="screen">

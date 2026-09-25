@@ -1,16 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import TextField from "@/components/ui/TextField";
 import Button from "@/components/ui/Button";
 import Toast from "@/components/ui/Toast";
 import { api, saveUserSession, ApiError } from "@/lib/api";
 
-/** ログイン画面（Figma完成版）。送信すると /api/auth/login を呼び、成功すればホーム導線（/home）へ遷移する。 */
+/** ログイン画面（Figma完成版）。送信すると /api/auth/login を呼び、成功すれば ?next（無ければ /home）へ遷移する。 */
 export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") || "/home";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +33,7 @@ export default function LoginPage() {
     try {
       const { token, display_name } = await api.login(email, password);
       saveUserSession({ token, displayName: display_name });
-      router.push("/home");
+      router.push(next);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "ログインできませんでした");
     } finally {
@@ -64,7 +74,7 @@ export default function LoginPage() {
         </Button>
 
         <p className="signup-hint">
-          アカウントの新規登録は<Link href="/register">こちら</Link>
+          アカウントの新規登録は<Link href={`/register?next=${encodeURIComponent(next)}`}>こちら</Link>
         </p>
       </form>
       <Toast message={error} />
