@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import TicketCard from "@/components/invite/TicketCard";
+import MemberWinsList from "@/components/summary/MemberWinsList";
+import PlaceTimeline from "@/components/summary/PlaceTimeline";
 import Card from "@/components/ui/Card";
 import Spinner from "@/components/ui/Spinner";
-import TicketCard from "@/components/invite/TicketCard";
-import PlaceTimeline from "@/components/summary/PlaceTimeline";
-import MemberWinsList from "@/components/summary/MemberWinsList";
-import { api, tokenFor } from "@/lib/api";
 import type { GroupSummary } from "@/lib/api";
+import { api, tokenFor } from "@/lib/api";
 
 /** 決定まとめ画面（Figma 363:6926 完成版 計画確定）。旅の内容と、全員の希望がかなったかを確認する */
 export default function SummaryPage() {
@@ -80,7 +80,10 @@ export default function SummaryPage() {
         </Card>
 
         <div className="mx-auto w-full max-w-[315px]">
-          <Link href="/home" className="inline-flex min-h-[52px] w-full items-center justify-center rounded-full border border-foreground bg-primary px-6 py-3 text-base font-medium text-primary-foreground shadow-pop transition-transform duration-75 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <Link
+            href="/home"
+            className="inline-flex min-h-[52px] w-full items-center justify-center rounded-full border border-foreground bg-primary px-6 py-3 text-base font-medium text-primary-foreground shadow-pop transition-transform duration-75 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
             ホームに戻る
           </Link>
         </div>

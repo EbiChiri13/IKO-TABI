@@ -41,10 +41,7 @@ export default function HeroCarousel({ slides = [] }: HeroCarouselProps) {
         }}
       >
         {slides.map((slide) => (
-          <div
-            key={slide.id}
-            className="h-[443px] w-[279px] shrink-0 snap-center"
-          >
+          <div key={slide.id} className="h-[443px] w-[279px] shrink-0 snap-center">
             <TripCard
               groupId={slide.groupId}
               href={slide.href}

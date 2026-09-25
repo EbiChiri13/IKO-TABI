@@ -21,10 +21,7 @@ export default function Badge({ tone = "wait", children }: BadgeProps) {
   return (
     <PrimitiveBadge
       variant="outline"
-      className={cn(
-        "rounded-full px-2.5 py-[3px] text-[0.72rem] font-bold",
-        TONE_CLASS[tone] ?? TONE_CLASS.wait,
-      )}
+      className={cn("rounded-full px-2.5 py-[3px] text-[0.72rem] font-bold", TONE_CLASS[tone] ?? TONE_CLASS.wait)}
     >
       {children}
     </PrimitiveBadge>

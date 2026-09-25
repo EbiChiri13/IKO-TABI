@@ -27,7 +27,7 @@
   --border: rgba(39, 39, 39, 0.11);
   --input: rgba(39, 39, 39, 0.11);
   --ring: #48bfae;
-  --highlight: #FFE100; /* Figma selected/highlight yellow (picked tags) */
+  --highlight: #ffe100; /* Figma selected/highlight yellow (picked tags) */
   --media-placeholder: #d9d9d9;
 
   /* ---- shape / elevation (central knobs: utilities + component CSS share) ---- */
@@ -46,15 +46,15 @@
      Every legacy name resolves to the final palette above, so the old class
      names keep working while the whole app shares one theme. Prefer the
      semantic names in new code; drop an alias once its last consumer moves. */
-  --teal-900: var(--foreground);      /* dark fills, logo stroke/shadow (keep dark) */
-  --teal-700: var(--foreground);      /* accent text on light fills */
-  --teal-600: var(--primary);         /* brand fills (headers, buttons, chips) */
+  --teal-900: var(--foreground); /* dark fills, logo stroke/shadow (keep dark) */
+  --teal-700: var(--foreground); /* accent text on light fills */
+  --teal-600: var(--primary); /* brand fills (headers, buttons, chips) */
   --teal-500: var(--primary);
-  --vote-mint: var(--primary);        /* 投票ボタン（Figma「完成版」） */
-  --mint-400: var(--secondary);       /* light accent wash */
+  --vote-mint: var(--primary); /* 投票ボタン（Figma「完成版」） */
+  --mint-400: var(--secondary); /* light accent wash */
   --mint-300: var(--secondary);
-  --cream-100: var(--muted);          /* chip / badge fills */
-  --cream-200: var(--background);     /* page surfaces */
+  --cream-100: var(--muted); /* chip / badge fills */
+  --cream-200: var(--background); /* page surfaces */
   --ink-900: var(--foreground);
   --ink-600: var(--foreground);
   --ink-400: var(--muted-foreground);
@@ -117,8 +117,13 @@
   --color-danger: var(--danger);
 }
 
-* { box-sizing: border-box; }
-html, body { height: 100%; }
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+}
 body {
   margin: 0;
   background: var(--background);
@@ -136,7 +141,7 @@ body {
   -webkit-text-stroke: 2px var(--foreground);
   paint-order: stroke fill;
   text-shadow: 3px 3px 0 var(--foreground);
-  letter-spacing: .02em;
+  letter-spacing: 0.02em;
 }
 
 .screen {
@@ -150,10 +155,20 @@ body {
 }
 
 .visually-hidden {
-  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }

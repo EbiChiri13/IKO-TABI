@@ -374,8 +374,7 @@ export const api = {
   join: (inviteToken: string, nickname: string) =>
     request<JoinResult>(`/api/invites/${inviteToken}/join`, { method: "POST", body: { nickname } }),
   listTags: () => request<TagCategory[]>("/api/tags"),
-  tagSummary: (groupId: string, token: string) =>
-    request<TagSummary>(`/api/groups/${groupId}/tag-summary`, { token }),
+  tagSummary: (groupId: string, token: string) => request<TagSummary>(`/api/groups/${groupId}/tag-summary`, { token }),
   getMySelections: (groupId: string, token: string) =>
     request<MySelections>(`/api/groups/${groupId}/selections/me`, { token }),
   saveMySelections: (groupId: string, token: string, tagIds: number[], shareAnswers: boolean) =>
@@ -406,11 +405,7 @@ export const api = {
 };
 
 /** 変更通知の WebSocket（F-13）。onChange({changed:["votes",...]}) を呼ぶ */
-export function connectRealtime(
-  groupId: string,
-  token: string,
-  onChange: (msg: RealtimeMessage) => void,
-): () => void {
+export function connectRealtime(groupId: string, token: string, onChange: (msg: RealtimeMessage) => void): () => void {
   if (typeof window === "undefined") return () => {};
   const proto = window.location.protocol === "https:" ? "wss" : "ws";
   const apiHost = process.env.NEXT_PUBLIC_API_WS_HOST || window.location.host;

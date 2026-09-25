@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Button from "@/components/ui/Button";
-import BottomBar from "@/components/ui/BottomBar";
-import Spinner from "@/components/ui/Spinner";
-import Toast from "@/components/ui/Toast";
+import { useEffect, useState } from "react";
+import { ShareIcon } from "@/components/icons";
 import InviteHero from "@/components/invite/InviteHero";
 import InviteLinkBox from "@/components/invite/InviteLinkBox";
 import TicketCard from "@/components/invite/TicketCard";
-import { ShareIcon } from "@/components/icons";
-import { api, inviteLinkFor, saveInviteLink, tokenFor } from "@/lib/api";
+import BottomBar from "@/components/ui/BottomBar";
+import Button from "@/components/ui/Button";
+import Spinner from "@/components/ui/Spinner";
+import Toast from "@/components/ui/Toast";
 import type { GroupView } from "@/lib/api";
+import { api, inviteLinkFor, saveInviteLink, tokenFor } from "@/lib/api";
 
 /** 招待画面（design: グループ結成／飛行機の搭乗券風チケット）。グループにつき1本のリンクを全員で使い回す。 */
 export default function InvitePage() {
@@ -26,7 +26,10 @@ export default function InvitePage() {
 
   useEffect(() => {
     if (!token) return;
-    api.getGroup(groupId, token).then(setGroup).catch((e: unknown) => setError(e instanceof Error ? e.message : "読み込みに失敗しました"));
+    api
+      .getGroup(groupId, token)
+      .then(setGroup)
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : "読み込みに失敗しました"));
   }, [groupId, token]);
 
   useEffect(() => {

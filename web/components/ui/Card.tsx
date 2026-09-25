@@ -9,12 +9,7 @@ type CardProps<T extends ElementType = "div"> = {
   readonly className?: string;
 } & Omit<ComponentPropsWithoutRef<T>, "as" | "children" | "className">;
 
-export default function Card<T extends ElementType = "div">({
-  as,
-  children,
-  className = "",
-  ...rest
-}: CardProps<T>) {
+export default function Card<T extends ElementType = "div">({ as, children, className = "", ...rest }: CardProps<T>) {
   const Tag = as ?? "div";
 
   return (

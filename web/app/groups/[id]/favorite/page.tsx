@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { BackIcon } from "@/components/icons";
 import ProgressSteps from "@/components/layout/ProgressSteps";
 import FavoritePill from "@/components/tags/FavoritePill";
@@ -10,8 +10,8 @@ import BottomBar from "@/components/ui/BottomBar";
 import Button from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
 import Toast from "@/components/ui/Toast";
-import { api, tokenFor } from "@/lib/api";
 import type { Tag } from "@/lib/api";
+import { api, tokenFor } from "@/lib/api";
 
 /** お気に入り選定画面（Figma 363:7030）。選んだタグの中から「今回の旅行で譲れないこと」を1つ選ぶ。 */
 export default function FavoritePage() {

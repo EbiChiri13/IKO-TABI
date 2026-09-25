@@ -11,11 +11,17 @@ type DateRangeFieldProps = {
   readonly error?: string;
 };
 
-const INPUT_CLASS =
-  "h-auto min-h-[52px] rounded-md border-[1.5px] px-4 py-3 text-base font-medium md:text-base";
+const INPUT_CLASS = "h-auto min-h-[52px] rounded-md border-[1.5px] px-4 py-3 text-base font-medium md:text-base";
 
 /** グループ作成画面の「日程」欄：出発日 → 帰る日 */
-export default function DateRangeField({ label = "日程", start, end, onChangeStart, onChangeEnd, error }: DateRangeFieldProps) {
+export default function DateRangeField({
+  label = "日程",
+  start,
+  end,
+  onChangeStart,
+  onChangeEnd,
+  error,
+}: DateRangeFieldProps) {
   return (
     <div className="mb-4 font-sans font-bold">
       <span className="mb-1.5 block">{label}</span>
@@ -27,7 +33,9 @@ export default function DateRangeField({ label = "日程", start, end, onChangeS
           onChange={(e) => onChangeStart(e.target.value)}
           aria-label="出発日"
         />
-        <span aria-hidden="true" className="font-bold text-muted-foreground">→</span>
+        <span aria-hidden="true" className="font-bold text-muted-foreground">
+          →
+        </span>
         <Input
           type="date"
           className={INPUT_CLASS}
@@ -37,9 +45,7 @@ export default function DateRangeField({ label = "日程", start, end, onChangeS
           min={start || undefined}
         />
       </div>
-      {error && (
-        <span className="mt-1.5 block font-medium text-[0.82rem] text-destructive">{error}</span>
-      )}
+      {error && <span className="mt-1.5 block font-medium text-[0.82rem] text-destructive">{error}</span>}
     </div>
   );
 }

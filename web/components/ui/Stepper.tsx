@@ -30,7 +30,9 @@ export default function Stepper({ label, value, min = 2, max = 4, onChange }: St
         >
           −
         </PrimitiveButton>
-        <span className="min-w-[1.5em] text-center text-[1.2rem] font-extrabold" aria-live="polite">{value}</span>
+        <span className="min-w-[1.5em] text-center text-[1.2rem] font-extrabold" aria-live="polite">
+          {value}
+        </span>
         <PrimitiveButton
           type="button"
           variant="outline"

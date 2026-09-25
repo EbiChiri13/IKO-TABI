@@ -1,8 +1,7 @@
 "use client";
 
-import { useId } from "react";
-
 import type { InputHTMLAttributes } from "react";
+import { useId } from "react";
 
 import { Input } from "@/components/ui/primitives/input";
 import { cn } from "@/lib/utils";

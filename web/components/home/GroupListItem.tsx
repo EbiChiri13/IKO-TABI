@@ -1,6 +1,6 @@
 import Link from "next/link";
-import AvatarStack from "@/components/ui/AvatarStack";
 import { CalendarIcon, ChevronRightIcon } from "@/components/icons";
+import AvatarStack from "@/components/ui/AvatarStack";
 
 type GroupListItemProps = {
   readonly groupId: string;

@@ -1,12 +1,12 @@
 "use client";
 
-import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import TextField from "@/components/ui/TextField";
+import { Suspense, useState } from "react";
 import Button from "@/components/ui/Button";
+import TextField from "@/components/ui/TextField";
 import Toast from "@/components/ui/Toast";
-import { api, saveUserSession, ApiError } from "@/lib/api";
+import { ApiError, api, saveUserSession } from "@/lib/api";
 
 /** アカウント新規登録画面。ログイン画面と同じ見た目で、表示名・メール・パスワードを受け付ける。成功すれば ?next（無ければ /home）へ遷移する。 */
 export default function RegisterPage() {

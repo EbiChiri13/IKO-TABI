@@ -1,7 +1,7 @@
 import Card from "@/components/ui/Card";
 import { Button as PrimitiveButton } from "@/components/ui/primitives/button";
+import type { TagCategory as ApiTagCategory, Tag } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import type { Tag, TagCategory as ApiTagCategory } from "@/lib/api";
 
 type TagCategoryProps = Pick<ApiTagCategory, "label" | "tags"> & {
   readonly selectedIds: ReadonlySet<Tag["id"]>;
@@ -15,7 +15,12 @@ export default function TagCategory({ label, tags, selectedIds, onToggle }: TagC
     <Card as="section">
       <div className="flex items-baseline justify-between gap-2">
         <h3 className="text-[15px] font-bold">{label}</h3>
-        <span className={cn("whitespace-nowrap text-[12px]", count > 0 ? "font-bold text-foreground" : "text-muted-foreground")}>
+        <span
+          className={cn(
+            "whitespace-nowrap text-[12px]",
+            count > 0 ? "font-bold text-foreground" : "text-muted-foreground",
+          )}
+        >
           {count > 0 ? `${count}個選択中` : "1つ以上選んでください"}
         </span>
       </div>

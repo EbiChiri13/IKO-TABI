@@ -1,5 +1,5 @@
-import CandidateCard from "./CandidateCard";
 import type { CandidateItem, TargetType } from "@/lib/api";
+import CandidateCard from "./CandidateCard";
 
 type CandidateListProps = {
   readonly items: readonly CandidateItem[];
@@ -14,7 +14,14 @@ export default function CandidateList({ items, type, onToggle, locked, selectedI
   return (
     <div className="flex w-full max-w-[380px] flex-col gap-4">
       {items.map((item) => (
-        <CandidateCard key={item.id} item={item} type={type} onToggle={onToggle} locked={locked} selected={selectedIds.has(item.id)} />
+        <CandidateCard
+          key={item.id}
+          item={item}
+          type={type}
+          onToggle={onToggle}
+          locked={locked}
+          selected={selectedIds.has(item.id)}
+        />
       ))}
     </div>
   );

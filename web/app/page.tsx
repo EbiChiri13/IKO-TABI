@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { myGroups } from "@/lib/api";
 
 /**
@@ -36,11 +36,7 @@ export default function WelcomePage() {
         <p className="absolute left-[65.2%] top-[27.8%] whitespace-nowrap text-[clamp(13px,3.6vw,16px)] font-extrabold text-background">
           を叶える
         </p>
-        <img
-          className="absolute left-[13.93%] top-[31.69%] w-[74.88%]"
-          src="/splash/wordmark.svg"
-          alt="いこ！たび"
-        />
+        <img className="absolute left-[13.93%] top-[31.69%] w-[74.88%]" src="/splash/wordmark.svg" alt="いこ！たび" />
 
         {/* 後光だけは横にはみ出すためこの枠で切る */}
         <div className="absolute inset-0 overflow-hidden">

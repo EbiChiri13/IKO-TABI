@@ -1,17 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import CandidateList from "@/components/candidates/CandidateList";
 import { BackIcon } from "@/components/icons";
 import ProgressSteps from "@/components/layout/ProgressSteps";
-import CandidateList from "@/components/candidates/CandidateList";
 import BottomBar from "@/components/ui/BottomBar";
 import Button from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
 import Toast from "@/components/ui/Toast";
+import type { CandidateItem, CandidatesView, MemberRole, TargetType } from "@/lib/api";
 import { api, connectRealtime, tokenFor } from "@/lib/api";
-import type { CandidatesView, CandidateItem, MemberRole, TargetType } from "@/lib/api";
 
 /** Figma完成版の選定画面（363:6679 行き先 / 363:6722 宿泊 / 363:6808 食事 / 363:6765 観光地）の見出しコピー */
 const META = {
@@ -148,7 +148,13 @@ export default function VoteTypePage() {
         </div>
       </main>
       <BottomBar note={role === "host" ? "幹事はいつでも今の投票で決められます" : undefined}>
-        <Button variant="primary" block className="min-w-0 flex-1 px-3" disabled={selected.size === 0 || busy} onClick={submit}>
+        <Button
+          variant="primary"
+          block
+          className="min-w-0 flex-1 px-3"
+          disabled={selected.size === 0 || busy}
+          onClick={submit}
+        >
           {busy ? "送信しています…" : alreadyVoted ? "投票を変更する" : "投票する"}
         </Button>
         {role === "host" && (

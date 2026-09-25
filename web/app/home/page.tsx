@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import Spinner from "@/components/ui/Spinner";
-import HeroCarousel, { type HeroSlide } from "@/components/home/HeroCarousel";
+import { useEffect, useState } from "react";
 import GroupListItem from "@/components/home/GroupListItem";
-import { api, myGroups } from "@/lib/api";
+import HeroCarousel, { type HeroSlide } from "@/components/home/HeroCarousel";
+import Spinner from "@/components/ui/Spinner";
 import type { GroupView } from "@/lib/api";
+import { api, myGroups } from "@/lib/api";
 
 type GroupEntry = { readonly id: string; readonly g: GroupView };
 
@@ -27,7 +27,7 @@ export default function HomePage() {
           } catch {
             return null;
           }
-        })
+        }),
       );
       if (!cancelled) setGroups(results.filter((result): result is GroupEntry => result !== null));
     })();

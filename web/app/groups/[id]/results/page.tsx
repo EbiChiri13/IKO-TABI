@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Card from "@/components/ui/Card";
-import Button from "@/components/ui/Button";
+import { useEffect, useState } from "react";
+import TagResultBar from "@/components/tags/TagResultBar";
 import BottomBar from "@/components/ui/BottomBar";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
 import Spinner from "@/components/ui/Spinner";
 import Toast from "@/components/ui/Toast";
-import TagResultBar from "@/components/tags/TagResultBar";
-import { api, tokenFor } from "@/lib/api";
 import type { TagSummary } from "@/lib/api";
+import { api, tokenFor } from "@/lib/api";
 
 /** 投票結果画面（Figma 363:6634）。ハッシュタグ集計をもとに行き先を決めていく橋渡し画面。 */
 export default function ResultsPage() {
@@ -46,7 +46,12 @@ export default function ResultsPage() {
         ))}
       </main>
       <BottomBar>
-        <Button variant="primary" block className="border-foreground bg-foreground text-background hover:bg-foreground/90 hover:text-background" onClick={() => router.push(`/groups/${groupId}/vote/destination`)}>
+        <Button
+          variant="primary"
+          block
+          className="border-foreground bg-foreground text-background hover:bg-foreground/90 hover:text-background"
+          onClick={() => router.push(`/groups/${groupId}/vote/destination`)}
+        >
           行き先を見る
         </Button>
       </BottomBar>

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import Spinner from "@/components/ui/Spinner";
 import type { GroupStatus, GroupView } from "@/lib/api";
 import { useLiveGroup } from "@/lib/useLiveGroup";

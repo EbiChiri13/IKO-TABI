@@ -22,7 +22,7 @@ type ProgressStepsProps = {
 
 /** 全画面の上部に出す、6分割の進み具合バー（Figma「緑変えてみた」準拠）。 */
 export default function ProgressSteps({ status, step }: ProgressStepsProps) {
-  const current = step ? step - 1 : (status ? STEP_INDEX[status] : 0) ?? 0;
+  const current = step ? step - 1 : ((status ? STEP_INDEX[status] : 0) ?? 0);
   return (
     <ol
       className="m-0! grid list-none! grid-cols-6 gap-1.5 bg-background px-5! pt-3.5! pb-0!"

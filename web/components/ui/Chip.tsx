@@ -28,10 +28,7 @@ export default function Chip({ label, selected = false, onClick, disabled = fals
           : "border-border bg-background text-foreground hover:bg-foreground/5 hover:text-foreground",
       )}
     >
-      <span
-        aria-hidden="true"
-        className={cn(selected ? "text-primary-foreground/75" : "text-muted-foreground")}
-      >
+      <span aria-hidden="true" className={cn(selected ? "text-primary-foreground/75" : "text-muted-foreground")}>
         #
       </span>
       {label}

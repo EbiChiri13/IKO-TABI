@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import Button from "@/components/ui/Button";
-import TextField from "@/components/ui/TextField";
-import Spinner from "@/components/ui/Spinner";
-import TicketCard from "@/components/invite/TicketCard";
+import { useEffect, useState } from "react";
 import { BackIcon } from "@/components/icons";
-import { api, saveMembership, userSession } from "@/lib/api";
+import TicketCard from "@/components/invite/TicketCard";
+import Button from "@/components/ui/Button";
+import Spinner from "@/components/ui/Spinner";
+import TextField from "@/components/ui/TextField";
 import type { InviteInfo } from "@/lib/api";
+import { api, saveMembership, userSession } from "@/lib/api";
 
 /**
  * 招待参加画面（design: 招待チケット node 473:4614 / Figma 363:6567）。
@@ -27,7 +27,10 @@ export default function JoinPage() {
   const [session] = useState(() => userSession());
 
   useEffect(() => {
-    api.getInvite(inviteToken).then(setInfo).catch((e: unknown) => setError(e instanceof Error ? e.message : "招待情報を読み込めませんでした"));
+    api
+      .getInvite(inviteToken)
+      .then(setInfo)
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : "招待情報を読み込めませんでした"));
   }, [inviteToken]);
 
   useEffect(() => {
@@ -92,10 +95,14 @@ export default function JoinPage() {
           </p>
           <p className="mb-2 text-[0.82rem] text-muted-foreground">参加するにはログインまたは新規登録が必要です。</p>
           <Link href={`/login?next=${encodeURIComponent(nextUrl)}`}>
-            <Button variant="primary" block>ログイン</Button>
+            <Button variant="primary" block>
+              ログイン
+            </Button>
           </Link>
           <Link href={`/register?next=${encodeURIComponent(nextUrl)}`}>
-            <Button variant="quiet" block>アカウントの新規登録はこちら</Button>
+            <Button variant="quiet" block>
+              アカウントの新規登録はこちら
+            </Button>
           </Link>
         </main>
       </div>
@@ -139,7 +146,13 @@ export default function JoinPage() {
         </p>
 
         {info.usable ? (
-          <form onSubmit={(e) => { e.preventDefault(); void join(); }} className="flex flex-col gap-2.5 px-5">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              void join();
+            }}
+            className="flex flex-col gap-2.5 px-5"
+          >
             <TextField
               label="あなたのニックネーム"
               hint="※必須"

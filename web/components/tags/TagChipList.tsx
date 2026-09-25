@@ -14,9 +14,7 @@ export default function TagChipList({ labels, highlight }: TagChipListProps) {
           key={label}
           className={cn(
             "inline-block rounded-full px-4 py-2 text-[0.88rem] font-bold",
-            label === highlight
-              ? "bg-highlight text-foreground"
-              : "bg-primary text-primary-foreground",
+            label === highlight ? "bg-highlight text-foreground" : "bg-primary text-primary-foreground",
           )}
         >
           {label}

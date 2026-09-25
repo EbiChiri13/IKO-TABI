@@ -13,10 +13,11 @@ export default function AvatarStack({ names = [], max = 4 }: AvatarStackProps) {
   const shown = names.slice(0, max);
   const extra = names.length - shown.length;
   return (
-    <span className="inline-flex" aria-label={`メンバー ${names.length}人`}>
+    <span className="inline-flex" role="img" aria-label={`メンバー ${names.length}人`}>
       {shown.map((name, i) => (
         <span
           className={AVATAR_CLASS}
+          // biome-ignore lint/suspicious/noArrayIndexKey: 並び替えの無い静的な表示なので index をキーにして問題ない
           key={i}
           style={{ zIndex: shown.length - i }}
           title={name}
@@ -24,9 +25,7 @@ export default function AvatarStack({ names = [], max = 4 }: AvatarStackProps) {
           {name ? name[0] : ""}
         </span>
       ))}
-      {extra > 0 && (
-        <span className={cn(AVATAR_CLASS, "bg-muted text-muted-foreground")}>+{extra}</span>
-      )}
+      {extra > 0 && <span className={cn(AVATAR_CLASS, "bg-muted text-muted-foreground")}>+{extra}</span>}
     </span>
   );
 }

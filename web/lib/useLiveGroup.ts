@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { api, connectRealtime, tokenFor } from "./api";
 import type { GroupView, RealtimeMessage } from "./api";
+import { api, connectRealtime, tokenFor } from "./api";
 
 /**
  * グループの状態を取得し、WebSocket の通知が来るたびに取り直す（F-13）。

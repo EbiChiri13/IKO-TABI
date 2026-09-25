@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import TicketButton from "@/components/invite/TicketButton";
 import ProgressPill from "@/components/members/ProgressPill";
-import Card from "@/components/ui/Card";
-import Button from "@/components/ui/Button";
+import TagChipList from "@/components/tags/TagChipList";
 import BottomBar from "@/components/ui/BottomBar";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
 import Spinner from "@/components/ui/Spinner";
 import Toast from "@/components/ui/Toast";
-import TagChipList from "@/components/tags/TagChipList";
-import TicketButton from "@/components/invite/TicketButton";
-import { api } from "@/lib/api";
 import type { Tag } from "@/lib/api";
+import { api } from "@/lib/api";
 import { useLiveGroup } from "@/lib/useLiveGroup";
 
 /** 回答待ち画面（Figma 363:6861）。全員回答で自動遷移、幹事は2人以上で先へ進める【Q8】 */

@@ -19,7 +19,14 @@ type AppHeaderProps = {
  * グループ作成・招待・回答待ちなどで使う、ティール地の見出しヘッダー。
  * dark にすると「決定まとめ」などで使う濃紺のチケット風ヘッダーになる。
  */
-export default function AppHeader({ eyebrow, title, backHref, dark = false, decorate = true, children }: AppHeaderProps) {
+export default function AppHeader({
+  eyebrow,
+  title,
+  backHref,
+  dark = false,
+  decorate = true,
+  children,
+}: AppHeaderProps) {
   return (
     <header
       className={cn(
@@ -30,7 +37,9 @@ export default function AppHeader({ eyebrow, title, backHref, dark = false, deco
       {decorate && <PlaneTrail />}
       <div className="mb-2 flex min-h-[28px]">
         {backHref ? (
-          <Link href={backHref} className="inline-flex text-inherit no-underline" aria-label="戻る"><BackIcon /></Link>
+          <Link href={backHref} className="inline-flex text-inherit no-underline" aria-label="戻る">
+            <BackIcon />
+          </Link>
         ) : (
           <span />
         )}

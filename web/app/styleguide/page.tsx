@@ -1,22 +1,22 @@
 "use client";
 
-import { useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
-import Button from "@/components/ui/Button";
-import TextField from "@/components/ui/TextField";
-import DateRangeField from "@/components/ui/DateRangeField";
-import Stepper from "@/components/ui/Stepper";
-import Switch from "@/components/ui/Switch";
-import Chip from "@/components/ui/Chip";
-import Card from "@/components/ui/Card";
-import Badge from "@/components/ui/Badge";
-import AvatarStack from "@/components/ui/AvatarStack";
-import BottomBar from "@/components/ui/BottomBar";
-import Toast from "@/components/ui/Toast";
-import Spinner from "@/components/ui/Spinner";
+import { useState } from "react";
 import AppHeader from "@/components/layout/AppHeader";
 import ProgressSteps from "@/components/layout/ProgressSteps";
 import SpeechBubbleSticker from "@/components/layout/SpeechBubbleSticker";
+import AvatarStack from "@/components/ui/AvatarStack";
+import Badge from "@/components/ui/Badge";
+import BottomBar from "@/components/ui/BottomBar";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+import Chip from "@/components/ui/Chip";
+import DateRangeField from "@/components/ui/DateRangeField";
+import Spinner from "@/components/ui/Spinner";
+import Stepper from "@/components/ui/Stepper";
+import Switch from "@/components/ui/Switch";
+import TextField from "@/components/ui/TextField";
+import Toast from "@/components/ui/Toast";
 
 /**
  * UIライブラリ（スタイルガイド）。components/ui・components/layout の部品を
@@ -47,23 +47,29 @@ export default function StyleguidePage() {
         <p className="mb-1 text-[0.85rem] font-extrabold text-primary">いこたび UIライブラリ</p>
         <h1 className="mb-2.5 text-[1.6rem]">コンポーネント一覧</h1>
         <p className="max-w-[56ch] text-foreground opacity-70">
-          Figma完成デザインのトークン（Tailwind v4 + CSS変数）に合わせた部品集。
-          ここでの見た目の変更は<code className={CODE_CLASS}>components/ui/primitives</code>・<code className={CODE_CLASS}>components/ui</code>を直せば全画面に反映される。
+          Figma完成デザインのトークン（Tailwind v4 + CSS変数）に合わせた部品集。 ここでの見た目の変更は
+          <code className={CODE_CLASS}>components/ui/primitives</code>・
+          <code className={CODE_CLASS}>components/ui</code>を直せば全画面に反映される。
         </p>
       </header>
 
       <Section title="カラートークン">
         <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3">
-          {([
-            ["--primary", "メイン（#48BFAE）"],
-            ["--foreground", "文字（#272727）"],
-            ["--background", "画面背景（白）"],
-            ["--secondary", "差し色"],
-            ["--border", "枠線"],
-            ["--muted", "ミュート"],
-          ] as const).map(([token, label]) => (
+          {(
+            [
+              ["--primary", "メイン（#48BFAE）"],
+              ["--foreground", "文字（#272727）"],
+              ["--background", "画面背景（白）"],
+              ["--secondary", "差し色"],
+              ["--border", "枠線"],
+              ["--muted", "ミュート"],
+            ] as const
+          ).map(([token, label]) => (
             <div className="flex flex-col gap-1" key={token}>
-              <span className="block h-10 w-full rounded-[10px] border border-border" style={{ background: `var(${token})` }} />
+              <span
+                className="block h-10 w-full rounded-[10px] border border-border"
+                style={{ background: `var(${token})` }}
+              />
               <code className={CODE_CLASS}>{token}</code>
               <span className="text-[0.82rem] text-muted-foreground">{label}</span>
             </div>

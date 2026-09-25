@@ -16,10 +16,7 @@ export default function CandidateCard({ item, type, onToggle, locked, selected }
   const selectable = !locked && !item.decided;
   return (
     <Card
-      className={cn(
-        "w-full max-w-[380px] gap-0 overflow-hidden p-0",
-        (selected || item.decided) && "bg-primary/10",
-      )}
+      className={cn("w-full max-w-[380px] gap-0 overflow-hidden p-0", (selected || item.decided) && "bg-primary/10")}
     >
       <div className="mx-auto mt-2.5 h-1 w-9 rounded-full bg-border" aria-hidden="true" />
       <div
@@ -41,7 +38,9 @@ export default function CandidateCard({ item, type, onToggle, locked, selected }
         <div className="flex items-baseline justify-between gap-2">
           <h3 className="text-xl font-bold">
             {item.name}
-            {type === "destination" && <span className="text-sm font-medium text-muted-foreground">（{item.area}）</span>}
+            {type === "destination" && (
+              <span className="text-sm font-medium text-muted-foreground">（{item.area}）</span>
+            )}
           </h3>
           <span className="flex-none text-[1.3rem] leading-none font-black text-foreground">
             {item.match}
@@ -78,7 +77,13 @@ export default function CandidateCard({ item, type, onToggle, locked, selected }
           onClick={() => selectable && onToggle(item.id)}
           className={cn(selected && "border-foreground bg-foreground text-background hover:bg-foreground/90")}
         >
-          {item.decided ? "この候補に決定しました" : selected ? locked ? "投票済み" : "選択中（タップで取り消す）" : "この行き先に投票する"}
+          {item.decided
+            ? "この候補に決定しました"
+            : selected
+              ? locked
+                ? "投票済み"
+                : "選択中（タップで取り消す）"
+              : "この行き先に投票する"}
           <span className="text-sm font-bold opacity-85">{item.votes}票</span>
         </Button>
       </div>

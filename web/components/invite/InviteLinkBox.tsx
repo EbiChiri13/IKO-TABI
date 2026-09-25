@@ -42,7 +42,11 @@ export default function InviteLinkBox({ url }: InviteLinkBoxProps) {
         {copied ? <CheckIcon /> : <CopyIcon />}
       </button>
       <span aria-live="polite" className={copyError ? "w-full text-xs text-destructive" : "sr-only"}>
-        {copyError ? "コピーできませんでした。リンクを選択してコピーしてください" : copied ? "リンクをコピーしました" : ""}
+        {copyError
+          ? "コピーできませんでした。リンクを選択してコピーしてください"
+          : copied
+            ? "リンクをコピーしました"
+            : ""}
       </span>
     </div>
   );
