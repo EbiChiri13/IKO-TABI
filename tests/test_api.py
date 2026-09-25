@@ -343,3 +343,38 @@ def test_responses_match_schema(client):
     assert set(tags[0]) == {"key", "label", "tags"}
     assert set(tags[0]["tags"][0]) == {"id", "label", "kind"}
 
+
+def test_reconsider_only_host_and_only_current_phase(client):
+    """候補の再計算は幹事だけが、いま投票中の項目に対してだけ実行できる。"""
+    r = client.post(
+        "/api/groups",
+        json={
+            "name": "再計算",
+            "start_date": "2026-11-01",
+            "end_date": "2026-11-02",
+            "member_limit": 2,
+            "nickname": "えび",
+        },
+    ).json()
+    gid, host = r["group_id"], r["token"]
+    inv = client.post(f"/api/groups/{gid}/invites", headers=h(host)).json()["token"]
+    guest = client.post(f"/api/invites/{inv}/join", json={"nickname": "ちり"}).json()["token"]
+
+    labels = ["温泉", "のんびり", "関東", "歴史・寺社", "温泉付き"]
+    answer(client, gid, host, labels)
+    answer(client, gid, guest, labels)
+    assert client.get(f"/api/groups/{gid}", headers=h(host)).json()["status"] == "destination"
+
+    # 幹事以外は実行できない
+    assert (
+        client.post(f"/api/groups/{gid}/candidates/reconsider?type=destination", headers=h(guest)).status_code == 403
+    )
+
+    ok = client.post(f"/api/groups/{gid}/candidates/reconsider?type=destination", headers=h(host))
+    assert ok.status_code == 200
+    assert ok.json() == {"ok": True}
+
+    # いま投票中でない項目は受け付けない
+    assert client.post(f"/api/groups/{gid}/candidates/reconsider?type=lodging", headers=h(host)).status_code == 409
+
+
