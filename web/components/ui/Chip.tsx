@@ -2,6 +2,9 @@
 
 import type { MouseEventHandler } from "react";
 
+import { Button as PrimitiveButton } from "@/components/ui/primitives/button";
+import { cn } from "@/lib/utils";
+
 type ChipProps = {
   readonly label: string;
   readonly selected?: boolean;
@@ -12,36 +15,26 @@ type ChipProps = {
 /** ハッシュタグ選択の丸ピル。#付きで表示する */
 export default function Chip({ label, selected = false, onClick, disabled = false }: ChipProps) {
   return (
-    <button
+    <PrimitiveButton
       type="button"
-      className="chip"
       aria-pressed={selected}
       onClick={onClick}
       disabled={disabled}
+      variant="outline"
+      className={cn(
+        "h-auto min-h-[42px] cursor-pointer gap-0.5 rounded-pill border-[1.5px] px-4 py-2 text-[0.92rem] font-bold shadow-none transition-colors duration-150 disabled:pointer-events-auto disabled:cursor-not-allowed",
+        selected
+          ? "border-primary bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
+          : "border-border bg-background text-foreground hover:bg-foreground/5 hover:text-foreground",
+      )}
     >
-      <span className="hash" aria-hidden="true">#</span>
+      <span
+        aria-hidden="true"
+        className={cn(selected ? "text-primary-foreground/75" : "text-muted-foreground")}
+      >
+        #
+      </span>
       {label}
-      <style jsx>{`
-        .chip {
-          appearance: none; cursor: pointer;
-          display: inline-flex; align-items: center; gap: 2px;
-          min-height: 42px; padding: 8px 16px;
-          border-radius: var(--radius-pill);
-          border: 1.5px solid var(--line);
-          background: var(--white); color: var(--ink-900);
-          font-size: 0.92rem; font-weight: 700;
-          transition: background 0.12s, border-color 0.12s, color 0.12s;
-        }
-        .chip:disabled { opacity: 0.5; cursor: not-allowed; }
-        .chip[aria-pressed="true"] {
-          background: var(--teal-600); border-color: var(--teal-600); color: var(--white);
-        }
-        .hash { color: var(--ink-400); }
-        .chip[aria-pressed="true"] .hash { color: color-mix(in srgb, var(--white) 75%, transparent); }
-        .chip:focus-visible {
-          outline: 3px solid color-mix(in srgb, var(--teal-600) 45%, transparent); outline-offset: 2px;
-        }
-      `}</style>
-    </button>
+    </PrimitiveButton>
   );
 }

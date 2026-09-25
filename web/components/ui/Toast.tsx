@@ -7,17 +7,11 @@ type ToastProps = {
 export default function Toast({ message }: ToastProps) {
   if (!message) return null;
   return (
-    <div className="toast" role="status">
+    <div
+      className="fixed bottom-24 left-1/2 z-30 max-w-[calc(100%_-_32px)] -translate-x-1/2 rounded-sm bg-foreground px-[18px] py-2.5 text-[0.9rem] text-background shadow-pop"
+      role="status"
+    >
       {message}
-      <style jsx>{`
-        .toast {
-          position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%);
-          max-width: calc(100% - 32px);
-          background: var(--ink-900); color: var(--cream-200);
-          padding: 10px 18px; border-radius: 12px; font-size: 0.9rem; z-index: 30;
-          box-shadow: var(--shadow-pop);
-        }
-      `}</style>
     </div>
   );
 }

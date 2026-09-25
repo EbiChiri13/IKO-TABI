@@ -4,43 +4,36 @@ import { useId } from "react";
 
 import type { InputHTMLAttributes } from "react";
 
+import { Input } from "@/components/ui/primitives/input";
+import { cn } from "@/lib/utils";
+
 type TextFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, "label"> & {
   readonly label?: string;
   readonly hint?: string;
   readonly error?: string;
 };
 
-export default function TextField({ label, hint, error, ...inputProps }: TextFieldProps) {
+export default function TextField({ label, hint, error, className, ...inputProps }: TextFieldProps) {
   const id = useId();
   return (
-    <label className="field" htmlFor={id}>
+    <label className="mb-4 block font-sans font-bold" htmlFor={id}>
       {label && (
-        <span className="field-label">
+        <span className="mb-1.5 block">
           {label}
-          {hint && <span className="field-hint">{hint}</span>}
+          {hint && <span className="ml-1.5 text-[0.8rem] font-medium text-muted-foreground">{hint}</span>}
         </span>
       )}
-      <input id={id} className="field-input" aria-invalid={!!error} {...inputProps} />
-      {error && <span className="field-error">{error}</span>}
-      <style jsx>{`
-        .field { display: block; margin-bottom: 16px; font-weight: 700; }
-        .field-label { display: block; margin-bottom: 6px; }
-        .field-hint { font-weight: 500; color: var(--ink-400); font-size: 0.8rem; margin-left: 6px; }
-        .field-input {
-          display: block; width: 100%;
-          min-height: 52px; padding: 12px 16px;
-          border: 1.5px solid var(--line); border-radius: var(--radius-sm);
-          background: var(--white); color: var(--ink-900);
-          font-size: 1rem; font-weight: 500;
-        }
-        .field-input::placeholder { color: var(--ink-400); }
-        .field-input:focus-visible {
-          outline: 3px solid color-mix(in srgb, var(--teal-600) 45%, transparent);
-          outline-offset: 1px;
-        }
-        .field-input[aria-invalid="true"] { border-color: var(--danger); }
-        .field-error { display: block; margin-top: 6px; color: var(--danger); font-size: 0.82rem; font-weight: 500; }
-      `}</style>
+      <Input
+        id={id}
+        aria-invalid={!!error}
+        className={cn(
+          "h-auto min-h-[52px] rounded-md border-[1.5px] px-4 py-3 text-base font-medium md:text-base",
+          error && "border-destructive",
+          className,
+        )}
+        {...inputProps}
+      />
+      {error && <span className="mt-1.5 block text-[0.82rem] font-medium text-destructive">{error}</span>}
     </label>
   );
 }

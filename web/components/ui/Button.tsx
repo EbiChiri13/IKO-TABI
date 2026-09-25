@@ -2,15 +2,15 @@
 
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-const BASE =
-  "appearance-none border-0 cursor-pointer inline-flex items-center justify-center gap-1.5 min-h-[52px] px-6 py-3 rounded-pill font-bold text-base transition-[transform,opacity,box-shadow] duration-150 active:scale-[0.98] disabled:opacity-45 disabled:cursor-not-allowed";
+import { Button as PrimitiveButton } from "@/components/ui/primitives/button";
+import { cn } from "@/lib/utils";
 
 const VARIANT_CLASS = {
-  primary: "bg-teal-600 text-white shadow-pop",
-  mint: "bg-mint-400 text-ink-900 shadow-pop",
-  ghost: "bg-transparent text-teal-600 border-2 border-teal-600",
-  quiet: "bg-white text-ink-900 border-[1.5px] border-line",
-};
+  primary: "border-foreground bg-primary text-primary-foreground shadow-pop hover:bg-primary/90",
+  mint: "border-foreground bg-secondary text-secondary-foreground shadow-pop hover:bg-secondary/80",
+  ghost: "border-2 border-foreground bg-transparent text-foreground shadow-none hover:bg-foreground/5",
+  quiet: "border-border bg-card text-foreground shadow-none hover:bg-foreground/5",
+} as const;
 
 type ButtonVariant = keyof typeof VARIANT_CLASS;
 
@@ -25,7 +25,7 @@ type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "type" | "disab
 };
 
 /**
- * ピル形のボタン。variant: primary(ティール) / mint(差し色の緑) / ghost(枠線) / quiet(地味)
+ * ピル形のボタン。variant: primary(メイン) / mint(差し色) / ghost(枠線) / quiet(地味)
  */
 export default function Button({
   variant = "primary",
@@ -35,19 +35,24 @@ export default function Button({
   type = "button",
   onClick,
   children,
+  className,
   ...rest
 }: ButtonProps) {
   return (
-    <button
+    <PrimitiveButton
       type={type}
       disabled={disabled}
       onClick={onClick}
-      className={`${BASE} ${VARIANT_CLASS[variant] ?? VARIANT_CLASS.primary} ${
-        size === "sm" ? "min-h-[40px] px-[18px] py-2 text-sm" : ""
-      } ${block ? "w-full" : ""}`}
+      className={cn(
+        "rounded-full border font-sans font-medium transition-transform duration-75 active:scale-[0.98] disabled:active:scale-100 disabled:opacity-45",
+        size === "sm" ? "h-auto min-h-[40px] px-[18px] py-2 text-[0.9rem]" : "h-auto min-h-[52px] px-6 py-3 text-base",
+        VARIANT_CLASS[variant] ?? VARIANT_CLASS.primary,
+        block && "w-full",
+        className,
+      )}
       {...rest}
     >
       {children}
-    </button>
+    </PrimitiveButton>
   );
 }

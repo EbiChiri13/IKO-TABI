@@ -1,5 +1,8 @@
 import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
 
+import { cardSurface } from "@/components/ui/primitives/card";
+import { cn } from "@/lib/utils";
+
 type CardProps<T extends ElementType = "div"> = {
   readonly as?: T;
   readonly children?: ReactNode;
@@ -15,17 +18,8 @@ export default function Card<T extends ElementType = "div">({
   const Tag = as ?? "div";
 
   return (
-    <Tag className={`card ${className}`} {...rest}>
+    <Tag className={cn(cardSurface, "p-[18px]", className)} {...rest}>
       {children}
-      <style jsx>{`
-        .card {
-          background: var(--white);
-          border: 1px solid var(--line);
-          border-radius: var(--radius-md);
-          box-shadow: var(--shadow-card);
-          padding: 18px;
-        }
-      `}</style>
     </Tag>
   );
 }

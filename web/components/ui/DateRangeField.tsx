@@ -1,5 +1,7 @@
 "use client";
 
+import { Input } from "@/components/ui/primitives/input";
+
 type DateRangeFieldProps = {
   readonly label?: string;
   readonly start: string;
@@ -9,45 +11,35 @@ type DateRangeFieldProps = {
   readonly error?: string;
 };
 
+const INPUT_CLASS =
+  "h-auto min-h-[52px] rounded-md border-[1.5px] px-4 py-3 text-base font-medium md:text-base";
+
 /** グループ作成画面の「日程」欄：出発日 → 帰る日 */
 export default function DateRangeField({ label = "日程", start, end, onChangeStart, onChangeEnd, error }: DateRangeFieldProps) {
   return (
-    <div className="field">
-      <span className="field-label">{label}</span>
-      <div className="range">
-        <input
+    <div className="mb-4 font-sans font-bold">
+      <span className="mb-1.5 block">{label}</span>
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+        <Input
           type="date"
-          className="range-input"
+          className={INPUT_CLASS}
           value={start}
           onChange={(e) => onChangeStart(e.target.value)}
           aria-label="出発日"
         />
-        <span className="arrow" aria-hidden="true">→</span>
-        <input
+        <span aria-hidden="true" className="font-bold text-muted-foreground">→</span>
+        <Input
           type="date"
-          className="range-input"
+          className={INPUT_CLASS}
           value={end}
           onChange={(e) => onChangeEnd(e.target.value)}
           aria-label="帰る日"
           min={start || undefined}
         />
       </div>
-      {error && <span className="field-error">{error}</span>}
-      <style jsx>{`
-        .field { margin-bottom: 16px; font-weight: 700; }
-        .field-label { display: block; margin-bottom: 6px; }
-        .range { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; }
-        .range-input {
-          min-height: 52px; padding: 10px 12px; width: 100%;
-          border: 1.5px solid var(--line); border-radius: var(--radius-sm);
-          background: var(--white); color: var(--ink-900); font: inherit; font-size: 0.95rem;
-        }
-        .range-input:focus-visible {
-          outline: 3px solid color-mix(in srgb, var(--teal-600) 45%, transparent);
-        }
-        .arrow { color: var(--ink-400); font-weight: 700; }
-        .field-error { display: block; margin-top: 6px; color: var(--danger); font-size: 0.82rem; font-weight: 500; }
-      `}</style>
+      {error && (
+        <span className="mt-1.5 block font-medium text-[0.82rem] text-destructive">{error}</span>
+      )}
     </div>
   );
 }

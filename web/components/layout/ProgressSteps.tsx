@@ -1,4 +1,5 @@
 import type { GroupStatus } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 const STEPS = ["ハッシュタグ", "お気に入り", "行き先", "宿泊", "食事", "観光地"] as const;
 
@@ -23,23 +24,19 @@ type ProgressStepsProps = {
 export default function ProgressSteps({ status, step }: ProgressStepsProps) {
   const current = step ? step - 1 : (status ? STEP_INDEX[status] : 0) ?? 0;
   return (
-    <ol className="steps" aria-label="旅行を決める進み具合">
+    <ol
+      className="m-0! grid list-none! grid-cols-6 gap-1.5 bg-background px-5! pt-3.5! pb-0!"
+      aria-label="旅行を決める進み具合"
+    >
       {STEPS.map((label, i) => (
-        <li key={label} className={i < current ? "done" : i === current ? "now" : ""} aria-current={i === current}>
+        <li
+          key={label}
+          className={cn("h-[7px] rounded-[4px]", i <= current ? "bg-primary" : "bg-border")}
+          aria-current={i === current}
+        >
           <span className="visually-hidden">{label}</span>
         </li>
       ))}
-      <style jsx>{`
-        .steps {
-          list-style: none; margin: 0; padding: 14px 20px 0;
-          display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px;
-          background: var(--cream-200);
-        }
-        li {
-          height: 7px; border-radius: 4px; background: var(--line);
-        }
-        li.done, li.now { background: var(--teal-600); }
-      `}</style>
     </ol>
   );
 }
