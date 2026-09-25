@@ -11,7 +11,7 @@ import Spinner from "@/components/ui/Spinner";
 import type { GroupSummary } from "@/lib/api";
 import { api, tokenFor } from "@/lib/api";
 
-/** 決定まとめ画面（Figma 363:6926 完成版 計画確定）。旅の内容と、全員の希望がかなったかを確認する */
+/** 決定まとめ画面（Figma 473:4979 完成版 計画確定）。旅の内容と、全員の希望がかなったかを確認する */
 export default function SummaryPage() {
   const { id: groupId } = useParams<{ id: string }>();
   const router = useRouter();

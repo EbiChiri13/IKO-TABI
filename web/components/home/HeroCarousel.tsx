@@ -12,10 +12,10 @@ type HeroCarouselProps = {
   readonly slides?: readonly HeroSlide[];
 };
 
-const SLIDE_WIDTH = 279; // Figma 363:7079: チケット 279x443
+const SLIDE_WIDTH = 279; // Figma 473:5133: チケット 279x443
 const PITCH = SLIDE_WIDTH + 23;
 
-/** ホーム上部の旅行チケットカルーセル（Figma 363:7079）。横スクロールで次カードが覗く。 */
+/** ホーム上部の旅行チケットカルーセル（Figma 473:5133）。横スクロールで次カードが覗く。 */
 export default function HeroCarousel({ slides = [] }: HeroCarouselProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);

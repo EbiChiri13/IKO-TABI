@@ -11,7 +11,7 @@ import Toast from "@/components/ui/Toast";
 import type { TagSummary } from "@/lib/api";
 import { api, tokenFor } from "@/lib/api";
 
-/** 投票結果画面（Figma 363:6634）。ハッシュタグ集計をもとに行き先を決めていく橋渡し画面。 */
+/** 投票結果画面（Figma 473:4678）。ハッシュタグ集計をもとに行き先を決めていく橋渡し画面。 */
 export default function ResultsPage() {
   const { id: groupId } = useParams<{ id: string }>();
   const router = useRouter();

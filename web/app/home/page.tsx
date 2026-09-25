@@ -4,13 +4,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import GroupListItem from "@/components/home/GroupListItem";
 import HeroCarousel, { type HeroSlide } from "@/components/home/HeroCarousel";
+import HomeMenu from "@/components/home/HomeMenu";
 import Spinner from "@/components/ui/Spinner";
 import type { GroupView } from "@/lib/api";
 import { api, myGroups } from "@/lib/api";
 
 type GroupEntry = { readonly id: string; readonly g: GroupView };
 
-/** ホーム画面（Figma 363:7079）：ロゴ・旅行チケットカルーセル・所属グループ一覧・作成CTA。 */
+/** ホーム画面（Figma 473:5133）：ロゴ・旅行チケットカルーセル・所属グループ一覧・作成CTA。 */
 export default function HomePage() {
   const [groups, setGroups] = useState<GroupEntry[] | null>(null); // null = 読み込み中
 
@@ -49,10 +50,13 @@ export default function HomePage() {
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[480px] flex-col bg-background text-foreground">
-      <header className="flex justify-center pt-[60px]">
+      <header className="relative flex justify-center pt-[60px]">
         <h1>
           <img src="/splash/wordmark.svg" alt="いこ！たび" width={174} height={54} className="h-[54px] w-[174px]" />
         </h1>
+        <div className="absolute top-[74px] right-5">
+          <HomeMenu />
+        </div>
       </header>
 
       <main className="flex flex-1 flex-col px-5 pb-[calc(24px+env(safe-area-inset-bottom))]">
@@ -64,7 +68,10 @@ export default function HomePage() {
         )}
 
         <section className={slides.length > 0 ? "mt-[24px]" : "mt-10"}>
-          <h2 className="text-[15px] font-bold">所属グループ</h2>
+          <div className="flex items-center gap-2">
+            <img src="/home/pin.svg" alt="" aria-hidden="true" width={27} height={27} className="h-[27px] w-[27px]" />
+            <h2 className="text-[15px] font-bold">所属グループ</h2>
+          </div>
           {groups.length === 0 ? (
             <p className="mt-4 text-[13px] leading-relaxed text-muted-foreground">
               まだ参加しているグループがありません。招待リンクを開くか、新しくグループを作ってみましょう。

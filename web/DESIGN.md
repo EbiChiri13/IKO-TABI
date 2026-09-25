@@ -8,7 +8,7 @@ used in shared UI code must be named here before it is used in code.
 
 | Lane | Deliverable |
 |---|---|
-| Figma completed-design frames (`i9wGtdI2N3ZJhjQlStMIIx`) | Tokens extracted from `363:7079` Home, `363:7047` Create Group, `363:6485` Tags, `363:6679` Vote, `363:6926` Summary via `get_design_context` (skill `resource:figma-design-to-code`). Screenshots reviewed as the visual target; final palette confirmed as teal primary `#48BFAE`, ink `#272727`, white surface, Noto Sans JP (replacing the earlier cream/brown exploration). |
+| Figma completed-design frames (`i9wGtdI2N3ZJhjQlStMIIx`) | Tokens extracted from `473:5133` Home, `473:5101` Create Group, `473:4521` Tags, `473:4723` Vote, `473:4979` Summary via `get_design_context` (skill `resource:figma-design-to-code`). Screenshots reviewed as the visual target; final palette confirmed as teal primary `#48BFAE`, ink `#272727`, white surface, Noto Sans JP (replacing the earlier cream/brown exploration). |
 | Context7 (shadcn/ui + Tailwind v4) | `components.json` with `"cssVariables": true`; Tailwind v4 `@theme inline` maps `--color-primary: var(--primary)` style aliases so semantic vars stay in exactly one `:root` block. |
 | Next.js 16 docs (`node_modules/next/dist/docs`) | PostCSS config via `postcss.config.*` with string plugin ids; `next/font/google` for Noto Sans JP; styled-jsx is gone — every component uses Tailwind utilities + the CSS variables below. |
 | Existing code inventory | 12 `components/ui/*` + `components/layout/*` public props recorded below and preserved by adapters. |

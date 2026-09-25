@@ -9,7 +9,7 @@ type GroupListItemProps = {
   readonly memberNames?: readonly string[];
 };
 
-/** ホーム「所属グループ」の1行（Figma 363:7079）：サムネ／名前／日付／アバター／シェブロン */
+/** ホーム「所属グループ」の1行（Figma 473:5133）：サムネ／名前／日付／アバター／シェブロン */
 export default function GroupListItem({ groupId, name, dateLabel, memberNames = [] }: GroupListItemProps) {
   return (
     <Link

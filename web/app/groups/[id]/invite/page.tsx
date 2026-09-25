@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ShareIcon } from "@/components/icons";
+import { CalendarIcon, ShareIcon } from "@/components/icons";
 import InviteHero from "@/components/invite/InviteHero";
 import InviteLinkBox from "@/components/invite/InviteLinkBox";
 import TicketCard from "@/components/invite/TicketCard";
@@ -83,7 +83,7 @@ export default function InvitePage() {
     <div className="screen">
       <InviteHero backHref="/home" groupName={group.name} />
       <main className="flex flex-1 flex-col gap-3.5 pb-5">
-        {/* Figma 363:6526: チケット上端 y=151（ヘッダー h213 に 62px 重ねる） */}
+        {/* Figma 473:4566: チケット上端 y=151（ヘッダー h213 に 62px 重ねる） */}
         <div className="-mt-[22px] flex flex-col">
           <TicketCard groupId={groupId} name={group.name} start={group.start_date} end={group.end_date} />
         </div>
@@ -100,9 +100,18 @@ export default function InvitePage() {
           )}
         </div>
 
-        <div className="mt-auto px-5">
-          <Button variant="quiet" block onClick={() => router.push(`/groups/${groupId}/tags`)}>
+        {/* Figma 473:4566 は「リンクを共有する」→「あとで」→「計画を始める」の順に縦に並ぶ */}
+        <div className="mt-auto flex flex-col items-center gap-1 px-5">
+          <button
+            type="button"
+            onClick={() => router.push(`/groups/${groupId}/tags`)}
+            className="cursor-pointer py-2 text-[14px] text-muted-foreground hover:text-foreground"
+          >
             あとで
+          </button>
+          <Button variant="ghost" block onClick={() => router.push(`/groups/${groupId}/tags`)}>
+            <CalendarIcon size={18} />
+            計画を始める
           </Button>
         </div>
       </main>

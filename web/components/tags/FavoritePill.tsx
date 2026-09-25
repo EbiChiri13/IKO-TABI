@@ -9,7 +9,7 @@ type FavoritePillProps = {
   readonly onClick: () => void;
 };
 
-/** お気に入り選定画面のピル（Figma 363:7030 の 154×66 2列グリッド）。選ばれたもの（＝譲れないこと）だけ黄色になる。 */
+/** お気に入り選定画面のピル（Figma 473:5083 の 154×66 2列グリッド）。選ばれたもの（＝譲れないこと）だけ黄色になる。 */
 export default function FavoritePill({ label, selected, onClick }: FavoritePillProps) {
   return (
     <PrimitiveButton

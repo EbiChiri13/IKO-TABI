@@ -29,6 +29,8 @@
   --ring: #48bfae;
   --highlight: #ffe100; /* Figma selected/highlight yellow (picked tags) */
   --media-placeholder: #d9d9d9;
+  --panel-dark: #0c3239; /* 濃紺のヘッダー地（Figma 473:5101・invite-header.svg / summary-hero.svg と同じ色） */
+  --map-band: #bde3ff; /* 選定画面の日本地図の帯（Figma 473:4723 Rectangle 58） */
 
   /* ---- shape / elevation (central knobs: utilities + component CSS share) ---- */
   --radius-sm: 12px;
@@ -87,6 +89,8 @@
   --color-ring: var(--ring);
   --color-highlight: var(--highlight);
   --color-media-placeholder: var(--media-placeholder);
+  --color-panel-dark: var(--panel-dark);
+  --color-map-band: var(--map-band);
 
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);

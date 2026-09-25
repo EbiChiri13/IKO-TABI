@@ -7,7 +7,7 @@ type PlaceTimelineProps = {
   readonly places: readonly PlaceSummary[];
 };
 
-/** 決定まとめの縦タイムライン（Figma 363:6926 計画確定）。観光地／食事先／宿泊先で使う。 */
+/** 決定まとめの縦タイムライン（Figma 473:4979 計画確定）。観光地／食事先／宿泊先で使う。 */
 export default function PlaceTimeline({ label, places }: PlaceTimelineProps) {
   if (places.length === 0) return null;
   return (

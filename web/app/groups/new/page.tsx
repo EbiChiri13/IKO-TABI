@@ -8,7 +8,7 @@ import { BackIcon } from "@/components/icons";
 import type { CreateGroupInput } from "@/lib/api";
 import { api, saveMembership } from "@/lib/api";
 
-/** グループ作成画面（Figma 363:7047 — 402x874 / ヘッダー213px濃紺・ティール飾り）。仕様書B 4.2「グループ作成」 */
+/** グループ作成画面（Figma 473:5101 — 402x874 / ヘッダー213px濃紺・ティール飾り）。仕様書B 4.2「グループ作成」 */
 export default function NewGroupPage() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
@@ -30,18 +30,17 @@ export default function NewGroupPage() {
 
   return (
     <div className="screen">
-      {/* ヒーロー（Figma: 高さ213pxの濃紺地にティールのミニチケット飾り） */}
-      <header className="relative h-[213px] shrink-0 overflow-hidden bg-foreground px-5 pt-3.5 pb-6 text-background">
-        <div className="mb-2 flex min-h-[28px]">
-          <Link href="/" className="inline-flex text-inherit no-underline" aria-label="戻る">
-            <BackIcon />
-          </Link>
-        </div>
-        <p className="mb-1! text-[0.85rem] font-bold opacity-90">グループ作成</p>
-        <h1 className="relative z-[1] text-[1.5rem]! whitespace-pre-line">{"旅行のグループを\n作りましょう！"}</h1>
+      {/* ヒーロー（Figma 473:5101: 高さ213pxの濃紺地。ラベルは上部中央、タイトルは下部中央、チケットは中央に重なる） */}
+      <header className="relative h-[213px] shrink-0 bg-panel-dark px-5 text-background">
+        <Link href="/" className="absolute top-[62px] left-5 inline-flex text-inherit no-underline" aria-label="戻る">
+          <BackIcon />
+        </Link>
+        <p className="absolute top-[62px] left-0 w-full text-center text-[0.9rem]! font-bold opacity-90">
+          グループ作成
+        </p>
         {/* ティールのミニチケット＋バーコード飾り（public/figma/create-*） */}
         <div
-          className="pointer-events-none absolute right-[-32px] bottom-[-12px] w-[270px] rotate-[-5deg]"
+          className="pointer-events-none absolute bottom-[-26px] left-1/2 w-[270px] -translate-x-1/2 rotate-[-5deg]"
           aria-hidden="true"
         >
           <div className="relative aspect-[316/98]">
@@ -59,6 +58,9 @@ export default function NewGroupPage() {
             />
           </div>
         </div>
+        <h1 className="absolute bottom-[10px] left-0 z-[1] w-full text-center text-[1.5rem]! leading-tight whitespace-pre-line">
+          {"旅行のグループを\n作りましょう！"}
+        </h1>
       </header>
       <CreateGroupForm onSubmit={handleSubmit} submitting={submitting} error={error} />
     </div>

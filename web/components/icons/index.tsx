@@ -98,3 +98,11 @@ export function CheckIcon({ size = 16, ...rest }: IconProps) {
     </svg>
   );
 }
+
+export function MenuIcon({ size = 30, ...rest }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" {...base} {...rest}>
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </svg>
+  );
+}

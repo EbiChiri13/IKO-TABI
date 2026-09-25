@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { BackIcon, HomeIcon } from "@/components/icons";
 import TicketButton from "@/components/invite/TicketButton";
 import ProgressPill from "@/components/members/ProgressPill";
 import TagChipList from "@/components/tags/TagChipList";
@@ -14,7 +16,7 @@ import type { Tag } from "@/lib/api";
 import { api } from "@/lib/api";
 import { useLiveGroup } from "@/lib/useLiveGroup";
 
-/** 回答待ち画面（Figma 363:6861）。全員回答で自動遷移、幹事は2人以上で先へ進める【Q8】 */
+/** 回答待ち画面（Figma 473:4905 / 473:4930 / 473:4955）。全員回答で自動遷移、幹事は2人以上で先へ進める【Q8】 */
 export default function WaitingPage() {
   const { id: groupId } = useParams<{ id: string }>();
   const router = useRouter();
@@ -63,13 +65,19 @@ export default function WaitingPage() {
 
   return (
     <div className="screen">
-      <main className="flex flex-1 flex-col gap-[18px] px-5 pt-[73px] pb-5 text-center">
-        <h1 className="text-left text-[20px] font-black text-foreground">
+      <header className="px-5 pt-4">
+        <div className="flex h-8 items-center">
+          <Link href={`/groups/${groupId}`} aria-label="戻る" className="inline-flex text-foreground no-underline">
+            <BackIcon size={32} />
+          </Link>
+        </div>
+        <h1 className="pt-[65px] text-left text-[20px] font-black text-foreground">
           グループ全員の投票が完了するまで
           <br />
           しばらくお待ちください
         </h1>
-
+      </header>
+      <main className="flex flex-1 flex-col gap-[18px] px-5 pt-[51px] pb-5 text-center">
         <ProgressPill answered={group.answered_count} total={group.member_limit} />
         <p className="-mt-2 text-[0.82rem] text-muted-foreground">みんなの行きたいがそろうまで、もう少しです</p>
 
@@ -83,6 +91,14 @@ export default function WaitingPage() {
         <Button variant="quiet" block onClick={() => router.push(`/groups/${groupId}/tags`)}>
           希望を直す
         </Button>
+
+        <Link
+          href="/home"
+          className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full border border-border bg-background px-6 py-3 font-sans text-base font-medium text-foreground no-underline hover:bg-foreground/5"
+        >
+          <HomeIcon size={24} />
+          ホームへ戻る
+        </Link>
       </main>
 
       {canStart && (

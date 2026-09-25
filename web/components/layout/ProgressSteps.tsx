@@ -18,20 +18,24 @@ type ProgressStepsProps = {
   readonly status?: GroupStatus;
   /** 1〜6。渡すとこちらを優先し、省略時は status から推定する */
   readonly step?: number;
+  readonly className?: string;
 };
 
-/** 全画面の上部に出す、6分割の進み具合バー（Figma「緑変えてみた」準拠）。 */
-export default function ProgressSteps({ status, step }: ProgressStepsProps) {
+/**
+ * 上部に出す6分割の進み具合バー。Figma 完成版（473:4521 / 473:4723 等）では
+ * 画面幅いっぱいではなく中央寄せの 264px（1本38px＋すきま7px）で描かれている。
+ */
+export default function ProgressSteps({ status, step, className }: ProgressStepsProps) {
   const current = step ? step - 1 : ((status ? STEP_INDEX[status] : 0) ?? 0);
   return (
     <ol
-      className="m-0! grid list-none! grid-cols-6 gap-1.5 bg-background px-5! pt-3.5! pb-0!"
+      className={cn("m-0! flex w-[264px] list-none! items-center gap-[7px] bg-transparent p-0!", className)}
       aria-label="旅行を決める進み具合"
     >
       {STEPS.map((label, i) => (
         <li
           key={label}
-          className={cn("h-[7px] rounded-[4px]", i <= current ? "bg-primary" : "bg-border")}
+          className={cn("h-[7px] flex-1 rounded-[4px]", i <= current ? "bg-primary" : "bg-border")}
           aria-current={i === current}
         >
           <span className="visually-hidden">{label}</span>

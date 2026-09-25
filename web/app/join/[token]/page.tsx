@@ -12,7 +12,7 @@ import type { InviteInfo } from "@/lib/api";
 import { api, saveMembership, userSession } from "@/lib/api";
 
 /**
- * 招待参加画面（design: 招待チケット node 473:4614 / Figma 363:6567）。
+ * 招待参加画面（design: 招待チケット node 473:4614 / Figma 473:4612）。
  * アカウント未ログインの場合は、まずログイン／新規登録を促すゲート画面を出し、
  * ログイン後にこの画面へ戻ってきて参加できるようにする。
  * ただし ?demo=1（ハッカソンのデモ版で参加）の場合はこのゲートを飛ばす。
@@ -142,7 +142,7 @@ function JoinForm() {
       </header>
 
       <main className="flex flex-1 flex-col gap-4 pb-6">
-        {/* Figma 363:6567: チケット上端 y=151（ヘッダー h213 に 62px 重ねる） */}
+        {/* Figma 473:4612: チケット上端 y=151（ヘッダー h213 に 62px 重ねる） */}
         <div className="-mt-[22px] flex flex-col">
           <TicketCard
             name={info.group_name}

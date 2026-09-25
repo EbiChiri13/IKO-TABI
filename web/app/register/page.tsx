@@ -54,7 +54,7 @@ function RegisterForm() {
       <form className="form" onSubmit={handleSubmit}>
         <TextField
           type="text"
-          placeholder="表示名"
+          placeholder="ニックネーム"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
           required
@@ -81,7 +81,7 @@ function RegisterForm() {
         </Button>
 
         <p className="signup-hint">
-          アカウントをお持ちの方は<Link href={`/login?next=${encodeURIComponent(next)}`}>こちら</Link>
+          <Link href={`/login?next=${encodeURIComponent(next)}`}>ログインはこちら</Link>
         </p>
       </form>
       <Toast message={error} />

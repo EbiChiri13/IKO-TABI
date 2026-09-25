@@ -8,7 +8,7 @@ type TagCategoryProps = Pick<ApiTagCategory, "label" | "tags"> & {
   readonly onToggle: (id: Tag["id"]) => void;
 };
 
-/** 4つの質問のうち1つぶん（Figma 363:6485 の白い選択カード・13pxチップ）。1つ以上選ぶと ok 表示になる【F-04】 */
+/** 4つの質問のうち1つぶん（Figma 473:4521 の白い選択カード・33pxチップ）。1つ以上選ぶと ok 表示になる【F-04】 */
 export default function TagCategory({ label, tags, selectedIds, onToggle }: TagCategoryProps) {
   const count = tags.filter((t) => selectedIds.has(t.id)).length;
   return (
@@ -24,7 +24,7 @@ export default function TagCategory({ label, tags, selectedIds, onToggle }: TagC
           {count > 0 ? `${count}個選択中` : "1つ以上選んでください"}
         </span>
       </div>
-      <div className="mt-2.5 flex flex-wrap gap-2">
+      <div className="mt-2.5 flex flex-wrap gap-1.5">
         {tags.map((t) => {
           const selected = selectedIds.has(t.id);
           return (
@@ -35,7 +35,7 @@ export default function TagCategory({ label, tags, selectedIds, onToggle }: TagC
               onClick={() => onToggle(t.id)}
               variant="outline"
               className={cn(
-                "h-auto min-h-[34px] cursor-pointer whitespace-pre rounded-full border-[1.5px] px-3.5 py-1.5 text-[13px] font-bold shadow-none transition-colors duration-150",
+                "h-[33px] cursor-pointer whitespace-pre rounded-full border-[0.5px] px-3.5 py-0 text-[13px] shadow-none transition-colors duration-150",
                 selected
                   ? "border-primary bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
                   : "border-border bg-background text-foreground hover:bg-foreground/5 hover:text-foreground",

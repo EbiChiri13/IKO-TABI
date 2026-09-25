@@ -13,7 +13,7 @@ type CreateGroupFormProps = {
   readonly error: string | null;
 };
 
-/** グループ作成フォーム本体（Figma 363:7047 — 部屋の名前 y293 / 日程 y389 / 人数 y482 / ニックネーム / CTA y735）。仕様書B F-01 */
+/** グループ作成フォーム本体（Figma 473:5101 — 部屋の名前 y293 / 日程 y389 / 人数 y482 / ニックネーム / CTA y735）。仕様書B F-01 */
 export default function CreateGroupForm({ onSubmit, submitting, error }: CreateGroupFormProps) {
   const [name, setName] = useState("");
   const [nickname, setNickname] = useState("");

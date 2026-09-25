@@ -4,7 +4,7 @@ type TagResultBarProps = {
   readonly total: number;
 };
 
-/** 投票結果画面の横棒（Figma 363:6634、バー高25px）。何人が選んだかの割合を表す。 */
+/** 投票結果画面の横棒（Figma 473:4678、バー高25px）。何人が選んだかの割合を表す。 */
 export default function TagResultBar({ label, count, total }: TagResultBarProps) {
   const pct = total > 0 ? Math.round((count / total) * 100) : 0;
   return (

@@ -18,7 +18,7 @@ type TicketCardProps = {
 };
 
 /**
- * 搭乗券風のチケット（Figma 363:6526 / 279×443）。
+ * 搭乗券風のチケット（Figma 473:4566 / 279×443）。
  * 上部に写真エリア（279×201、photoUrl は動的）、teal のノッチ付き本体に
  * 日付・ID、ミシン目（y309）とバーコードのスタブ。
  * 写真が無いときは ticket-photo-placeholder.svg を表示する。

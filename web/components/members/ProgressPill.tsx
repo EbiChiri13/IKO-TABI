@@ -3,7 +3,7 @@ type ProgressPillProps = {
   readonly total: number;
 };
 
-/** 投票待ち画面の横長プログレスバー（Figma 363:6861）。track 48px・primary塗りで回答状況を表す。 */
+/** 投票待ち画面の横長プログレスバー（Figma 473:4905）。track 48px・primary塗りで回答状況を表す。 */
 export default function ProgressPill({ answered, total }: ProgressPillProps) {
   const pct = total > 0 ? Math.round((answered / total) * 100) : 0;
   return (
