@@ -82,6 +82,22 @@ export default function WelcomePage() {
         >
           {hasGroups ? "参加中のグループを見る" : "ログイン"}
         </Link>
+
+        {/* ハッカソンのデモ用。アカウント登録を飛ばして進められる導線 */}
+        <div className="mt-2 flex w-full max-w-[315px] gap-2">
+          <Link
+            href="/groups/new"
+            className="flex h-[40px] flex-1 items-center justify-center rounded-full border border-dashed border-muted-foreground text-[0.82rem] font-medium text-muted-foreground no-underline transition-opacity hover:opacity-70"
+          >
+            デモ版を開始
+          </Link>
+          <Link
+            href="/demo/join"
+            className="flex h-[40px] flex-1 items-center justify-center rounded-full border border-dashed border-muted-foreground text-[0.82rem] font-medium text-muted-foreground no-underline transition-opacity hover:opacity-70"
+          >
+            デモ版で参加
+          </Link>
+        </div>
       </div>
     </div>
   );

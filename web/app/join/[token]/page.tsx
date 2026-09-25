@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { BackIcon } from "@/components/icons";
 import TicketCard from "@/components/invite/TicketCard";
 import Button from "@/components/ui/Button";
@@ -15,10 +15,21 @@ import { api, saveMembership, userSession } from "@/lib/api";
  * 招待参加画面（design: 招待チケット node 473:4614 / Figma 363:6567）。
  * アカウント未ログインの場合は、まずログイン／新規登録を促すゲート画面を出し、
  * ログイン後にこの画面へ戻ってきて参加できるようにする。
+ * ただし ?demo=1（ハッカソンのデモ版で参加）の場合はこのゲートを飛ばす。
  */
 export default function JoinPage() {
+  return (
+    <Suspense>
+      <JoinForm />
+    </Suspense>
+  );
+}
+
+function JoinForm() {
   const { token: inviteToken } = useParams<{ token: string }>();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isDemo = searchParams.get("demo") === "1";
 
   const [info, setInfo] = useState<InviteInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +90,7 @@ export default function JoinPage() {
 
   const nextUrl = `/join/${inviteToken}`;
 
-  if (!session) {
+  if (!session && !isDemo) {
     return (
       <div className="screen">
         <div className="bg-foreground px-6 pt-8 pb-7 text-center text-background">
