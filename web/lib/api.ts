@@ -79,10 +79,14 @@ export interface UserSession {
   displayName: string;
 }
 
+/**
+ * ログインセッションは sessionStorage に保存する。localStorage と違いタブ/ウィンドウを閉じると
+ * 消えるため、トークンが盗まれた場合でも悪用できる期間を短くできる（XSS自体への対策ではない）。
+ */
 export function userSession(): UserSession | null {
   if (typeof window === "undefined") return null;
   try {
-    return JSON.parse(window.localStorage.getItem(USER_SESSION_KEY) || "null") as UserSession | null;
+    return JSON.parse(window.sessionStorage.getItem(USER_SESSION_KEY) || "null") as UserSession | null;
   } catch {
     return null;
   }
@@ -91,7 +95,7 @@ export function userSession(): UserSession | null {
 export function saveUserSession(session: UserSession) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(USER_SESSION_KEY, JSON.stringify(session));
+    window.sessionStorage.setItem(USER_SESSION_KEY, JSON.stringify(session));
   } catch {
     // プライベートブラウジング等で保存できなくても致命的ではない
   }
@@ -99,7 +103,7 @@ export function saveUserSession(session: UserSession) {
 
 export function clearUserSession() {
   if (typeof window === "undefined") return;
-  window.localStorage.removeItem(USER_SESSION_KEY);
+  window.sessionStorage.removeItem(USER_SESSION_KEY);
 }
 
 export class ApiError extends Error {
