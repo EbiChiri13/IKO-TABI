@@ -1,39 +1,112 @@
 @import "tailwindcss";
 
-/* いこたび デザイントークン（Figma「緑変えてみた」より） */
+/* ============================================================
+   Design tokens — single source of truth (web/DESIGN.md)
+   Final Figma theme: primary #48BFAE / ink #272727 / highlight #FFE100 / white.
+   Values are defined ONCE below; @theme inline and the compatibility
+   aliases only reference them, so nothing can drift.
+   ============================================================ */
 :root {
-  --teal-900: #123b34; /* チケット風の濃いヘッダー */
-  --teal-700: #1d7566;
-  --teal-600: #2e9b84; /* メインのヘッダー・ボタン色 */
-  --teal-500: #3aab93;
-  --mint-400: #a8e6c0; /* 差し色のボタン・スプラッシュ背景 */
-  --mint-300: #c3f0d6;
-  --vote-mint: #48bfae; /* Figma「完成版」の投票ボタン色（黒枠つき） */
-  --cream-100: #ffffff;
-  --cream-200: #ffffff; /* 画面の背景 */
-  --ink-900: #3b2a1f; /* 見出し・本文の焦げ茶 */
-  --ink-600: #6b5745;
-  --ink-400: #9c8c7e;
-  --line: #e4d9c9;
-  --white: #ffffff;
-  --danger: #d9534f;
-  --shadow-card: 0 2px 10px rgba(59, 42, 31, 0.06);
-  --shadow-pop: 0 10px 24px rgba(18, 59, 52, 0.16);
-  --radius-lg: 24px;
-  --radius-md: 16px;
+  /* ---- semantic colors ---- */
+  --background: #ffffff;
+  --foreground: #272727;
+  --card: #ffffff;
+  --card-foreground: #272727;
+  --popover: #ffffff;
+  --popover-foreground: #272727;
+  --primary: #48bfae;
+  --primary-foreground: #272727;
+  --secondary: #e2f5f2;
+  --secondary-foreground: #272727;
+  --muted: #f4f6f5;
+  --muted-foreground: rgba(39, 39, 39, 0.5);
+  --accent: #e2f5f2;
+  --accent-foreground: #272727;
+  --destructive: #d9534f;
+  --destructive-foreground: #ffffff;
+  --border: rgba(39, 39, 39, 0.11);
+  --input: rgba(39, 39, 39, 0.11);
+  --ring: #48bfae;
+  --highlight: #FFE100; /* Figma selected/highlight yellow (picked tags) */
+  --media-placeholder: #d9d9d9;
+
+  /* ---- shape / elevation (central knobs: utilities + component CSS share) ---- */
   --radius-sm: 12px;
-  --radius-pill: 999px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+  --shadow-card: 0 2px 10px rgba(39, 39, 39, 0.06);
+  --shadow-pop: 0 10px 24px rgba(39, 39, 39, 0.16);
+
+  /* ---- type ---- */
+  --font-ui: var(--font-noto), "Noto Sans JP", ui-sans-serif, system-ui, sans-serif;
+
+  /* ---- compatibility aliases (legacy names still used by un-migrated screens) ----
+     Every legacy name resolves to the final palette above, so the old class
+     names keep working while the whole app shares one theme. Prefer the
+     semantic names in new code; drop an alias once its last consumer moves. */
+  --teal-900: var(--foreground);      /* dark fills, logo stroke/shadow (keep dark) */
+  --teal-700: var(--foreground);      /* accent text on light fills */
+  --teal-600: var(--primary);         /* brand fills (headers, buttons, chips) */
+  --teal-500: var(--primary);
+  --vote-mint: var(--primary);        /* 投票ボタン（Figma「完成版」） */
+  --mint-400: var(--secondary);       /* light accent wash */
+  --mint-300: var(--secondary);
+  --cream-100: var(--muted);          /* chip / badge fills */
+  --cream-200: var(--background);     /* page surfaces */
+  --ink-900: var(--foreground);
+  --ink-600: var(--foreground);
+  --ink-400: var(--muted-foreground);
+  --line: var(--border);
+  --white: var(--background);
+  --danger: var(--destructive);
 }
 
-/* Tailwind v4: 既存のCSS変数（デザイントークン）をそのままユーティリティクラスにマッピングする */
+/* Tailwind v4: theme keys alias the tokens above — no literal values here,
+   so utilities and plain CSS read the same definitions. */
 @theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-highlight: var(--highlight);
+  --color-media-placeholder: var(--media-placeholder);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-pill: var(--radius-pill);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-pop: var(--shadow-pop);
+
+  --font-sans: var(--font-ui);
+
+  /* Legend utilities kept for screens not yet moved to the semantic names. */
   --color-teal-900: var(--teal-900);
   --color-teal-700: var(--teal-700);
   --color-teal-600: var(--teal-600);
   --color-teal-500: var(--teal-500);
+  --color-vote-mint: var(--vote-mint);
   --color-mint-400: var(--mint-400);
   --color-mint-300: var(--mint-300);
-  --color-vote-mint: var(--vote-mint);
   --color-cream-100: var(--cream-100);
   --color-cream-200: var(--cream-200);
   --color-ink-900: var(--ink-900);
@@ -42,37 +115,27 @@
   --color-line: var(--line);
   --color-white: var(--white);
   --color-danger: var(--danger);
-  --shadow-card: var(--shadow-card);
-  --shadow-pop: var(--shadow-pop);
-  --radius-lg: var(--radius-lg);
-  --radius-md: var(--radius-md);
-  --radius-sm: var(--radius-sm);
-  --radius-pill: var(--radius-pill);
 }
 
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 body {
   margin: 0;
-  background: var(--cream-200);
-  color: var(--ink-900);
-  font-family: var(--font-body), "Hiragino Maru Gothic ProN", "Hiragino Sans", "Yu Gothic UI", sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-ui);
   font-weight: 500;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
 }
-h1, h2, h3, h4 { margin: 0; font-weight: 800; line-height: 1.35; }
-p { margin: 0; }
-a { color: inherit; }
-button { font-family: inherit; }
-input, select { font-family: inherit; }
-
+/* Wordmark: white fill held legible by the dark stroke + shadow
+   (contrast is preserved even on primary fills — keep the stroke ink). */
 .ikotabi-logo {
-  font-family: var(--font-logo), var(--font-body), sans-serif;
-  color: var(--white);
-  -webkit-text-stroke: 2px var(--teal-900);
+  font-family: var(--font-logo), var(--font-ui);
+  color: var(--background);
+  -webkit-text-stroke: 2px var(--foreground);
   paint-order: stroke fill;
-  text-shadow: 3px 3px 0 var(--teal-900);
+  text-shadow: 3px 3px 0 var(--foreground);
   letter-spacing: .02em;
 }
 
@@ -82,7 +145,7 @@ input, select { font-family: inherit; }
   flex-direction: column;
   max-width: 480px;
   margin: 0 auto;
-  background: var(--cream-200);
+  background: var(--background);
   position: relative;
 }
 
