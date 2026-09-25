@@ -22,8 +22,6 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev
 
 # 日本語 BERT モデルをビルド時に一度だけダウンロードしてイメージに焼き込みます。
-# app.embedding.Embedder 経由で呼ぶことで、新しい transformers での
-# BertJapaneseTokenizer.basic_tokenizer 改名対応パッチ（互換エイリアス）も適用されます。
 # こうしておくと、コンテナが再起動するたびに Hugging Face へ問い合わせに行かずに済み、
 # 起動が数十秒〜数分から数秒になります（Railway 等のヘルスチェックタイムアウト対策）。
 ARG BERT_MODEL=sonoisa/sentence-bert-base-ja-mean-tokens-v2

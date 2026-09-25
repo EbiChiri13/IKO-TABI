@@ -25,7 +25,7 @@
 | 領域 | 使用技術 |
 | --- | --- |
 | バックエンド | Python 3.12 / FastAPI / Uvicorn / psycopg (PostgreSQL) / uv（依存管理） |
-| マッチング | sentence-transformers + 日本語 Sentence-BERT (`sonoisa/sentence-bert-base-ja-mean-tokens-v2`) / NumPy |
+| マッチング | transformers + 日本語 Sentence-BERT (`sonoisa/sentence-bert-base-ja-mean-tokens-v2`、fugashi + IPADic) / NumPy |
 | DB | PostgreSQL 16 |
 | フロントエンド | Next.js 16 (App Router) / React 19 / TypeScript / Tailwind CSS v4 / Radix UI |
 | テスト | pytest / httpx2 |
