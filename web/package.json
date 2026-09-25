@@ -9,7 +9,10 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "api:spec": "cd .. && uv run python scripts/export_openapi.py",
+    "api:generate": "npm run api:spec && orval",
+    "api:check": "npm run api:generate && git add -N openapi.json lib/generated && git diff --exit-code -- openapi.json lib/generated"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.3.3",
@@ -19,7 +22,8 @@
     "next": "^16.3.6",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "tailwind-merge": "^3.7.0"
+    "tailwind-merge": "^3.7.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",
@@ -27,6 +31,7 @@
     "@types/node": "26.6.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "^19.3.0",
+    "orval": "8.37.0",
     "postcss": "^8.5.28",
     "tailwindcss": "^4.3.3",
     "typescript": "7.0.2"

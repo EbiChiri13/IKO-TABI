@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import TextField from "@/components/ui/TextField";
 import Toast from "@/components/ui/Toast";
 import { ApiError, api, saveUserSession } from "@/lib/api";
+import { firstError, registerForm } from "@/lib/forms";
 
 /** アカウント新規登録画面。ログイン画面と同じ見た目で、表示名・メール・パスワードを受け付ける。成功すれば ?next（無ければ /home）へ遷移する。 */
 export default function RegisterPage() {
@@ -29,10 +30,20 @@ function RegisterForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    // 送信前にサーバーと同じ条件で検証します（空白だけのニックネームもここで弾けます）。
+    const parsed = registerForm.safeParse({ display_name: displayName, email, password });
+    if (!parsed.success) {
+      setError(firstError(parsed.error));
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
-      const { token, display_name } = await api.register(displayName, email, password);
+      const { token, display_name } = await api.register(
+        parsed.data.display_name,
+        parsed.data.email,
+        parsed.data.password,
+      );
       saveUserSession({ token, displayName: display_name });
       router.push(next);
     } catch (e) {

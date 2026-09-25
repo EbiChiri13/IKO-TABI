@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!public", "!package-lock.json"]
+    "includes": ["**", "!public", "!package-lock.json", "!lib/generated", "!openapi.json"]
   },
   "formatter": {
     "enabled": true,

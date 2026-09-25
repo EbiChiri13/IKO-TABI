@@ -1,0 +1,2143 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "いこたび",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "summary": "Register",
+        "operationId": "register_api_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Login",
+        "operationId": "login_api_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "summary": "Me",
+        "operationId": "me_api_auth_me_get",
+        "parameters": [
+          {
+            "name": "X-User-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-User-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountMe"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups": {
+      "post": {
+        "summary": "Create Group",
+        "operationId": "create_group_api_groups_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GroupIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateGroupResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{group_id}": {
+      "get": {
+        "summary": "Get Group",
+        "operationId": "get_group_api_groups__group_id__get",
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Group Id"
+            }
+          },
+          {
+            "name": "X-Member-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Member-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{group_id}/invites": {
+      "post": {
+        "summary": "Create Invite",
+        "operationId": "create_invite_api_groups__group_id__invites_post",
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Group Id"
+            }
+          },
+          {
+            "name": "X-Member-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Member-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteToken"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Revoke Invites",
+        "operationId": "revoke_invites_api_groups__group_id__invites_delete",
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Group Id"
+            }
+          },
+          {
+            "name": "X-Member-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Member-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevokeResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/invites/{invite_token}": {
+      "get": {
+        "summary": "Get Invite",
+        "operationId": "get_invite_api_invites__invite_token__get",
+        "parameters": [
+          {
+            "name": "invite_token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Invite Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/invites/{invite_token}/join": {
+      "post": {
+        "summary": "Join",
+        "operationId": "join_api_invites__invite_token__join_post",
+        "parameters": [
+          {
+            "name": "invite_token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Invite Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JoinResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tags": {
+      "get": {
+        "summary": "Tags",
+        "operationId": "tags_api_tags_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TagCategory"
+                  },
+                  "type": "array",
+                  "title": "Response Tags Api Tags Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{group_id}/tag-summary": {
+      "get": {
+        "summary": "Tag Summary",
+        "description": "投票結果画面：カテゴリごとにどのタグが何人に選ばれたかの集計。",
+        "operationId": "tag_summary_api_groups__group_id__tag_summary_get",
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Group Id"
+            }
+          },
+          {
+            "name": "X-Member-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Member-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagSummary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{group_id}/selections/me": {
+      "get": {
+        "summary": "Get Selections",
+        "operationId": "get_selections_api_groups__group_id__selections_me_get",
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Group Id"
+            }
+          },
+          {
+            "name": "X-Member-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Member-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MySelections"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Put Selections",
+        "operationId": "put_selections_api_groups__group_id__selections_me_put",
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Group Id"
+            }
+          },
+          {
+            "name": "X-Member-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Member-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectionsIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{group_id}/selections/me/must-have": {
+      "put": {
+        "summary": "Put Must Have",
+        "description": "お気に入り選定：選んだタグの中から「今回の旅行で譲れないこと」を1つ確定する。",
+        "operationId": "put_must_have_api_groups__group_id__selections_me_must_have_put",
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Group Id"
+            }
+          },
+          {
+            "name": "X-Member-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Member-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MustHaveIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaveMustHaveResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{group_id}/candidates": {
+      "get": {
+        "summary": "Candidates",
+        "operationId": "candidates_api_groups__group_id__candidates_get",
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Group Id"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "destination",
+                "lodging",
+                "food",
+                "spot"
+              ],
+              "type": "string",
+              "title": "Type"
+            }
+          },
+          {
+            "name": "X-Member-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Member-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CandidatesView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{group_id}/votes": {
+      "post": {
+        "summary": "Vote",
+        "operationId": "vote_api_groups__group_id__votes_post",
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Group Id"
+            }
+          },
+          {
+            "name": "X-Member-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Member-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoteIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{group_id}/candidates/reconsider": {
+      "post": {
+        "summary": "Reconsider",
+        "description": "候補が合わないとき、幹事が地域・予算などの条件を外して候補を計算し直す。",
+        "operationId": "reconsider_api_groups__group_id__candidates_reconsider_post",
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Group Id"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "destination",
+                "lodging",
+                "food",
+                "spot"
+              ],
+              "type": "string",
+              "title": "Type"
+            }
+          },
+          {
+            "name": "X-Member-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Member-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{group_id}/summary": {
+      "get": {
+        "summary": "Summary",
+        "operationId": "summary_api_groups__group_id__summary_get",
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Group Id"
+            }
+          },
+          {
+            "name": "X-Member-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Member-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupSummary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "summary": "Health",
+        "description": "死活確認です。DB に到達でき、かつマッチング用のモデルが準備できているときだけ 200 を返します。",
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AccountMe": {
+        "properties": {
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "display_name",
+          "email"
+        ],
+        "title": "AccountMe"
+      },
+      "AuthResult": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token",
+          "display_name"
+        ],
+        "title": "AuthResult"
+      },
+      "CandidateItem": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "rank": {
+            "type": "integer",
+            "title": "Rank"
+          },
+          "match": {
+            "type": "integer",
+            "title": "Match"
+          },
+          "matched_count": {
+            "type": "integer",
+            "title": "Matched Count"
+          },
+          "member_count": {
+            "type": "integer",
+            "title": "Member Count"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "votes": {
+            "type": "integer",
+            "title": "Votes"
+          },
+          "my_vote": {
+            "type": "boolean",
+            "title": "My Vote"
+          },
+          "decided": {
+            "type": "boolean",
+            "title": "Decided"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "image": {
+            "type": "string",
+            "title": "Image"
+          },
+          "image_credit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Credit"
+          },
+          "area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price"
+          },
+          "ticket": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ticket"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "rank",
+          "match",
+          "matched_count",
+          "member_count",
+          "reason",
+          "votes",
+          "my_vote",
+          "decided",
+          "name",
+          "tags",
+          "image"
+        ],
+        "title": "CandidateItem",
+        "description": "行き先と宿・ごはん・スポットで項目が異なるため、無い側は null になります。"
+      },
+      "CandidatesView": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "destination",
+              "lodging",
+              "food",
+              "spot"
+            ],
+            "title": "Type"
+          },
+          "open": {
+            "type": "boolean",
+            "title": "Open"
+          },
+          "relaxed": {
+            "type": "boolean",
+            "title": "Relaxed"
+          },
+          "vote_limit": {
+            "type": "integer",
+            "title": "Vote Limit"
+          },
+          "pick_count": {
+            "type": "integer",
+            "title": "Pick Count"
+          },
+          "voted_count": {
+            "type": "integer",
+            "title": "Voted Count"
+          },
+          "member_total": {
+            "type": "integer",
+            "title": "Member Total"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CandidateItem"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "open",
+          "relaxed",
+          "vote_limit",
+          "pick_count",
+          "voted_count",
+          "member_total",
+          "items"
+        ],
+        "title": "CandidatesView"
+      },
+      "CreateGroupResult": {
+        "properties": {
+          "group_id": {
+            "type": "string",
+            "title": "Group Id"
+          },
+          "token": {
+            "type": "string",
+            "title": "Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "group_id",
+          "token"
+        ],
+        "title": "CreateGroupResult"
+      },
+      "DecidedDestination": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "area": {
+            "type": "string",
+            "title": "Area"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "image": {
+            "type": "string",
+            "title": "Image"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "area",
+          "description",
+          "image"
+        ],
+        "title": "DecidedDestination"
+      },
+      "EmptyResult": {
+        "properties": {},
+        "type": "object",
+        "title": "EmptyResult",
+        "description": "中身の無い成功レスポンス。"
+      },
+      "GroupIn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "title": "End Date"
+          },
+          "member_limit": {
+            "type": "integer",
+            "maximum": 4.0,
+            "minimum": 2.0,
+            "title": "Member Limit"
+          },
+          "nickname": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Nickname"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "start_date",
+          "end_date",
+          "member_limit",
+          "nickname"
+        ],
+        "title": "GroupIn"
+      },
+      "GroupMember": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "nickname": {
+            "type": "string",
+            "title": "Nickname"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "host",
+              "member"
+            ],
+            "title": "Role"
+          },
+          "answered": {
+            "type": "boolean",
+            "title": "Answered"
+          },
+          "is_me": {
+            "type": "boolean",
+            "title": "Is Me"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nickname",
+          "role",
+          "answered",
+          "is_me",
+          "tags"
+        ],
+        "title": "GroupMember"
+      },
+      "GroupSummary": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "collecting",
+              "destination",
+              "lodging",
+              "food",
+              "spot",
+              "done"
+            ],
+            "title": "Status"
+          },
+          "destination": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DecidedDestination"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lodging": {
+            "items": {
+              "$ref": "#/components/schemas/PlaceSummary"
+            },
+            "type": "array",
+            "title": "Lodging"
+          },
+          "food": {
+            "items": {
+              "$ref": "#/components/schemas/PlaceSummary"
+            },
+            "type": "array",
+            "title": "Food"
+          },
+          "spot": {
+            "items": {
+              "$ref": "#/components/schemas/PlaceSummary"
+            },
+            "type": "array",
+            "title": "Spot"
+          },
+          "members": {
+            "items": {
+              "$ref": "#/components/schemas/SummaryMemberWin"
+            },
+            "type": "array",
+            "title": "Members"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "start_date",
+          "end_date",
+          "status",
+          "destination",
+          "lodging",
+          "food",
+          "spot",
+          "members"
+        ],
+        "title": "GroupSummary"
+      },
+      "GroupView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date"
+          },
+          "member_limit": {
+            "type": "integer",
+            "title": "Member Limit"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "collecting",
+              "destination",
+              "lodging",
+              "food",
+              "spot",
+              "done"
+            ],
+            "title": "Status"
+          },
+          "me": {
+            "$ref": "#/components/schemas/Me"
+          },
+          "members": {
+            "items": {
+              "$ref": "#/components/schemas/GroupMember"
+            },
+            "type": "array",
+            "title": "Members"
+          },
+          "answered_count": {
+            "type": "integer",
+            "title": "Answered Count"
+          },
+          "open_invites": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Open Invites"
+          },
+          "voted_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Voted Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "start_date",
+          "end_date",
+          "member_limit",
+          "status",
+          "me",
+          "members",
+          "answered_count",
+          "open_invites",
+          "voted_count"
+        ],
+        "title": "GroupView"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Health": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "db": {
+            "type": "boolean",
+            "title": "Db"
+          },
+          "model": {
+            "type": "boolean",
+            "title": "Model"
+          },
+          "embedding": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embedding"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ok",
+          "db",
+          "model",
+          "embedding"
+        ],
+        "title": "Health"
+      },
+      "InviteInfo": {
+        "properties": {
+          "group_name": {
+            "type": "string",
+            "title": "Group Name"
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date"
+          },
+          "members": {
+            "type": "integer",
+            "title": "Members"
+          },
+          "member_limit": {
+            "type": "integer",
+            "title": "Member Limit"
+          },
+          "usable": {
+            "type": "boolean",
+            "title": "Usable"
+          }
+        },
+        "type": "object",
+        "required": [
+          "group_name",
+          "start_date",
+          "end_date",
+          "members",
+          "member_limit",
+          "usable"
+        ],
+        "title": "InviteInfo"
+      },
+      "InviteToken": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "title": "InviteToken"
+      },
+      "JoinIn": {
+        "properties": {
+          "nickname": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Nickname"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "nickname"
+        ],
+        "title": "JoinIn"
+      },
+      "JoinResult": {
+        "properties": {
+          "group_id": {
+            "type": "string",
+            "title": "Group Id"
+          },
+          "token": {
+            "type": "string",
+            "title": "Token"
+          },
+          "group_name": {
+            "type": "string",
+            "title": "Group Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "group_id",
+          "token",
+          "group_name"
+        ],
+        "title": "JoinResult"
+      },
+      "LoginIn": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Password"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "LoginIn"
+      },
+      "Me": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "nickname": {
+            "type": "string",
+            "title": "Nickname"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "host",
+              "member"
+            ],
+            "title": "Role"
+          },
+          "share_answers": {
+            "type": "boolean",
+            "title": "Share Answers"
+          },
+          "answered": {
+            "type": "boolean",
+            "title": "Answered"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nickname",
+          "role",
+          "share_answers",
+          "answered"
+        ],
+        "title": "Me"
+      },
+      "MustHaveIn": {
+        "properties": {
+          "tag_id": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Tag Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "tag_id"
+        ],
+        "title": "MustHaveIn"
+      },
+      "MySelections": {
+        "properties": {
+          "tag_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Tag Ids"
+          },
+          "share_answers": {
+            "type": "boolean",
+            "title": "Share Answers"
+          },
+          "must_have_tag_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Must Have Tag Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tag_ids",
+          "share_answers",
+          "must_have_tag_id"
+        ],
+        "title": "MySelections"
+      },
+      "OkResult": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "title": "OkResult",
+        "description": "成功だけを返す操作（投票・候補の再計算）のレスポンス。"
+      },
+      "PlaceSummary": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "price": {
+            "type": "integer",
+            "title": "Price"
+          },
+          "ticket": {
+            "type": "boolean",
+            "title": "Ticket"
+          },
+          "image": {
+            "type": "string",
+            "title": "Image"
+          },
+          "image_credit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Credit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "tags",
+          "price",
+          "ticket",
+          "image"
+        ],
+        "title": "PlaceSummary"
+      },
+      "RegisterIn": {
+        "properties": {
+          "display_name": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Display Name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 8,
+            "title": "Password"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "display_name",
+          "email",
+          "password"
+        ],
+        "title": "RegisterIn"
+      },
+      "RevokeResult": {
+        "properties": {
+          "revoked": {
+            "type": "integer",
+            "title": "Revoked"
+          }
+        },
+        "type": "object",
+        "required": [
+          "revoked"
+        ],
+        "title": "RevokeResult"
+      },
+      "SaveMustHaveResult": {
+        "properties": {
+          "started": {
+            "type": "boolean",
+            "title": "Started"
+          }
+        },
+        "type": "object",
+        "required": [
+          "started"
+        ],
+        "title": "SaveMustHaveResult"
+      },
+      "SelectionsIn": {
+        "properties": {
+          "tag_ids": {
+            "items": {
+              "type": "integer",
+              "minimum": 1.0
+            },
+            "type": "array",
+            "maxItems": 65,
+            "title": "Tag Ids"
+          },
+          "share_answers": {
+            "type": "boolean",
+            "title": "Share Answers",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "tag_ids"
+        ],
+        "title": "SelectionsIn"
+      },
+      "SummaryMemberWin": {
+        "properties": {
+          "nickname": {
+            "type": "string",
+            "title": "Nickname"
+          },
+          "wins": {
+            "type": "integer",
+            "title": "Wins"
+          },
+          "detail": {
+            "$ref": "#/components/schemas/WinDetail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nickname",
+          "wins",
+          "detail"
+        ],
+        "title": "SummaryMemberWin"
+      },
+      "Tag": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "semantic",
+              "region",
+              "budget"
+            ],
+            "title": "Kind"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "kind"
+        ],
+        "title": "Tag"
+      },
+      "TagCategory": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "type": "array",
+            "title": "Tags"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "tags"
+        ],
+        "title": "TagCategory"
+      },
+      "TagSummary": {
+        "properties": {
+          "member_count": {
+            "type": "integer",
+            "title": "Member Count"
+          },
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/TagSummaryCategory"
+            },
+            "type": "array",
+            "title": "Categories"
+          }
+        },
+        "type": "object",
+        "required": [
+          "member_count",
+          "categories"
+        ],
+        "title": "TagSummary"
+      },
+      "TagSummaryCategory": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/TagSummaryEntry"
+            },
+            "type": "array",
+            "title": "Tags"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "tags"
+        ],
+        "title": "TagSummaryCategory"
+      },
+      "TagSummaryEntry": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "count"
+        ],
+        "title": "TagSummaryEntry"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VoteIn": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "destination",
+              "lodging",
+              "food",
+              "spot"
+            ],
+            "title": "Type"
+          },
+          "target_ids": {
+            "items": {
+              "type": "integer",
+              "minimum": 1.0
+            },
+            "type": "array",
+            "maxItems": 3,
+            "title": "Target Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "type",
+          "target_ids"
+        ],
+        "title": "VoteIn"
+      },
+      "WinDetail": {
+        "properties": {
+          "destination": {
+            "type": "integer",
+            "title": "Destination"
+          },
+          "lodging": {
+            "type": "integer",
+            "title": "Lodging"
+          },
+          "food": {
+            "type": "integer",
+            "title": "Food"
+          },
+          "spot": {
+            "type": "integer",
+            "title": "Spot"
+          }
+        },
+        "type": "object",
+        "required": [
+          "destination",
+          "lodging",
+          "food",
+          "spot"
+        ],
+        "title": "WinDetail"
+      }
+    }
+  }
+}

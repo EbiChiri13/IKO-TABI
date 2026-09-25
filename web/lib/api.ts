@@ -3,11 +3,54 @@
 /**
  * サーバー（app/main.py、仕様書B 8章）を呼ぶだけの薄いクライアント。
  * アカウントは使わないので、グループごとのトークンを localStorage に保存する【Q3】。
+ *
+ * レスポンスは ./generated/schemas.ts（バックエンドの OpenAPI から自動生成）で実行時に検証します。
+ * 型もそのスキーマから導出しているため、サーバーとの二重管理にはなりません。
+ * 仕様を変えたときは `npm run api:generate` を実行してください。
  */
 
-export type TargetType = "destination" | "lodging" | "food" | "spot";
-export type GroupStatus = "collecting" | TargetType | "done";
-export type MemberRole = "host" | "member";
+import type * as z from "zod";
+
+import * as G from "./generated/schemas";
+
+// ───────── レスポンス・リクエストの型（app/schemas.py が正） ─────────
+
+export type GroupView = z.infer<typeof G.GetGroupApiGroupsGroupIdGetResponse>;
+export type GroupStatus = GroupView["status"];
+export type Me = GroupView["me"];
+export type GroupMember = GroupView["members"][number];
+
+export type TargetType = z.infer<typeof G.CandidatesApiGroupsGroupIdCandidatesGetQueryParams>["type"];
+export type CandidatesView = z.infer<typeof G.CandidatesApiGroupsGroupIdCandidatesGetResponse>;
+export type CandidateItem = CandidatesView["items"][number];
+
+export type GroupSummary = z.infer<typeof G.SummaryApiGroupsGroupIdSummaryGetResponse>;
+export type DecidedDestination = NonNullable<GroupSummary["destination"]>;
+export type PlaceSummary = GroupSummary["lodging"][number];
+export type SummaryMemberWin = GroupSummary["members"][number];
+
+export type TagCategory = z.infer<typeof G.TagsApiTagsGetResponse>[number];
+export type Tag = TagCategory["tags"][number];
+
+export type TagSummary = z.infer<typeof G.TagSummaryApiGroupsGroupIdTagSummaryGetResponse>;
+export type TagSummaryCategory = TagSummary["categories"][number];
+export type TagSummaryEntry = TagSummaryCategory["tags"][number];
+
+export type InviteInfo = z.infer<typeof G.GetInviteApiInvitesInviteTokenGetResponse>;
+export type InviteToken = z.infer<typeof G.CreateInviteApiGroupsGroupIdInvitesPostResponse>;
+export type JoinResult = z.infer<typeof G.JoinApiInvitesInviteTokenJoinPostResponse>;
+export type CreateGroupResult = z.infer<typeof G.CreateGroupApiGroupsPostResponse>;
+export type MySelections = z.infer<typeof G.GetSelectionsApiGroupsGroupIdSelectionsMeGetResponse>;
+export type SaveMustHaveResult = z.infer<typeof G.PutMustHaveApiGroupsGroupIdSelectionsMeMustHavePutResponse>;
+export type EmptyResult = z.infer<typeof G.PutSelectionsApiGroupsGroupIdSelectionsMePutResponse>;
+
+export type AuthResult = z.infer<typeof G.RegisterApiAuthRegisterPostResponse>;
+export type VoteResult = z.infer<typeof G.VoteApiGroupsGroupIdVotesPostResponse>;
+export type AccountMe = z.infer<typeof G.MeApiAuthMeGetResponse>;
+export type Health = z.infer<typeof G.HealthApiHealthGetResponse>;
+export type CreateGroupInput = z.infer<typeof G.CreateGroupApiGroupsPostBody>;
+
+// ───────── 端末内の保存（トークンなど） ─────────
 
 const STORAGE_KEY = "ikotabi.groups"; // { [groupId]: { token, nickname } }
 
@@ -106,6 +149,8 @@ export function clearUserSession() {
   window.sessionStorage.removeItem(USER_SESSION_KEY);
 }
 
+// ───────── HTTP ─────────
+
 export class ApiError extends Error {
   status: number;
 
@@ -116,13 +161,58 @@ export class ApiError extends Error {
   }
 }
 
+/** サーバーの応答が OpenAPI の仕様と一致しないとき（実装と仕様がずれている状態）。 */
+export class ApiContractError extends ApiError {
+  readonly issues: readonly unknown[];
+
+  constructor(path: string, status: number, issues: readonly unknown[]) {
+    super(status, `サーバーの応答が想定と一致しません（${path}）`);
+    this.name = "ApiContractError";
+    this.issues = issues;
+  }
+}
+
 interface RequestOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE";
   token?: string | null;
   body?: unknown;
 }
 
-async function request<T>(path: string, { method = "GET", token, body }: RequestOptions = {}): Promise<T> {
+/** 失敗したレスポンスから画面に出せるメッセージを取り出します。 */
+async function errorMessage(res: Response): Promise<string> {
+  try {
+    const data: unknown = await res.json();
+    const detail = typeof data === "object" && data !== null ? (data as { detail?: unknown }).detail : undefined;
+    if (typeof detail === "string") return detail;
+    // FastAPI の検証エラーは detail が配列で返ることがある（app/main.py で日本語化していますが、念のため）
+    if (Array.isArray(detail)) {
+      const messages = detail
+        .map((d) => (typeof d === "object" && d !== null ? (d as { msg?: unknown }).msg : undefined))
+        .filter((m): m is string => typeof m === "string");
+      if (messages.length > 0) return messages.join(" / ");
+    }
+  } catch {
+    // JSON でなければ statusText を使う
+  }
+  return res.statusText;
+}
+
+/** レスポンスをスキーマで検証してから返します。合わなければ ApiContractError を投げます。 */
+async function parse<S extends z.ZodType>(schema: S, res: Response, path: string): Promise<z.infer<S>> {
+  const data: unknown = await res.json();
+  const result = schema.safeParse(data);
+  if (!result.success) {
+    console.error(`[api] サーバーの応答が仕様と一致しません: ${path}`, result.error.issues);
+    throw new ApiContractError(path, res.status, result.error.issues);
+  }
+  return result.data;
+}
+
+async function request<S extends z.ZodType>(
+  path: string,
+  schema: S,
+  { method = "GET", token, body }: RequestOptions = {},
+): Promise<z.infer<S>> {
   const res = await fetch(path, {
     method,
     headers: {
@@ -131,20 +221,16 @@ async function request<T>(path: string, { method = "GET", token, body }: Request
     },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
-  if (!res.ok) {
-    let message = res.statusText;
-    try {
-      message = ((await res.json()) as { detail?: string }).detail ?? message;
-    } catch {
-      /* ignore */
-    }
-    throw new ApiError(res.status, message);
-  }
-  if (res.status === 204) return null as T;
-  return (await res.json()) as T;
+  if (!res.ok) throw new ApiError(res.status, await errorMessage(res));
+  return parse(schema, res, path);
 }
 
-async function authRequest<T>(path: string, body: unknown, token?: string | null): Promise<T> {
+async function authRequest<S extends z.ZodType>(
+  path: string,
+  schema: S,
+  body: unknown,
+  token?: string | null,
+): Promise<z.infer<S>> {
   const res = await fetch(path, {
     method: "POST",
     headers: {
@@ -153,258 +239,83 @@ async function authRequest<T>(path: string, body: unknown, token?: string | null
     },
     body: JSON.stringify(body),
   });
-  if (!res.ok) {
-    let message = res.statusText;
-    try {
-      message = ((await res.json()) as { detail?: string }).detail ?? message;
-    } catch {
-      /* ignore */
-    }
-    throw new ApiError(res.status, message);
-  }
-  return (await res.json()) as T;
-}
-
-// ───────── API レスポンスの型（app/service.py の戻り値に対応） ─────────
-
-export interface Me {
-  id: number;
-  nickname: string;
-  role: MemberRole;
-  share_answers: boolean;
-  answered: boolean;
-}
-
-export interface GroupMember {
-  id: number;
-  nickname: string;
-  role: MemberRole;
-  answered: boolean;
-  is_me: boolean;
-  /** 本人が公開を選んだときだけ返る【Q16】 */
-  tags: string[] | null;
-}
-
-export interface GroupView {
-  id: string;
-  name: string;
-  start_date: string;
-  end_date: string;
-  member_limit: number;
-  status: GroupStatus;
-  me: Me;
-  members: GroupMember[];
-  answered_count: number;
-  /** 幹事にしか返らない */
-  open_invites: number | null;
-  /** 投票フェーズ中のみ返る */
-  voted_count: number | null;
-}
-
-export interface Tag {
-  id: number;
-  label: string;
-  kind: string;
-}
-
-export interface TagCategory {
-  key: string;
-  label: string;
-  tags: Tag[];
-}
-
-export interface InviteInfo {
-  group_name: string;
-  start_date: string;
-  end_date: string;
-  members: number;
-  member_limit: number;
-  usable: boolean;
-}
-
-export interface JoinResult {
-  group_id: string;
-  token: string;
-  group_name: string;
-}
-
-export interface CreateGroupResult {
-  group_id: string;
-  token: string;
-}
-
-export interface InviteToken {
-  token: string;
-}
-
-export interface MySelections {
-  tag_ids: number[];
-  share_answers: boolean;
-  /** 「今回の旅行で譲れないこと」。お気に入り選定で選ぶまでは null */
-  must_have_tag_id: number | null;
-}
-
-export type SaveSelectionsResult = Record<string, never>;
-
-export interface SaveMustHaveResult {
-  started: boolean;
-}
-
-export interface CreateGroupInput {
-  name: string;
-  start_date: string;
-  end_date: string;
-  member_limit: number;
-  nickname: string;
-}
-
-export type CandidateItem = CandidateItemBase & CandidateItemDestination & CandidateItemPlace;
-
-interface CandidateItemBase {
-  id: number;
-  rank: number;
-  match: number;
-  matched_count: number;
-  member_count: number;
-  reason: string;
-  votes: number;
-  my_vote: boolean;
-  decided: boolean;
-  name: string;
-  tags: string[];
-  /** 宿・食事は実写真（楽天トラベル／ホットペッパー）が入ることがある。無ければダミー画像（picsum.photos） */
-  image: string;
-  /** 実写真が入っているときだけのクレジット表記（利用規約で表示義務あり） */
-  image_credit?: string | null;
-}
-
-interface CandidateItemDestination {
-  area?: string;
-  region?: string;
-  description?: string;
-}
-
-interface CandidateItemPlace {
-  price?: number;
-  ticket?: boolean;
-}
-
-export interface CandidatesView {
-  type: TargetType;
-  open: boolean;
-  relaxed: boolean;
-  vote_limit: number;
-  pick_count: number;
-  voted_count: number;
-  member_total: number;
-  items: CandidateItem[];
-}
-
-export interface DecidedDestination {
-  id: number;
-  name: string;
-  area: string;
-  description: string;
-  image: string;
-}
-
-export interface PlaceSummary {
-  id: number;
-  name: string;
-  tags: string[];
-  price: number;
-  ticket: boolean;
-  image: string;
-  image_credit?: string | null;
-}
-
-export interface SummaryMemberWin {
-  nickname: string;
-  wins: number;
-  detail: Record<TargetType, number>;
-}
-
-export interface GroupSummary {
-  name: string;
-  start_date: string;
-  end_date: string;
-  status: GroupStatus;
-  destination: DecidedDestination | null;
-  lodging: PlaceSummary[];
-  food: PlaceSummary[];
-  spot: PlaceSummary[];
-  members: SummaryMemberWin[];
-}
-
-/** 変更通知の WebSocket メッセージ */
-export interface RealtimeMessage {
-  changed: string[];
-}
-
-export interface TagSummaryEntry {
-  label: string;
-  count: number;
-}
-
-export interface TagSummaryCategory {
-  key: string;
-  label: string;
-  tags: TagSummaryEntry[];
-}
-
-export interface TagSummary {
-  member_count: number;
-  categories: TagSummaryCategory[];
+  if (!res.ok) throw new ApiError(res.status, await errorMessage(res));
+  return parse(schema, res, path);
 }
 
 export const api = {
   register: (displayName: string, email: string, password: string) =>
-    authRequest<{ token: string; display_name: string }>("/api/auth/register", {
+    authRequest("/api/auth/register", G.RegisterApiAuthRegisterPostResponse, {
       display_name: displayName,
       email,
       password,
     }),
   login: (email: string, password: string) =>
-    authRequest<{ token: string; display_name: string }>("/api/auth/login", { email, password }),
-  createGroup: (body: CreateGroupInput) => request<CreateGroupResult>("/api/groups", { method: "POST", body }),
-  getGroup: (groupId: string, token: string) => request<GroupView>(`/api/groups/${groupId}`, { token }),
+    authRequest("/api/auth/login", G.LoginApiAuthLoginPostResponse, { email, password }),
+  createGroup: (body: CreateGroupInput) =>
+    request("/api/groups", G.CreateGroupApiGroupsPostResponse, { method: "POST", body }),
+  getGroup: (groupId: string, token: string) =>
+    request(`/api/groups/${groupId}`, G.GetGroupApiGroupsGroupIdGetResponse, { token }),
   createInvite: (groupId: string, token: string) =>
-    request<InviteToken>(`/api/groups/${groupId}/invites`, { method: "POST", token }),
-  getInvite: (inviteToken: string) => request<InviteInfo>(`/api/invites/${inviteToken}`),
+    request(`/api/groups/${groupId}/invites`, G.CreateInviteApiGroupsGroupIdInvitesPostResponse, {
+      method: "POST",
+      token,
+    }),
+  getInvite: (inviteToken: string) =>
+    request(`/api/invites/${inviteToken}`, G.GetInviteApiInvitesInviteTokenGetResponse),
   join: (inviteToken: string, nickname: string) =>
-    request<JoinResult>(`/api/invites/${inviteToken}/join`, { method: "POST", body: { nickname } }),
-  listTags: () => request<TagCategory[]>("/api/tags"),
-  tagSummary: (groupId: string, token: string) => request<TagSummary>(`/api/groups/${groupId}/tag-summary`, { token }),
+    request(`/api/invites/${inviteToken}/join`, G.JoinApiInvitesInviteTokenJoinPostResponse, {
+      method: "POST",
+      body: { nickname },
+    }),
+  listTags: () => request("/api/tags", G.TagsApiTagsGetResponse),
+  tagSummary: (groupId: string, token: string) =>
+    request(`/api/groups/${groupId}/tag-summary`, G.TagSummaryApiGroupsGroupIdTagSummaryGetResponse, { token }),
   getMySelections: (groupId: string, token: string) =>
-    request<MySelections>(`/api/groups/${groupId}/selections/me`, { token }),
+    request(`/api/groups/${groupId}/selections/me`, G.GetSelectionsApiGroupsGroupIdSelectionsMeGetResponse, { token }),
   saveMySelections: (groupId: string, token: string, tagIds: number[], shareAnswers: boolean) =>
-    request<SaveSelectionsResult>(`/api/groups/${groupId}/selections/me`, {
+    request(`/api/groups/${groupId}/selections/me`, G.PutSelectionsApiGroupsGroupIdSelectionsMePutResponse, {
       method: "PUT",
       token,
       body: { tag_ids: tagIds, share_answers: shareAnswers },
     }),
   saveMustHave: (groupId: string, token: string, tagId: number) =>
-    request<SaveMustHaveResult>(`/api/groups/${groupId}/selections/me/must-have`, {
-      method: "PUT",
-      token,
-      body: { tag_id: tagId },
-    }),
+    request(
+      `/api/groups/${groupId}/selections/me/must-have`,
+      G.PutMustHaveApiGroupsGroupIdSelectionsMeMustHavePutResponse,
+      {
+        method: "PUT",
+        token,
+        body: { tag_id: tagId },
+      },
+    ),
   candidates: (groupId: string, token: string, type: TargetType) =>
-    request<CandidatesView>(`/api/groups/${groupId}/candidates?type=${type}`, { token }),
+    request(`/api/groups/${groupId}/candidates?type=${type}`, G.CandidatesApiGroupsGroupIdCandidatesGetResponse, {
+      token,
+    }),
   vote: (groupId: string, token: string, type: TargetType, targetIds: number[]) =>
-    request<{ ok: boolean }>(`/api/groups/${groupId}/votes`, {
+    request(`/api/groups/${groupId}/votes`, G.VoteApiGroupsGroupIdVotesPostResponse, {
       method: "POST",
       token,
       body: { type, target_ids: targetIds },
     }),
   /** 候補が合わないとき、幹事が地域・予算などの条件を外して候補を計算し直す。投票はリセットされる */
   reconsider: (groupId: string, token: string, type: TargetType) =>
-    request<{ ok: boolean }>(`/api/groups/${groupId}/candidates/reconsider?type=${type}`, {
-      method: "POST",
-      token,
-    }),
-  summary: (groupId: string, token: string) => request<GroupSummary>(`/api/groups/${groupId}/summary`, { token }),
+    request(
+      `/api/groups/${groupId}/candidates/reconsider?type=${type}`,
+      G.ReconsiderApiGroupsGroupIdCandidatesReconsiderPostResponse,
+      { method: "POST", token },
+    ),
+  summary: (groupId: string, token: string) =>
+    request(`/api/groups/${groupId}/summary`, G.SummaryApiGroupsGroupIdSummaryGetResponse, { token }),
 };
+
+// ───────── WebSocket ─────────
+
+/** 変更通知の WebSocket メッセージ（OpenAPI に載らないため手書き） */
+export interface RealtimeMessage {
+  changed: string[];
+}
 
 /** 変更通知の WebSocket（F-13）。onChange({changed:["votes",...]}) を呼ぶ */
 export function connectRealtime(groupId: string, token: string, onChange: (msg: RealtimeMessage) => void): () => void {

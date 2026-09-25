@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import TextField from "@/components/ui/TextField";
 import Toast from "@/components/ui/Toast";
 import { ApiError, api, saveUserSession } from "@/lib/api";
+import { firstError, loginForm } from "@/lib/forms";
 
 /** ログイン画面（Figma完成版）。送信すると /api/auth/login を呼び、成功すれば ?next（無ければ /home）へ遷移する。 */
 export default function LoginPage() {
@@ -28,10 +29,16 @@ function LoginForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    // 送信前にサーバーと同じ条件で検証します。
+    const parsed = loginForm.safeParse({ email, password });
+    if (!parsed.success) {
+      setError(firstError(parsed.error));
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
-      const { token, display_name } = await api.login(email, password);
+      const { token, display_name } = await api.login(parsed.data.email, parsed.data.password);
       saveUserSession({ token, displayName: display_name });
       router.push(next);
     } catch (e) {

@@ -6,6 +6,7 @@ import DateRangeField from "@/components/ui/DateRangeField";
 import Stepper from "@/components/ui/Stepper";
 import TextField from "@/components/ui/TextField";
 import type { CreateGroupInput } from "@/lib/api";
+import { createGroupForm } from "@/lib/forms";
 
 type CreateGroupFormProps = {
   readonly onSubmit: (values: CreateGroupInput) => void;
@@ -21,14 +22,22 @@ export default function CreateGroupForm({ onSubmit, submitting, error }: CreateG
   const [end, setEnd] = useState("");
   const [memberLimit, setMemberLimit] = useState(2);
 
-  const valid = name.trim().length > 0 && nickname.trim().length > 0 && start && end && end >= start;
+  // 検証はサーバー（app/main.py の GroupIn）から生成したスキーマに任せます。
+  const parsed = createGroupForm.safeParse({
+    name,
+    nickname,
+    start_date: start,
+    end_date: end,
+    member_limit: memberLimit,
+  });
+  const valid = parsed.success;
 
   return (
     <form
       className="flex flex-1 flex-col px-[29px] pt-[80px] pb-[87px]"
       onSubmit={(e) => {
         e.preventDefault();
-        if (valid) onSubmit({ name, nickname, start_date: start, end_date: end, member_limit: memberLimit });
+        if (parsed.success) onSubmit(parsed.data);
       }}
     >
       <TextField

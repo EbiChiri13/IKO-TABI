@@ -29,6 +29,7 @@
 | DB | PostgreSQL 16 |
 | フロントエンド | Next.js 16 (App Router) / React 19 / TypeScript / Tailwind CSS v4 / Radix UI |
 | テスト | pytest / httpx2 |
+| 型とスキーマ | バックエンドの Pydantic モデルを正とし、OpenAPI から Orval で Zod スキーマを生成（`web/lib/generated`） |
 | リンタ / フォーマッタ | Ruff（バックエンド） / Biome（フロントエンド） |
 | インフラ | Railway（バックエンド + DB, Docker）/ Vercel（フロントエンド）/ Docker Compose（ローカル DB） |
 
@@ -132,6 +133,11 @@ TEST_DATABASE_URL=postgresql://ikotabi:ikotabi@localhost:5432/ikotabi_test \
 # フロントエンド
 cd web
 npm run typecheck
+
+# 仕様とフロントの型・スキーマを合わせる（バックエンドのモデルを変えたとき）
+cd web
+npm run api:generate   # openapi.json を書き出して Zod スキーマを再生成
+npm run api:check      # 生成物が仕様と一致しているかを確認（差分があれば失敗）
 ```
 
 ## リンタ / フォーマッタ
@@ -257,6 +263,8 @@ docker run --rm -p 8000:8000 \
 認証は 2 系統あります。グループ参加は `X-Member-Token` ヘッダー、アカウントは `X-User-Token` ヘッダー。WebSocket はブラウザの制約上トークンをクエリで渡します。
 
 フェーズは自動で進みます。定員がそろって全員が回答すると行き先選びが始まり、以降は各フェーズで全員が投票すると次に進みます。幹事が途中で先に進めたり締め切ったりする操作はありません（定員に達するまで招待リンクは有効なままです）。
+
+仕様は**バックエンドの Pydantic モデルが正**です。`app/schemas.py` にレスポンス形を定義し、全エンドポイントに `response_model` を付けています。`app/main.py` から `/openapi.json` を書き出し、それを Orval でフロントの Zod スキーマ（`web/lib/generated/schemas.ts`）に変換して、フロントは受け取ったレスポンスを実行時に検証します。フォームの入力検証も同じスキーマから作るため、制約がサーバーと自動的に一致します。**モデルを変えたら `cd web && npm run api:generate` を実行してください**（生成物はコミットします）。
 
 ## 開発上の注意点
 

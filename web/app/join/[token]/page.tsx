@@ -10,6 +10,7 @@ import Spinner from "@/components/ui/Spinner";
 import TextField from "@/components/ui/TextField";
 import type { InviteInfo } from "@/lib/api";
 import { api, saveMembership, userSession } from "@/lib/api";
+import { firstError, joinForm } from "@/lib/forms";
 
 /**
  * 招待参加画面（design: 招待チケット node 473:4614 / Figma 473:4612）。
@@ -49,11 +50,17 @@ function JoinForm() {
   }, [session]);
 
   async function join() {
+    // 送信前にサーバーと同じ条件で検証します。
+    const parsed = joinForm.safeParse({ nickname });
+    if (!parsed.success) {
+      setError(firstError(parsed.error));
+      return;
+    }
     setJoining(true);
     setError(null);
     try {
-      const res = await api.join(inviteToken, nickname);
-      saveMembership(res.group_id, res.token, nickname);
+      const res = await api.join(inviteToken, parsed.data.nickname);
+      saveMembership(res.group_id, res.token, parsed.data.nickname);
       router.push(`/groups/${res.group_id}/tags`);
     } catch (e) {
       setError(e instanceof Error ? e.message || "参加できませんでした" : "参加できませんでした");
