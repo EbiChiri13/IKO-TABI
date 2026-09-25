@@ -10,7 +10,8 @@ import { myGroups } from "@/lib/api";
  * Figmaから書き出して public/splash に配置している。二人のイラストは新しいAI生成イラストに更新。
  *
  * 参加中のグループが端末にあれば、そのままホームへ促す。
- * アカウントは使わないので実際のログインフォームはなく、参加はすべて招待リンク経由【Q3】。
+ * 「新規登録」はアカウント登録画面（/register）へ、「ログイン」はログイン画面へ遷移する。
+ * グループへの参加（招待リンク経由）はアカウント不要な別方式として共存している【Q3】。
  * ボタンの見た目・配置はFigma通り（新規登録＝黒フチの塗り、ログイン＝黒フチの白抜き）。
  */
 export default function WelcomePage() {
@@ -39,7 +40,7 @@ export default function WelcomePage() {
       </div>
 
       <div className="cta">
-        <Link href="/groups/new" className="btn-link">
+        <Link href="/register" className="btn-link">
           <span className="btn btn--fill">新規登録</span>
         </Link>
         <Link href={hasGroups ? "/home" : "/login"} className="btn-link">
