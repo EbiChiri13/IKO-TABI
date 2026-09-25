@@ -2,6 +2,11 @@
 const API_ORIGIN = process.env.IKOTABI_API_ORIGIN || "http://localhost:8000";
 
 const nextConfig = {
+  // リポジトリ直下の別 lockfile を拾って ワークスペースルートを誤検出しないよう、
+  // このアプリのディレクトリを明示する（web/ がアプリのルート）。
+  turbopack: {
+    root: import.meta.dirname,
+  },
   async rewrites() {
     // 開発中は Next.js のサーバーから FastAPI (app/main.py) へ橋渡しする。
     // 本番では両方を同じオリジンで配信するか、リバースプロキシで束ねる想定。

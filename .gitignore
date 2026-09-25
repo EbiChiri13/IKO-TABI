@@ -5,3 +5,9 @@ __pycache__/
 .pytest_cache/
 .cache/
 pgdata/
+
+# ローカル開発ツールの状態（コミット対象外）
+.omo/
+.commandcode/
+.playwright-mcp/
+.codegraph/
