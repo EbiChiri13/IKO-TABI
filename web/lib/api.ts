@@ -276,8 +276,10 @@ interface CandidateItemBase {
   decided: boolean;
   name: string;
   tags: string[];
-  /** 実写真は無いのでダミー画像（picsum.photos）が入る */
+  /** 宿・食事は実写真（楽天トラベル／ホットペッパー）が入ることがある。無ければダミー画像（picsum.photos） */
   image: string;
+  /** 実写真が入っているときだけのクレジット表記（利用規約で表示義務あり） */
+  image_credit?: string | null;
 }
 
 interface CandidateItemDestination {
@@ -317,6 +319,7 @@ export interface PlaceSummary {
   price: number;
   ticket: boolean;
   image: string;
+  image_credit?: string | null;
 }
 
 export interface SummaryMemberWin {

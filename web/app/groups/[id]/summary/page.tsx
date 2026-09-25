@@ -79,6 +79,15 @@ export default function SummaryPage() {
           <MemberWinsList members={summary.members} />
         </Card>
 
+        {(() => {
+          const credits = Array.from(
+            new Set([...summary.lodging, ...summary.food].map((p) => p.image_credit).filter((c): c is string => !!c)),
+          );
+          return credits.length > 0 ? (
+            <p className="text-center text-[0.7rem] text-muted-foreground">{credits.join(" / ")}</p>
+          ) : null;
+        })()}
+
         <div className="mx-auto w-full max-w-[315px]">
           <Link
             href="/home"

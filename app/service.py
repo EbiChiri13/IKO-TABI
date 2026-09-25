@@ -14,6 +14,7 @@ from fastapi import HTTPException
 from app.data.hashtags import CATEGORIES
 from app.decide import PICK_COUNT, VOTE_LIMIT, choose
 from app.engine import Engine
+from app.live_photos import food_photo, hotel_photo
 from app.matching import MemberPrefs, is_matched, rank, rank_destinations
 from app.reason import reason_text
 
@@ -23,6 +24,22 @@ TARGETS = ["destination", "lodging", "food", "spot"]
 def placeholder_image(target_type: str, target_id: int) -> str:
     """写真素材がまだ無いので、IDから決まるダミー画像を返す（同じ候補なら毎回同じ画像になる）。"""
     return f"https://picsum.photos/seed/ikotabi-{target_type}-{target_id}/640/480"
+
+
+def place_image(engine: Engine, place: dict) -> tuple[str, str | None]:
+    """宿・食事の画像。都道府県名で楽天トラベル／ホットペッパーの実写真を引き、
+    無ければ従来のダミー画像にフォールバックする。戻り値は (画像URL, クレジット文言)。
+    """
+    prefecture = engine.destinations[place["destination_id"]]["prefecture"]
+    if place["type"] == "lodging":
+        url = hotel_photo(prefecture)
+        if url:
+            return url, "Powered by 楽天トラベル"
+    elif place["type"] == "food":
+        url = food_photo(prefecture)
+        if url:
+            return url, "Powered by ホットペッパー"
+    return placeholder_image(place["type"], place["id"]), None
 
 
 NEXT_STATUS = {"destination": "lodging", "lodging": "food", "food": "spot", "spot": "done"}
@@ -514,12 +531,14 @@ def candidates(conn, group_id: str, member: dict, target_type: str) -> dict:
             )
         else:
             p = engine.places[r["target_id"]]
+            image, credit = place_image(engine, p)
             item.update(
                 name=p["name"],
                 tags=p["tags"],
                 price=p["price"],
                 ticket=p["ticket"],
-                image=placeholder_image(target_type, r["target_id"]),
+                image=image,
+                image_credit=credit,
             )
         items.append(item)
 
@@ -615,13 +634,15 @@ def summary(conn, group_id: str) -> dict:
 
     def place(pid: int) -> dict:
         p = engine.places[pid]
+        image, credit = place_image(engine, p)
         return {
             "id": pid,
             "name": p["name"],
             "tags": p["tags"],
             "price": p["price"],
             "ticket": p["ticket"],
-            "image": placeholder_image(p["type"], pid),
+            "image": image,
+            "image_credit": credit,
         }
 
     dest = None

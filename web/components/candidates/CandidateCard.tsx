@@ -33,6 +33,11 @@ export default function CandidateCard({ item, type, onToggle, locked, selected }
             </span>
           )}
         </div>
+        {item.image_credit && (
+          <span className="ml-3 inline-block rounded-full bg-black/45 px-2 py-0.5 text-[0.65rem] text-white">
+            {item.image_credit}
+          </span>
+        )}
       </div>
       <div className="flex flex-col px-[18px] pt-3.5 pb-[18px]">
         <div className="flex items-baseline justify-between gap-2">
