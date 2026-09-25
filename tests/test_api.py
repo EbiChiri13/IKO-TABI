@@ -160,14 +160,18 @@ def test_full_flow(client):
     client.post(f"/api/groups/{gid}/votes", headers=h(b), json={"type": "destination", "target_ids": [top]})
     assert client.get(f"/api/groups/{gid}", headers=h(b)).json()["status"] == "lodging"
 
-    # 宿：幹事が締め切る
+    # 宿：全員が投票すると自動で決まる
     lodging = client.get(f"/api/groups/{gid}/candidates?type=lodging", headers=h(a)).json()
     assert len(lodging["items"]) == 2
-    client.post(
-        f"/api/groups/{gid}/votes", headers=h(a), json={"type": "lodging", "target_ids": [lodging["items"][1]["id"]]}
-    )
-    assert client.post(f"/api/groups/{gid}/decide", headers=h(a)).status_code == 403
-    assert client.post(f"/api/groups/{gid}/decide", headers=h(host)).status_code == 200
+    lodging_pick = lodging["items"][1]["id"]
+    for tok in (host, a, b):
+        assert (
+            client.post(
+                f"/api/groups/{gid}/votes", headers=h(tok), json={"type": "lodging", "target_ids": [lodging_pick]}
+            ).status_code
+            == 200
+        )
+    assert client.get(f"/api/groups/{gid}", headers=h(b)).json()["status"] == "food"
 
     # ごはん：2人がXとY、1人がZ → Z も必ず入る【Q2】
     food = client.get(f"/api/groups/{gid}/candidates?type=food", headers=h(a)).json()
@@ -205,14 +209,15 @@ def test_full_flow(client):
     )
 
 
-def test_host_can_start_early_and_invites_expire(client):
+def test_starts_only_when_member_limit_reached(client):
+    """定員に達するまで行き先選びは始まらず、その間は招待リンクも有効なまま。"""
     r = client.post(
         "/api/groups",
         json={
             "name": "家族旅行",
             "start_date": "2026-12-28",
             "end_date": "2026-12-30",
-            "member_limit": 4,
+            "member_limit": 3,
             "nickname": "父",
         },
     ).json()
@@ -223,10 +228,25 @@ def test_host_can_start_early_and_invites_expire(client):
 
     labels = ["沖縄", "のんびり", "マリンスポーツ", "オーシャンビュー"]
     answer(client, gid, host, labels)
-    assert client.post(f"/api/groups/{gid}/start", headers=h(host)).status_code == 409  # 1人だけ
     answer(client, gid, kid, labels)
-    assert client.post(f"/api/groups/{gid}/start", headers=h(kid)).status_code == 403
-    assert client.post(f"/api/groups/{gid}/start", headers=h(host)).status_code == 200
+
+    # 2人だけなので、まだ行き先選びは始まらない
+    view = client.get(f"/api/groups/{gid}", headers=h(host)).json()
+    assert view["status"] == "collecting"
+    assert view["answered_count"] == 2 and view["member_limit"] == 3
+
+    # 空きがある間は招待リンクが有効なまま（早期開始で3人目が参加できなくなっていた不具合の回帰確認）
+    info = client.get(f"/api/invites/{inv}").json()
+    assert info["usable"] is True and info["members"] == 2
+
+    # 早期開始・早期締め切りの API は廃止した
+    assert client.post(f"/api/groups/{gid}/start", headers=h(host)).status_code == 404
+    assert client.post(f"/api/groups/{gid}/decide", headers=h(host)).status_code == 404
+
+    # 3人目が参加して回答すると、自動で行き先選びが始まる
+    b = client.post(f"/api/invites/{inv}/join", json={"nickname": "たび"}).json()["token"]
+    assert answer(client, gid, b, labels).json()["started"] is True
+    assert client.get(f"/api/groups/{gid}", headers=h(b)).json()["status"] == "destination"
 
     dest = client.get(f"/api/groups/{gid}/candidates?type=destination", headers=h(kid)).json()
     assert dest["items"][0]["name"] == "沖縄"

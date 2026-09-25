@@ -210,15 +210,6 @@ def put_must_have(group_id: str, body: MustHaveIn, token: Token = None):
     return result
 
 
-@app.post("/api/groups/{group_id}/start")
-def start(group_id: str, token: Token = None):
-    with db.tx() as conn:
-        me = service.auth_member(conn, group_id, token)
-        events = service.start(conn, group_id, me)
-    hub.notify(group_id, events)
-    return {"ok": True}
-
-
 @app.get("/api/groups/{group_id}/candidates")
 def candidates(group_id: str, type: TargetType = Query(...), token: Token = None):
     with db.tx() as conn:
@@ -231,15 +222,6 @@ def vote(group_id: str, body: VoteIn, token: Token = None):
     with db.tx() as conn:
         me = service.auth_member(conn, group_id, token)
         events = service.vote(conn, group_id, me, body.type, body.target_ids)
-    hub.notify(group_id, events)
-    return {"ok": True}
-
-
-@app.post("/api/groups/{group_id}/decide")
-def decide(group_id: str, token: Token = None):
-    with db.tx() as conn:
-        me = service.auth_member(conn, group_id, token)
-        events = service.decide(conn, group_id, me)
     hub.notify(group_id, events)
     return {"ok": True}
 

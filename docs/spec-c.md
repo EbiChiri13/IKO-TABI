@@ -82,8 +82,8 @@ Figma「緑変えてみた」フレームをもとにしたデザイントーク
 | 招待 | `/groups/{id}/invite` | `POST /api/groups/{id}/invites` |
 | 招待参加 | `/join/{token}` | `GET /api/invites/{token}`, `POST /api/invites/{token}/join` |
 | ハッシュタグ選択 | `/groups/{id}/tags` | `GET /api/tags`, `GET/PUT /api/groups/{id}/selections/me` |
-| 回答待ち | `/groups/{id}/waiting` | `GET /api/groups/{id}`, `POST /api/groups/{id}/start` |
-| 行き先／宿／ごはん／スポット候補 | `/groups/{id}/vote/{type}` | `GET /api/groups/{id}/candidates`, `POST /api/groups/{id}/votes`, `POST /api/groups/{id}/decide` |
+| 回答待ち | `/groups/{id}/waiting` | `GET /api/groups/{id}` |
+| 行き先／宿／ごはん／スポット候補 | `/groups/{id}/vote/{type}` | `GET /api/groups/{id}/candidates`, `POST /api/groups/{id}/votes` |
 | 決定まとめ | `/groups/{id}/summary` | `GET /api/groups/{id}/summary` |
 | グループの入口（進み具合に応じて自動振り分け） | `/groups/{id}` | `GET /api/groups/{id}` |
 
@@ -140,7 +140,8 @@ web/
 | 画面の実装技術 | ビルド不要の素のJavaScript | Next.js（React）＋styled-jsx |
 | デザイン | 未確定（仕様のみ） | Figma「緑変えてみた」を反映（ティール×ミント×クリーム、手書きロゴ） |
 | コンポーネント分割 | 記載なし | `components/ui`・`layout`・画面別ディレクトリに分割 |
-| バックエンド・DB・API・マッチングロジック | — | 変更なし |
+| バックエンド・DB・API・マッチングロジック | — | 進行のトリガー以外は変更なし |
+| 進行のトリガー | 幹事は2人以上で先へ進められる（Q8）／「今の投票で決める」で締め切れる | 幹事による早期開始・早期締め切りを廃止。定員に達して全員が回答すると行き先選びが始まり、各フェーズは全員が投票すると次に進む |
 | 検証状況 | 仕様のみ | 単体・結合テスト、実機でのBERT・WebSocket動作確認まで実施 |
 
 ## 13. 今後の課題

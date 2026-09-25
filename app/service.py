@@ -26,7 +26,6 @@ def placeholder_image(target_type: str, target_id: int) -> str:
 
 
 NEXT_STATUS = {"destination": "lodging", "lodging": "food", "food": "spot", "spot": "done"}
-MIN_MEMBERS_TO_START = 2
 
 engine: Engine | None = None  # main.py の起動時に入れる
 
@@ -261,7 +260,6 @@ def group_view(conn, group_id: str, me: dict) -> dict:
         "answered_count": n["answered"],
         "open_invites": n["open_invites"] if me["role"] == "host" else None,
         "voted_count": voted,
-        "min_to_start": MIN_MEMBERS_TO_START,
     }
 
 
@@ -389,6 +387,8 @@ def save_must_have(conn, group_id: str, member: dict, tag_id: int) -> tuple[dict
     n = _counts(conn, group_id)
     if n["members"] == group["member_limit"] and n["answered"] == n["members"]:
         _start_destination(conn, group_id)
+        # 行き先選びが始まったら、使われなかった招待リンクは無効にする
+        conn.execute("DELETE FROM invites WHERE group_id = %s AND used_at IS NULL", (group_id,))
         events.append("status")
     return {"started": "status" in events}, events
 
@@ -462,20 +462,6 @@ def _start_places(conn, group_id: str, destination_id: int) -> None:
     for t in ("lodging", "food", "spot"):
         ranked = rank(engine.place_candidates(destination_id, t), members, engine.sim)
         _save_results(conn, group_id, t, ranked, members, False)
-
-
-def start(conn, group_id: str, member: dict) -> list[str]:
-    """幹事は2人以上が回答した時点で先に進められる【Q8】。"""
-    _require_host(member)
-    group = _lock_group(conn, group_id)
-    if group["status"] != "collecting":
-        _fail(409, "行き先選びはもう始まっています")
-    if _counts(conn, group_id)["answered"] < MIN_MEMBERS_TO_START:
-        _fail(409, f"{MIN_MEMBERS_TO_START}人以上が回答すると行き先を探せます")
-    _start_destination(conn, group_id)
-    # 招待したけれど間に合わなかったリンクは使えなくする
-    conn.execute("DELETE FROM invites WHERE group_id = %s AND used_at IS NULL", (group_id,))
-    return ["status"]
 
 
 # ───────── 候補・投票・決定 ─────────
@@ -583,16 +569,6 @@ def vote(conn, group_id: str, member: dict, target_type: str, target_ids: list[i
         _decide(conn, group_id, target_type)
         events.append("status")
     return events
-
-
-def decide(conn, group_id: str, member: dict) -> list[str]:
-    """幹事はいつでも今の投票で締め切れる。"""
-    _require_host(member)
-    group = _lock_group(conn, group_id)
-    if group["status"] not in TARGETS:
-        _fail(409, "いまは締め切るものがありません")
-    _decide(conn, group_id, group["status"])
-    return ["status"]
 
 
 def _decide(conn, group_id: str, target_type: str) -> None:

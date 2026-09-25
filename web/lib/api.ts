@@ -199,7 +199,6 @@ export interface GroupView {
   open_invites: number | null;
   /** 投票フェーズ中のみ返る */
   voted_count: number | null;
-  min_to_start: number;
 }
 
 export interface Tag {
@@ -393,8 +392,6 @@ export const api = {
       token,
       body: { tag_id: tagId },
     }),
-  start: (groupId: string, token: string) =>
-    request<{ ok: boolean }>(`/api/groups/${groupId}/start`, { method: "POST", token }),
   candidates: (groupId: string, token: string, type: TargetType) =>
     request<CandidatesView>(`/api/groups/${groupId}/candidates?type=${type}`, { token }),
   vote: (groupId: string, token: string, type: TargetType, targetIds: number[]) =>

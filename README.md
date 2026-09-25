@@ -248,15 +248,15 @@ docker run --rm -p 8000:8000 \
 | GET | `/api/groups/{id}/tag-summary` | タグ集計（投票結果画面用） |
 | GET / PUT | `/api/groups/{id}/selections/me` | 自分の選定の取得 / 保存 |
 | PUT | `/api/groups/{id}/selections/me/must-have` | 「譲れないこと」の確定 |
-| POST | `/api/groups/{id}/start` | 投票フェーズの開始 |
 | GET | `/api/groups/{id}/candidates` | 候補一覧（`type` 指定） |
 | POST | `/api/groups/{id}/votes` | 投票 |
-| POST | `/api/groups/{id}/decide` | 決定 |
 | GET | `/api/groups/{id}/summary` | 決定まとめ |
 | GET | `/api/health` | 死活確認（DB とモデルの準備状態を確認） |
 | WS | `/ws/groups/{id}?token=...` | 変更通知 |
 
 認証は 2 系統あります。グループ参加は `X-Member-Token` ヘッダー、アカウントは `X-User-Token` ヘッダー。WebSocket はブラウザの制約上トークンをクエリで渡します。
+
+フェーズは自動で進みます。定員がそろって全員が回答すると行き先選びが始まり、以降は各フェーズで全員が投票すると次に進みます。幹事が途中で先に進めたり締め切ったりする操作はありません（定員に達するまで招待リンクは有効なままです）。
 
 ## 開発上の注意点
 
