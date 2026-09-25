@@ -71,13 +71,13 @@ export default function WelcomePage() {
       {/* 白シート */}
       <div className="relative z-10 flex flex-1 flex-col items-center gap-[11px] rounded-t-[27px] bg-background px-6 pt-[30px] pb-[46px]">
         <Link
-          href="/groups/new"
+          href="/register"
           className="flex h-[50px] w-full max-w-[315px] items-center justify-center rounded-full border border-foreground bg-primary text-base font-medium text-foreground no-underline transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           新規登録
         </Link>
         <Link
-          href="/home"
+          href={hasGroups ? "/home" : "/login"}
           className="flex h-[46px] w-full max-w-[315px] items-center justify-center rounded-full border border-foreground bg-background text-base font-medium text-foreground no-underline transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           {hasGroups ? "参加中のグループを見る" : "ログイン"}
