@@ -60,7 +60,7 @@ export default function WaitingPage() {
         </h1>
       </header>
       <main className="flex flex-1 flex-col gap-[18px] px-5 pt-[51px] pb-5 text-center">
-        <ProgressPill answered={group.answered_count} total={group.member_limit} />
+        <ProgressPill current={group.answered_count} total={group.member_limit} unit="回答" />
         <p className="-mt-2 text-[0.82rem] text-muted-foreground">みんなの行きたいがそろうまで、もう少しです</p>
 
         {myTags && myTags.length > 0 && (

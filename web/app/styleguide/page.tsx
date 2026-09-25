@@ -149,7 +149,7 @@ export default function StyleguidePage() {
 
       <Section title="BottomBar / Toast / Spinner">
         <div className="max-w-[380px] overflow-hidden rounded-md border border-dashed border-border">
-          <BottomBar note="幹事はいつでも今の投票で決められます">
+          <BottomBar note="全員が投票すると自動で次に進みます">
             <Button variant="primary" block>
               投票する
             </Button>

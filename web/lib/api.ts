@@ -237,10 +237,6 @@ export interface InviteToken {
   token: string;
 }
 
-export interface RevokeResult {
-  revoked: number;
-}
-
 export interface MySelections {
   tag_ids: number[];
   share_answers: boolean;
@@ -374,8 +370,6 @@ export const api = {
   getGroup: (groupId: string, token: string) => request<GroupView>(`/api/groups/${groupId}`, { token }),
   createInvite: (groupId: string, token: string) =>
     request<InviteToken>(`/api/groups/${groupId}/invites`, { method: "POST", token }),
-  revokeInvites: (groupId: string, token: string) =>
-    request<RevokeResult>(`/api/groups/${groupId}/invites`, { method: "DELETE", token }),
   getInvite: (inviteToken: string) => request<InviteInfo>(`/api/invites/${inviteToken}`),
   join: (inviteToken: string, nickname: string) =>
     request<JoinResult>(`/api/invites/${inviteToken}/join`, { method: "POST", body: { nickname } }),
