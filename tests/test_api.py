@@ -252,3 +252,94 @@ def test_starts_only_when_member_limit_reached(client):
     assert dest["items"][0]["name"] == "沖縄"
     assert dest["relaxed"] is True  # 沖縄だけでは3件に満たない
     assert client.get(f"/api/invites/{spare}").status_code == 404  # 開始時に未使用リンクは無効
+
+
+def test_validation_errors_are_readable(client):
+    """入力の検証エラーは 422 で、画面にそのまま出せる日本語の文字列を返す（配列ではない）。"""
+    bad_email = client.post(
+        "/api/auth/register", json={"display_name": "テスター", "email": "not-an-email", "password": "hunter2222"}
+    )
+    assert bad_email.status_code == 422
+    detail = bad_email.json()["detail"]
+    assert isinstance(detail, str)  # フロントが [object Object] と表示しないこと
+    assert detail == "メールアドレスの形式が正しくありません"
+
+    # 空白だけのニックネームは未入力として弾く
+    blank = client.post(
+        "/api/auth/register", json={"display_name": "   ", "email": "blank@example.com", "password": "hunter2222"}
+    )
+    assert blank.status_code == 422
+    assert "ニックネーム" in blank.json()["detail"]
+
+    short = client.post(
+        "/api/auth/register", json={"display_name": "テスター", "email": "short@example.com", "password": "abc"}
+    )
+    assert short.status_code == 422
+    assert "パスワード" in short.json()["detail"]
+
+    # 定義していないフィールドは受け付けない
+    extra = client.post(
+        "/api/auth/register",
+        json={"display_name": "テスター", "email": "extra@example.com", "password": "hunter2222", "admin": True},
+    )
+    assert extra.status_code == 422
+    assert extra.json()["detail"] == "adminは指定できません"
+
+
+def test_group_validation(client):
+    """グループ作成の検証（定員の範囲・日付の前後関係）。"""
+    base = {
+        "name": "卒業旅行",
+        "start_date": "2026-11-01",
+        "end_date": "2026-11-02",
+        "member_limit": 2,
+        "nickname": "えび",
+    }
+
+    too_small = client.post("/api/groups", json={**base, "member_limit": 1})
+    assert too_small.status_code == 422
+    assert "定員" in too_small.json()["detail"]
+
+    too_large = client.post("/api/groups", json={**base, "member_limit": 5})
+    assert too_large.status_code == 422
+
+    reversed_dates = client.post("/api/groups", json={**base, "start_date": "2026-11-03"})
+    assert reversed_dates.status_code == 422
+    assert reversed_dates.json()["detail"] == "帰る日は出発日より後にしてください"
+
+
+def test_responses_match_schema(client):
+    """レスポンスが定義どおりの形で返る（response_model の契約テスト）。
+
+    フロントは値が無い項目も null として読むため、キー自体は必ず存在すること。
+    """
+    r = client.post(
+        "/api/groups",
+        json={"name": "検証", "start_date": "2026-11-01", "end_date": "2026-11-02", "member_limit": 2, "nickname": "えび"},
+    ).json()
+    gid, tok = r["group_id"], r["token"]
+
+    view = client.get(f"/api/groups/{gid}", headers=h(tok)).json()
+    assert set(view) == {
+        "id",
+        "name",
+        "start_date",
+        "end_date",
+        "member_limit",
+        "status",
+        "me",
+        "members",
+        "answered_count",
+        "open_invites",
+        "voted_count",
+    }
+    assert set(view["me"]) == {"id", "nickname", "role", "share_answers", "answered"}
+    assert set(view["members"][0]) == {"id", "nickname", "role", "answered", "is_me", "tags"}
+    assert view["open_invites"] is not None  # 幹事には未使用リンクの数が返る
+    assert view["voted_count"] is None  # 投票フェーズの外は null
+    assert view["members"][0]["tags"] is None  # 公開を選んでいないので null
+
+    tags = client.get("/api/tags").json()
+    assert set(tags[0]) == {"key", "label", "tags"}
+    assert set(tags[0]["tags"][0]) == {"id", "label", "kind"}
+

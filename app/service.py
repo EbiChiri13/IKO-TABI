@@ -5,7 +5,6 @@
 """
 
 import hashlib
-import re
 import secrets
 from datetime import date
 
@@ -61,7 +60,6 @@ def _fail(status: int, message: str):
 
 # ───────── アカウント（メール＋パスワード） ─────────
 
-_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 _PBKDF2_ITERATIONS = 200_000
 
 
@@ -80,9 +78,8 @@ def verify_password(password: str, stored: str) -> bool:
 
 
 def register_user(conn, display_name: str, email: str, password: str) -> dict:
+    # メールアドレスの形式は入口の Pydantic（EmailStr）が検証済みです。
     email = email.strip().lower()
-    if not _EMAIL_RE.match(email):
-        _fail(400, "メールアドレスの形式が正しくありません")
     if conn.execute("SELECT id FROM users WHERE email = %s", (email,)).fetchone():
         _fail(409, "このメールアドレスは既に登録されています")
     token = new_token()
@@ -145,8 +142,7 @@ def _lock_group(conn, group_id: str) -> dict:
 
 
 def create_group(conn, name: str, start: date, end: date, member_limit: int, nickname: str) -> dict:
-    if end < start:
-        _fail(400, "帰る日は出発日より後にしてください")
+    # 日付の前後関係は入口の Pydantic（GroupIn）が検証済みです。
     group_id = secrets.token_urlsafe(9)
     conn.execute(
         "INSERT INTO groups (id, name, start_date, end_date, member_limit) VALUES (%s, %s, %s, %s, %s)",
