@@ -32,14 +32,17 @@ export default function VoteTypePage() {
   const token = tokenFor(groupId);
 
   const [data, setData] = useState<CandidatesView | null>(null);
+  const [isHost, setIsHost] = useState(false);
   const [selected, setSelected] = useState<Set<CandidateItem["id"]>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [reconsidering, setReconsidering] = useState(false);
 
   const load = useCallback(async () => {
     if (!token || !type) return;
     const [group, candidates] = await Promise.all([api.getGroup(groupId, token), api.candidates(groupId, token, type)]);
     setData(candidates);
+    setIsHost(group.me.role === "host");
     setSelected(new Set(candidates.items.filter((i) => i.my_vote).map((i) => i.id)));
 
     if (group.status !== type) {
@@ -72,6 +75,21 @@ export default function VoteTypePage() {
       }
       return next;
     });
+  }
+
+  async function reconsider() {
+    if (!token || !type) return;
+    setReconsidering(true);
+    setError(null);
+    try {
+      await api.reconsider(groupId, token, type);
+      setSelected(new Set());
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message || "再計算できませんでした" : "再計算できませんでした");
+    } finally {
+      setReconsidering(false);
+    }
   }
 
   async function submit() {
@@ -117,6 +135,18 @@ export default function VoteTypePage() {
               選んだ地域だけでは3件そろわなかったので、地域の条件を外して選んでいます。
             </p>
           )}
+          <div className="mb-3.5 flex flex-col gap-2 rounded-sm bg-muted px-3.5 py-2.5">
+            <p className="text-[0.8rem] text-foreground/80">
+              候補が少なすぎる・合わないと感じたら、地域や予算の条件を外して選び直せます。
+            </p>
+            {isHost ? (
+              <Button variant="quiet" size="sm" disabled={reconsidering} onClick={reconsider}>
+                {reconsidering ? "再計算しています…" : "条件を外して再考慮する"}
+              </Button>
+            ) : (
+              <p className="text-[0.75rem] text-muted-foreground">※幹事だけが操作できます</p>
+            )}
+          </div>
           <p className="mb-3! text-[0.85rem] font-bold text-muted-foreground">
             投票済み {data.voted_count} / {data.member_total} 人 ・ {selected.size}/{data.vote_limit} 個選択中
           </p>

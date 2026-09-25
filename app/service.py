@@ -481,6 +481,36 @@ def _start_places(conn, group_id: str, destination_id: int) -> None:
         _save_results(conn, group_id, t, ranked, members, False)
 
 
+def reconsider(conn, group_id: str, member: dict, target_type: str) -> list[str]:
+    """候補が合わないとき、幹事が地域・予算・譲れない条件を外して候補を計算し直す。
+
+    今の投票中の項目だけをやり直す（他の項目・すでに決まった項目には触らない）。
+    候補の並びが変わるので、この項目の投票はリセットする。
+    """
+    if target_type not in TARGETS:
+        _fail(400, "type は destination / lodging / food / spot のどれかです")
+    group = _lock_group(conn, group_id)
+    _require_host(member)
+    if group["status"] != target_type:
+        _fail(409, "いまはこの項目の投票中ではありません")
+
+    members = _prefs(conn, group_id)
+    if target_type == "destination":
+        ranked = rank(engine.destination_candidates(), members, engine.sim, relaxed=True)[:3]
+    else:
+        dest = conn.execute(
+            "SELECT target_id FROM decisions WHERE group_id = %s AND target_type = 'destination'",
+            (group_id,),
+        ).fetchone()
+        if dest is None:
+            _fail(409, "行き先がまだ決まっていません")
+        ranked = rank(engine.place_candidates(dest["target_id"], target_type), members, engine.sim, relaxed=True)
+
+    _save_results(conn, group_id, target_type, ranked, members, True)
+    conn.execute("DELETE FROM votes WHERE group_id = %s AND target_type = %s", (group_id, target_type))
+    return ["votes"]
+
+
 # ───────── 候補・投票・決定 ─────────
 
 

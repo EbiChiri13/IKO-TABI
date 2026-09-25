@@ -226,6 +226,16 @@ def vote(group_id: str, body: VoteIn, token: Token = None):
     return {"ok": True}
 
 
+@app.post("/api/groups/{group_id}/candidates/reconsider")
+def reconsider(group_id: str, type: TargetType = Query(...), token: Token = None):
+    """候補が合わないとき、幹事が地域・予算などの条件を外して候補を計算し直す。"""
+    with db.tx() as conn:
+        me = service.auth_member(conn, group_id, token)
+        events = service.reconsider(conn, group_id, me, type)
+    hub.notify(group_id, events)
+    return {"ok": True}
+
+
 @app.get("/api/groups/{group_id}/summary")
 def summary(group_id: str, token: Token = None):
     with db.tx() as conn:

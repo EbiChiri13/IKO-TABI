@@ -397,6 +397,12 @@ export const api = {
       token,
       body: { type, target_ids: targetIds },
     }),
+  /** 候補が合わないとき、幹事が地域・予算などの条件を外して候補を計算し直す。投票はリセットされる */
+  reconsider: (groupId: string, token: string, type: TargetType) =>
+    request<{ ok: boolean }>(`/api/groups/${groupId}/candidates/reconsider?type=${type}`, {
+      method: "POST",
+      token,
+    }),
   summary: (groupId: string, token: string) => request<GroupSummary>(`/api/groups/${groupId}/summary`, { token }),
 };
 

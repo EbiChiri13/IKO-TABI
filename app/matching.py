@@ -60,34 +60,37 @@ def tag_closeness(member: MemberPrefs, c: Candidate, sim: Similarity) -> float:
     return mean(scores) if scores else 0.0
 
 
-def region_fit(member: MemberPrefs, c: Candidate) -> float:
+def region_fit(member: MemberPrefs, c: Candidate, relaxed: bool = False) -> float:
     # 宿・ごはん・スポットは決まった行き先の中から選ぶので、地域は常に合う
-    if c.type != "destination" or not member.regions:
+    if relaxed or c.type != "destination" or not member.regions:
         return 1.0
     if c.region in member.regions or ("near" in member.regions and c.near):
         return 1.0
     return 0.0
 
 
-def budget_fit(member: MemberPrefs, c: Candidate) -> float:
-    if not member.budgets:
+def budget_fit(member: MemberPrefs, c: Candidate, relaxed: bool = False) -> float:
+    if relaxed or not member.budgets:
         return 1.0
     gap = min(abs(b - c.band) for b in member.budgets)
     return {0: 1.0, 1: 0.5}.get(gap, 0.0)
 
 
-def must_have_fit(member: MemberPrefs, c: Candidate, sim: Similarity) -> float:
+def must_have_fit(member: MemberPrefs, c: Candidate, sim: Similarity, relaxed: bool = False) -> float:
     """「今回の旅行で譲れないこと」が候補にないと、適合度を大きく下げる。"""
-    if not member.must_have:
+    if relaxed or not member.must_have:
         return 1.0
     if member.must_have in c.tags:
         return 1.0
     return 1.0 if sim(member.must_have, c.type, c.id) >= MUST_HAVE_SEMANTIC_OK else MUST_HAVE_PENALTY
 
 
-def member_fit(member: MemberPrefs, c: Candidate, sim: Similarity) -> float:
-    base = W_TAG * tag_closeness(member, c, sim) + W_REGION * region_fit(member, c) + W_BUDGET * budget_fit(member, c)
-    return base * must_have_fit(member, c, sim)
+def member_fit(member: MemberPrefs, c: Candidate, sim: Similarity, relaxed: bool = False) -> float:
+    """relaxed=True のときは地域・予算・譲れない条件を無視し、タグの近さだけで見る（「再考慮する」用）。"""
+    base = W_TAG * tag_closeness(member, c, sim) + W_REGION * region_fit(member, c, relaxed) + W_BUDGET * budget_fit(
+        member, c, relaxed
+    )
+    return base * must_have_fit(member, c, sim, relaxed)
 
 
 def group_score(fits: list[float]) -> float:
@@ -106,10 +109,10 @@ def is_matched(member: MemberPrefs, c: Candidate) -> bool:
     )
 
 
-def rank(candidates: list[Candidate], members: list[MemberPrefs], sim: Similarity) -> list[Ranked]:
+def rank(candidates: list[Candidate], members: list[MemberPrefs], sim: Similarity, relaxed: bool = False) -> list[Ranked]:
     out = []
     for c in candidates:
-        fits = {m.member_id: member_fit(m, c, sim) for m in members}
+        fits = {m.member_id: member_fit(m, c, sim, relaxed) for m in members}
         out.append(
             Ranked(
                 candidate=c,
