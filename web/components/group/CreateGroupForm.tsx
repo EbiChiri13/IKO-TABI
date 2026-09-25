@@ -13,7 +13,7 @@ type CreateGroupFormProps = {
   readonly error: string | null;
 };
 
-/** グループ作成フォーム本体（design: 部屋の名前 / 日程 / 人数）。仕様書B F-01 */
+/** グループ作成フォーム本体（Figma 363:7047 — 部屋の名前 y293 / 日程 y389 / 人数 y482 / ニックネーム / CTA y735）。仕様書B F-01 */
 export default function CreateGroupForm({ onSubmit, submitting, error }: CreateGroupFormProps) {
   const [name, setName] = useState("");
   const [nickname, setNickname] = useState("");
@@ -25,7 +25,7 @@ export default function CreateGroupForm({ onSubmit, submitting, error }: CreateG
 
   return (
     <form
-      className="form"
+      className="flex flex-1 flex-col px-[29px] pt-[80px] pb-[87px]"
       onSubmit={(e) => {
         e.preventDefault();
         if (valid) onSubmit({ name, nickname, start_date: start, end_date: end, member_limit: memberLimit });
@@ -47,14 +47,12 @@ export default function CreateGroupForm({ onSubmit, submitting, error }: CreateG
         value={nickname}
         onChange={(e) => setNickname(e.target.value)}
       />
-      {error && <p className="error">{error}</p>}
-      <Button type="submit" variant="primary" block disabled={!valid || submitting}>
-        {submitting ? "作成しています…" : "グループを作成"}
-      </Button>
-      <style jsx>{`
-        .form { padding: 20px; display: flex; flex-direction: column; }
-        .error { color: var(--danger); font-size: 0.85rem; margin: -8px 0 12px; }
-      `}</style>
+      {error && <p className="mb-3! text-[0.85rem] font-medium text-destructive">{error}</p>}
+      <div className="mt-auto">
+        <Button type="submit" variant="primary" block disabled={!valid || submitting}>
+          {submitting ? "作成しています…" : "グループを作成"}
+        </Button>
+      </div>
     </form>
   );
 }

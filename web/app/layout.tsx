@@ -1,12 +1,12 @@
-import { Zen_Maru_Gothic, Yomogi } from "next/font/google";
+import { Noto_Sans_JP, Yomogi } from "next/font/google";
 import type { ReactNode } from "react";
 import "./globals.css";
 
-// 本文用の丸ゴシック
-const body = Zen_Maru_Gothic({
+// デザインシステム標準書体（Figma完成版・Noto Sans JP）— body から全画面で既定
+const noto = Noto_Sans_JP({
+  weight: ["400", "500", "700", "900"],
   subsets: ["latin"],
-  weight: ["500", "700", "900"],
-  variable: "--font-body",
+  variable: "--font-noto",
   display: "swap",
 });
 
@@ -26,12 +26,12 @@ export const metadata = {
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#2e9b84",
+  themeColor: "#48bfae",
 };
 
 export default function RootLayout({ children }: { readonly children: ReactNode }) {
   return (
-    <html lang="ja" className={`${body.variable} ${logo.variable}`}>
+    <html lang="ja" className={`${noto.variable} ${logo.variable}`}>
       <body>{children}</body>
     </html>
   );

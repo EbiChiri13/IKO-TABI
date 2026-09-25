@@ -30,7 +30,7 @@ export default function GroupEntryPage() {
   if (error) {
     return (
       <div className="screen">
-        <p style={{ padding: 24, color: "var(--danger)" }}>{error instanceof Error ? error.message : "読み込みに失敗しました"}</p>
+        <p className="p-6 text-destructive">{error instanceof Error ? error.message : "読み込みに失敗しました"}</p>
       </div>
     );
   }

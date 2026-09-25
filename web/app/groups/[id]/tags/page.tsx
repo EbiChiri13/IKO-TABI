@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import AppHeader from "@/components/layout/AppHeader";
+import { BackIcon } from "@/components/icons";
 import ProgressSteps from "@/components/layout/ProgressSteps";
 import TagCategory from "@/components/tags/TagCategory";
 import Switch from "@/components/ui/Switch";
-import Card from "@/components/ui/Card";
 import BottomBar from "@/components/ui/BottomBar";
 import Button from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
@@ -14,7 +14,7 @@ import Toast from "@/components/ui/Toast";
 import { api, tokenFor } from "@/lib/api";
 import type { Tag, TagCategory as TagCategoryData } from "@/lib/api";
 
-/** ハッシュタグ選択画面（仕様書B 4.2・5.1）。自由入力はなく、用意された65語から選ぶ【Q6】 */
+/** ハッシュタグ選択画面（Figma 363:6485）。自由入力はなく、用意された65語から選ぶ【Q6】 */
 export default function TagsPage() {
   const { id: groupId } = useParams<{ id: string }>();
   const router = useRouter();
@@ -39,7 +39,8 @@ export default function TagsPage() {
   function toggle(id: Tag["id"]) {
     setSelected((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   }
@@ -67,24 +68,42 @@ export default function TagsPage() {
 
   return (
     <div className="screen">
-      <AppHeader eyebrow="希望を教えてください" title="どんな旅にしたい？" homeHref="/home" />
-      <ProgressSteps step={1} />
-      <main className="flex-1 p-5">
-        {categories.map((c) => (
-          <TagCategory key={c.key} label={c.label} tags={c.tags} selectedIds={selected} onToggle={toggle} />
-        ))}
-        <Card>
+      <header>
+        <div className="flex min-h-[28px] px-5 pt-4">
+          <Link href={`/groups/${groupId}`} aria-label="戻る" className="inline-flex text-foreground no-underline">
+            <BackIcon />
+          </Link>
+        </div>
+        <ProgressSteps step={1} />
+        <div className="px-5 pt-12">
+          <h1 className="text-[20px] font-extrabold text-foreground">今回の旅行でやりたいことは？</h1>
+          <p className="mt-1 text-[13px] text-muted-foreground">気になるものを選んでみましょう（あとから変更できます）</p>
+        </div>
+      </header>
+      <main className="flex-1 px-5 pt-7 pb-6">
+        <div className="mx-auto flex w-full max-w-[337px] flex-col gap-5">
+          {categories.map((c) => (
+            <TagCategory key={c.key} label={c.label} tags={c.tags} selectedIds={selected} onToggle={toggle} />
+          ))}
+        </div>
+        <section className="mx-auto mt-3 w-full max-w-[337px] py-1">
           <Switch
             checked={share}
             onChange={setShare}
             label="選んだタグをメンバーに見せる"
             sub="オフのままだと「回答済み」とだけ表示されます"
           />
-        </Card>
+        </section>
       </main>
       <BottomBar note={allAnswered ? undefined : "それぞれの質問で1つ以上選んでください"}>
-        <Button variant="primary" block disabled={!allAnswered || saving} onClick={submit}>
-          {saving ? "送信しています…" : "この希望で決定"}
+        <Button
+          variant="primary"
+          block
+          disabled={!allAnswered || saving}
+          onClick={submit}
+          className="border-foreground bg-foreground text-background shadow-pop hover:bg-foreground/90 hover:text-background"
+        >
+          {saving ? "送信しています…" : "次へ"}
         </Button>
       </BottomBar>
       <Toast message={error} />

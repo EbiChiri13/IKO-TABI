@@ -22,6 +22,8 @@ import SpeechBubbleSticker from "@/components/layout/SpeechBubbleSticker";
  * UIライブラリ（スタイルガイド）。components/ui・components/layout の部品を
  * 一覧して確認するための開発用ページ。本番の画面フローには含めない。
  */
+const CODE_CLASS = "rounded-[6px] bg-muted px-1.5 py-px text-[0.85em]";
+
 export default function StyleguidePage() {
   const [switchOn, setSwitchOn] = useState(true);
   const [selectedChips, setSelectedChips] = useState(new Set(["温泉"]));
@@ -33,36 +35,37 @@ export default function StyleguidePage() {
   function toggleChip(label: string) {
     setSelectedChips((prev) => {
       const next = new Set(prev);
-      next.has(label) ? next.delete(label) : next.add(label);
+      if (next.has(label)) next.delete(label);
+      else next.add(label);
       return next;
     });
   }
 
   return (
-    <div className="page">
-      <header className="intro">
-        <p className="eyebrow">いこたび UIライブラリ</p>
-        <h1>コンポーネント一覧</h1>
-        <p className="lead">
-          Figma「緑変えてみた」のトンマナに合わせた部品集。ここでの見た目の変更は
-          <code>components/ui</code>・<code>components/layout</code>を直せば全画面に反映される。
+    <div className="mx-auto max-w-[720px] px-5 pt-8 pb-20">
+      <header className="mb-8">
+        <p className="mb-1 text-[0.85rem] font-extrabold text-primary">いこたび UIライブラリ</p>
+        <h1 className="mb-2.5 text-[1.6rem]">コンポーネント一覧</h1>
+        <p className="max-w-[56ch] text-foreground opacity-70">
+          Figma完成デザインのトークン（Tailwind v4 + CSS変数）に合わせた部品集。
+          ここでの見た目の変更は<code className={CODE_CLASS}>components/ui/primitives</code>・<code className={CODE_CLASS}>components/ui</code>を直せば全画面に反映される。
         </p>
       </header>
 
       <Section title="カラートークン">
-        <div className="swatches">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3">
           {([
-            ["--teal-900", "濃色ヘッダー"],
-            ["--teal-600", "メインカラー"],
-            ["--mint-400", "差し色"],
-            ["--cream-200", "画面背景"],
-            ["--ink-900", "文字色"],
-            ["--line", "枠線"],
+            ["--primary", "メイン（#48BFAE）"],
+            ["--foreground", "文字（#272727）"],
+            ["--background", "画面背景（白）"],
+            ["--secondary", "差し色"],
+            ["--border", "枠線"],
+            ["--muted", "ミュート"],
           ] as const).map(([token, label]) => (
-            <div className="swatch" key={token}>
-              <span className="chip-color" style={{ background: `var(${token})` }} />
-              <code>{token}</code>
-              <span className="muted">{label}</span>
+            <div className="flex flex-col gap-1" key={token}>
+              <span className="block h-10 w-full rounded-[10px] border border-border" style={{ background: `var(${token})` }} />
+              <code className={CODE_CLASS}>{token}</code>
+              <span className="text-[0.82rem] text-muted-foreground">{label}</span>
             </div>
           ))}
         </div>
@@ -84,7 +87,7 @@ export default function StyleguidePage() {
       </Section>
 
       <Section title="TextField / DateRangeField / Stepper">
-        <div className="narrow">
+        <div className="max-w-[360px]">
           <TextField label="部屋の名前" placeholder="例：卒業旅行メンバー" hint="20文字まで" />
           <TextField label="エラー例" defaultValue="12345" error="正しい形式で入力してください" />
           <DateRangeField start={start} end={end} onChangeStart={setStart} onChangeEnd={setEnd} />
@@ -93,7 +96,7 @@ export default function StyleguidePage() {
       </Section>
 
       <Section title="Switch">
-        <div className="narrow">
+        <div className="max-w-[360px]">
           <Card>
             <Switch checked={switchOn} onChange={setSwitchOn} label="選んだタグをメンバーに見せる" sub="初期値はオフ" />
           </Card>
@@ -101,7 +104,7 @@ export default function StyleguidePage() {
       </Section>
 
       <Section title="Chip（ハッシュタグ）">
-        <div className="chips-demo">
+        <div className="flex flex-wrap gap-2">
           {["温泉", "のんびり", "関東", "食べ歩き", "写真映え"].map((label) => (
             <Chip key={label} label={label} selected={selectedChips.has(label)} onClick={() => toggleChip(label)} />
           ))}
@@ -118,96 +121,69 @@ export default function StyleguidePage() {
       </Section>
 
       <Section title="Card">
-        <div className="narrow">
+        <div className="max-w-[360px]">
           <Card>
             <h3>カード見出し</h3>
-            <p className="muted">白背景・角丸・薄い枠線のベースコンポーネント。</p>
+            <p className="text-[0.82rem] text-muted-foreground">白背景・角丸・薄い枠線のベースコンポーネント。</p>
           </Card>
         </div>
       </Section>
 
       <Section title="AppHeader / ProgressSteps">
-        <div className="frame">
+        <div className="max-w-[380px] overflow-hidden rounded-md border border-dashed border-border">
           <AppHeader eyebrow="グループ作成" title={"旅行のグループを\n作りましょう！"} backHref="#">
             <SpeechBubbleSticker />
           </AppHeader>
           <ProgressSteps status="destination" />
         </div>
-        <div className="frame" style={{ marginTop: 12 }}>
+        <div className="mt-3 max-w-[380px] overflow-hidden rounded-md border border-dashed border-border">
           <AppHeader dark eyebrow="2026.11.20 〜 11.21" title="決定まとめ" />
         </div>
       </Section>
 
       <Section title="BottomBar / Toast / Spinner">
-        <div className="frame">
+        <div className="max-w-[380px] overflow-hidden rounded-md border border-dashed border-border">
           <BottomBar note="幹事はいつでも今の投票で決められます">
             <Button variant="primary" block>
               投票する
             </Button>
           </BottomBar>
         </div>
-        <Row style={{ marginTop: 12 }}>
+        <Row className="mt-3">
           <Button variant="quiet" onClick={() => setToastOn(true)}>
             トーストを表示
           </Button>
         </Row>
-        <div className="frame" style={{ marginTop: 12 }}>
+        <div className="mt-3 max-w-[380px] overflow-hidden rounded-md border border-dashed border-border">
           <Spinner />
         </div>
         {toastOn && <Toast message="保存しました" />}
       </Section>
-
-      <style jsx>{`
-        .page {
-          max-width: 720px;
-          margin: 0 auto;
-          padding: 32px 20px 80px;
-        }
-        .intro { margin-bottom: 32px; }
-        .eyebrow { color: var(--teal-700); font-weight: 800; font-size: 0.85rem; margin-bottom: 4px; }
-        h1 { font-size: 1.6rem; margin-bottom: 10px; }
-        .lead { color: var(--ink-600); max-width: 56ch; }
-        code {
-          background: var(--cream-100); padding: 1px 6px; border-radius: 6px; font-size: 0.85em;
-        }
-        .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-        .swatch { display: flex; flex-direction: column; gap: 4px; }
-        .chip-color { display: block; width: 100%; height: 40px; border-radius: 10px; border: 1px solid var(--line); }
-        .muted { color: var(--ink-400); font-size: 0.82rem; }
-        .narrow { max-width: 360px; }
-        .chips-demo { display: flex; flex-wrap: wrap; gap: 8px; }
-        .frame {
-          border: 1px dashed var(--line); border-radius: var(--radius-md); overflow: hidden;
-          max-width: 380px;
-        }
-      `}</style>
     </div>
   );
 }
 
 function Section({ title, children }: { readonly title: string; readonly children: ReactNode }) {
   return (
-    <section className="section">
-      <h2>{title}</h2>
+    <section className="mb-10">
+      <h2 className="mb-3.5 border-b-2 border-border pb-2 text-[1rem]">{title}</h2>
       {children}
-      <style jsx>{`
-        .section { margin-bottom: 40px; }
-        h2 {
-          font-size: 1rem; margin-bottom: 14px; padding-bottom: 8px;
-          border-bottom: 2px solid var(--line);
-        }
-      `}</style>
     </section>
   );
 }
 
-function Row({ children, style }: { readonly children: ReactNode; readonly style?: CSSProperties }) {
+function Row({
+  children,
+  className,
+  style,
+}: {
+  readonly children: ReactNode;
+  readonly className?: string;
+  readonly style?: CSSProperties;
+}) {
   return (
-    <div className="row" style={style}>
+    <div className={`flex flex-wrap items-center gap-2.5 ${className ?? ""}`} style={style}>
       {children}
-      <style jsx>{`
-        .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-      `}</style>
     </div>
   );
 }

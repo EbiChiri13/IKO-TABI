@@ -1,26 +1,43 @@
 import type { PlaceSummary } from "@/lib/api";
+import { cardSurface } from "@/components/ui/primitives/card";
+import { cn } from "@/lib/utils";
 
 type PlaceTimelineProps = {
   readonly label: string;
   readonly places: readonly PlaceSummary[];
 };
 
-/** 決定まとめの縦タイムライン（design: 完成版 計画確定画面）。観光地／食事先／宿泊先で使う。 */
+/** 決定まとめの縦タイムライン（Figma 363:6926 計画確定）。観光地／食事先／宿泊先で使う。 */
 export default function PlaceTimeline({ label, places }: PlaceTimelineProps) {
   if (places.length === 0) return null;
   return (
-    <section className="section">
-      <span className="flag">{label}</span>
-      <ul className="list">
+    <section className="relative">
+      {/* 左レール：ティールの破線＋各行動ドット（Figma Line 8–10 / Ellipse 32–39） */}
+      <span aria-hidden="true" className="absolute top-[18px] bottom-[48px] left-[40px] w-0 border-l-2 border-dashed border-primary" />
+      <div className="relative flex min-h-[35px] items-center pl-[57px]">
+        <span aria-hidden="true" className="absolute top-1/2 left-[36px] size-2.5 -translate-y-1/2 rounded-full bg-primary" />
+        {/* 旗ラベル（public/figma/section-flag.svg、Figma Rectangle 75） */}
+        <span className="relative inline-flex h-[35px] w-[102px] items-center pl-[23px]">
+          <img src="/figma/section-flag.svg" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full" />
+          <span className="relative text-base leading-none font-extrabold text-primary-foreground">{label}</span>
+        </span>
+      </div>
+      <ul className="relative mt-[13px] m-0 flex list-none flex-col gap-[9px] pl-[57px]">
         {places.map((p) => (
-          <li key={p.id} className="item">
-            <span className="dot" aria-hidden="true" />
-            <div className="thumb" style={{ backgroundImage: `url(${p.image})` }} />
-            <div className="info">
-              <p className="name">{p.name}</p>
-              <p className="tags">
+          <li key={p.id} className={cn(cardSurface, "relative flex h-[95px] items-center gap-2.5 px-[18px]")}>
+            <span aria-hidden="true" className="absolute top-1/2 left-[-21px] size-2.5 -translate-y-1/2 rounded-full bg-primary" />
+            <div
+              className="size-[51px] shrink-0 rounded-sm bg-muted bg-cover bg-center"
+              style={{ backgroundImage: `url(${p.image})` }}
+            />
+            <div className="min-w-0">
+              <p className="truncate text-base font-extrabold">{p.name}</p>
+              <p className="mt-1 flex flex-wrap gap-1">
                 {p.tags.slice(0, 3).map((t) => (
-                  <span key={t} className="tag">
+                  <span
+                    key={t}
+                    className="inline-flex h-6 items-center rounded-full bg-muted px-2.5 text-[0.72rem] text-muted-foreground"
+                  >
                     {t}
                   </span>
                 ))}
@@ -29,29 +46,6 @@ export default function PlaceTimeline({ label, places }: PlaceTimelineProps) {
           </li>
         ))}
       </ul>
-      <style jsx>{`
-        .section { position: relative; margin-bottom: 8px; }
-        .flag {
-          display: inline-block; background: var(--teal-600); color: var(--white);
-          font-weight: 800; font-size: 0.85rem; padding: 6px 18px 6px 14px;
-          border-radius: 6px 14px 14px 6px; margin-bottom: 10px;
-        }
-        .list { list-style: none; margin: 0 0 0 12px; padding: 0; border-left: 2px dotted var(--line); }
-        .item { position: relative; display: flex; gap: 12px; padding: 10px 0 10px 20px; align-items: center; }
-        .dot {
-          position: absolute; left: -7px; top: 50%; transform: translateY(-50%);
-          width: 12px; height: 12px; border-radius: 50%; background: var(--teal-600);
-          border: 2px solid var(--white); box-shadow: 0 0 0 1px var(--line);
-        }
-        .thumb { width: 56px; height: 56px; border-radius: 14px; background: var(--line) center/cover no-repeat; flex: none; }
-        .info { min-width: 0; }
-        .name { font-weight: 800; }
-        .tags { margin: 2px 0 0; }
-        .tag {
-          display: inline-block; font-size: 0.72rem; color: var(--ink-400);
-          background: var(--cream-100); border-radius: var(--radius-pill); padding: 1px 9px; margin: 2px 4px 0 0;
-        }
-      `}</style>
     </section>
   );
 }

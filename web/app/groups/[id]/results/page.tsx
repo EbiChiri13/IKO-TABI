@@ -11,7 +11,7 @@ import TagResultBar from "@/components/tags/TagResultBar";
 import { api, tokenFor } from "@/lib/api";
 import type { TagSummary } from "@/lib/api";
 
-/** 投票結果画面（design: 完成版 投票確認画面）。ハッシュタグ集計をもとに行き先を決めていく橋渡し画面。 */
+/** 投票結果画面（Figma 363:6634）。ハッシュタグ集計をもとに行き先を決めていく橋渡し画面。 */
 export default function ResultsPage() {
   const { id: groupId } = useParams<{ id: string }>();
   const router = useRouter();
@@ -32,14 +32,13 @@ export default function ResultsPage() {
 
   return (
     <div className="screen">
-      <main className="body">
-        <h1 className="ikotabi-logo logo">いこ！たび</h1>
-        <h2 className="title">投票結果</h2>
-        <p className="lead">この結果をもとに、行き先をきめていきます</p>
+      <main className="flex flex-1 flex-col gap-[14px] px-5 pt-[91px] pb-5 text-center">
+        <h1 className="text-[24px] font-black text-foreground">投票結果</h1>
+        <p className="mb-2 text-[11px] text-muted-foreground">この結果をもとに、行き先をきめていきます</p>
 
         {summary.categories.map((c) => (
           <Card key={c.key}>
-            <p className="card-title">{c.label}</p>
+            <p className="mb-3 text-left font-extrabold">{c.label}</p>
             {c.tags.map((t) => (
               <TagResultBar key={t.label} label={t.label} count={t.count} total={summary.member_count} />
             ))}
@@ -47,18 +46,11 @@ export default function ResultsPage() {
         ))}
       </main>
       <BottomBar>
-        <Button variant="primary" block onClick={() => router.push(`/groups/${groupId}/vote/destination`)}>
+        <Button variant="primary" block className="border-foreground bg-foreground text-background hover:bg-foreground/90 hover:text-background" onClick={() => router.push(`/groups/${groupId}/vote/destination`)}>
           行き先を見る
         </Button>
       </BottomBar>
       <Toast message={error} />
-      <style jsx>{`
-        .body { flex: 1; padding: 32px 20px 20px; display: flex; flex-direction: column; gap: 14px; text-align: center; }
-        .logo { font-size: 2rem; }
-        .title { font-size: 1.3rem; }
-        .lead { font-size: 0.82rem; color: var(--ink-400); margin-bottom: 8px; }
-        .card-title { font-weight: 800; margin-bottom: 12px; text-align: left; }
-      `}</style>
     </div>
   );
 }

@@ -1,68 +1,87 @@
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
 import type { CandidateItem, TargetType } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 type CandidateCardProps = {
   readonly item: CandidateItem;
   readonly type: TargetType;
   readonly onToggle: (id: CandidateItem["id"]) => void;
   readonly locked: boolean;
+  readonly selected: boolean;
 };
 
-/** 行き先・宿・ごはん・スポットに共通の候補カード（design: 行き先選定＝写真＋番号バッジ＋大きなボタン） */
-export default function CandidateCard({ item, type, onToggle, locked }: CandidateCardProps) {
+/** 行き先・宿・ごはん・スポットに共通の候補カード（Figma投票カード：写真＋タイトル＋タグ＋teal/ink投票CTA） */
+export default function CandidateCard({ item, type, onToggle, locked, selected }: CandidateCardProps) {
   const selectable = !locked && !item.decided;
   return (
-    <div
-      className={`bg-white rounded-lg overflow-hidden shadow-card mb-4 border-2 ${
-        item.my_vote || item.decided ? "border-teal-600" : "border-transparent"
-      }`}
+    <Card
+      className={cn(
+        "w-full max-w-[380px] gap-0 overflow-hidden p-0",
+        (selected || item.decided) && "bg-primary/10",
+      )}
     >
-      <div className="w-9 h-1 rounded-full bg-line mx-auto mt-2.5" aria-hidden="true" />
+      <div className="mx-auto mt-2.5 h-1 w-9 rounded-full bg-border" aria-hidden="true" />
       <div
-        className="relative h-[170px] mt-2 bg-line bg-cover bg-center"
+        className="mt-2 h-[170px] bg-border bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${item.image})` }}
       >
-        <span className="absolute top-3 left-3 w-7 h-7 rounded-full bg-white text-teal-700 grid place-items-center font-black text-[0.85rem] shadow-card">
-          {item.rank}
-        </span>
-        {item.decided && (
-          <span className="absolute top-3 right-3 bg-teal-600 text-white text-[0.72rem] font-extrabold px-3 py-[3px] rounded-pill">
-            決定！
+        <div className="flex items-start justify-between p-3">
+          <span className="grid h-7 w-7 place-items-center rounded-full bg-background text-[0.85rem] font-black text-foreground shadow-card">
+            {item.rank}
           </span>
-        )}
+          {item.decided && (
+            <span className="rounded-full bg-primary px-3 py-[3px] text-xs font-extrabold text-primary-foreground">
+              決定！
+            </span>
+          )}
+        </div>
       </div>
-      <div className="px-[18px] pt-3.5 pb-[18px]">
+      <div className="flex flex-col px-[18px] pt-3.5 pb-[18px]">
         <div className="flex items-baseline justify-between gap-2">
-          <h3 className="text-xl">
+          <h3 className="text-xl font-bold">
             {item.name}
-            {type === "destination" && <span className="text-[0.82rem] text-ink-400 font-medium">（{item.area}）</span>}
+            {type === "destination" && <span className="text-sm font-medium text-muted-foreground">（{item.area}）</span>}
           </h3>
-          <span className="text-[1.3rem] font-black text-teal-700 flex-none">
+          <span className="flex-none text-[1.3rem] leading-none font-black text-foreground">
             {item.match}
-            <small className="text-[0.7rem]">%</small>
+            <small className="text-xs">%</small>
           </span>
         </div>
 
-        <p className="mt-2.5 mb-1">
-          {item.tags.slice(0, 3).map((t) => (
-            <span
-              key={t}
-              className="inline-block text-[0.8rem] px-3.5 py-[3px] rounded-pill border border-ink-900 bg-vote-mint/0 text-ink-900 mr-1.5 mb-1.5"
-            >
-              {t}
+        <p className="mt-2 flex flex-wrap gap-1.5">
+          {item.tags.slice(0, 4).map((t) => (
+            <span key={t} className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-foreground/80">
+              #{t}
             </span>
           ))}
         </p>
 
-        <button
+        <p className="mt-2 text-sm text-foreground/80">{item.reason}</p>
+
+        <div className="mt-2.5 mb-3.5 flex flex-wrap items-center gap-2.5 text-xs text-muted-foreground">
+          <span className="rounded-full bg-secondary px-2.5 py-0.5 font-bold text-secondary-foreground">
+            {item.member_count}人中{item.matched_count}人の希望にマッチ
+          </span>
+          {item.price !== undefined && (
+            <span>{item.price > 0 ? `1人あたり ${item.price.toLocaleString()}円〜` : "無料"}</span>
+          )}
+          {item.ticket && <span>チケット必要</span>}
+        </div>
+
+        <Button
           type="button"
-          className="w-full flex items-center justify-center gap-2 min-h-[52px] rounded-pill border border-ink-900 bg-vote-mint text-ink-900 font-black text-[0.98rem] disabled:opacity-60 disabled:cursor-default aria-pressed:bg-white"
-          aria-pressed={item.my_vote}
+          block
+          variant="primary"
+          aria-pressed={selected}
           disabled={!selectable}
           onClick={() => selectable && onToggle(item.id)}
+          className={cn(selected && "border-foreground bg-foreground text-background hover:bg-foreground/90")}
         >
-          {item.decided ? "この候補に決定しました" : item.my_vote ? "投票済み（タップで取り消す）" : "この行き先に投票する"}
-        </button>
+          {item.decided ? "この候補に決定しました" : selected ? locked ? "投票済み" : "選択中（タップで取り消す）" : "この行き先に投票する"}
+          <span className="text-sm font-bold opacity-85">{item.votes}票</span>
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 }

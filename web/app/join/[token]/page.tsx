@@ -3,18 +3,17 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import AppHeader from "@/components/layout/AppHeader";
-import TextField from "@/components/ui/TextField";
 import Button from "@/components/ui/Button";
-import Card from "@/components/ui/Card";
+import TextField from "@/components/ui/TextField";
 import Spinner from "@/components/ui/Spinner";
+import TicketCard from "@/components/invite/TicketCard";
+import { BackIcon } from "@/components/icons";
 import { api, saveMembership, userSession } from "@/lib/api";
-import type { FormEvent } from "react";
 import type { InviteInfo } from "@/lib/api";
 
 /**
- * 招待参加画面（design: 招待チケット node 473:4614）。
- * リンクを開いた人がアカウント未ログインの場合は、まずログイン／新規登録を促すゲート画面を出し、
+ * 招待参加画面（design: 招待チケット node 473:4614 / Figma 363:6567）。
+ * アカウント未ログインの場合は、まずログイン／新規登録を促すゲート画面を出し、
  * ログイン後にこの画面へ戻ってきて参加できるようにする。
  */
 export default function JoinPage() {
@@ -35,8 +34,7 @@ export default function JoinPage() {
     if (session) setNickname(session.displayName);
   }, [session]);
 
-  async function join(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  async function join() {
     setJoining(true);
     setError(null);
     try {
@@ -53,9 +51,23 @@ export default function JoinPage() {
   if (error && !info) {
     return (
       <div className="screen">
-        <AppHeader title="招待リンク" backHref="/" />
-        <main className="body">
-          <p className="error">{error}</p>
+        <header className="relative h-[213px] shrink-0 overflow-hidden">
+          <img src="/figma/invite-header.svg" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full" />
+          <div className="relative flex h-full flex-col px-5 pb-5 pt-3.5">
+            <a
+              href="/"
+              aria-label="戻る"
+              className="-ml-2.5 inline-flex size-11 items-center justify-center rounded-full text-background transition-transform duration-75 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background"
+            >
+              <BackIcon size={22} />
+            </a>
+          </div>
+        </header>
+        <main className="flex flex-1 flex-col items-center justify-center gap-4 px-5 pb-6">
+          <p className="text-center font-bold text-destructive">{error}</p>
+          <Button variant="quiet" block onClick={() => router.push("/")}>
+            ホームへ戻る
+          </Button>
         </main>
       </div>
     );
@@ -67,18 +79,18 @@ export default function JoinPage() {
   if (!session) {
     return (
       <div className="screen">
-        <div className="ticket-header">
-          <p className="ticket-eyebrow">招待チケット</p>
-          <p className="ticket-name">{info.group_name}</p>
-          <p className="ticket-dates">
+        <div className="bg-foreground px-6 pt-8 pb-7 text-center text-background">
+          <p className="mb-2 text-[0.78rem] opacity-80">招待チケット</p>
+          <p className="mb-1.5 text-[1.4rem] font-extrabold">{info.group_name}</p>
+          <p className="text-[0.85rem] opacity-85">
             {info.start_date} 〜 {info.end_date}
           </p>
         </div>
-        <main className="body">
-          <p className="gate-message">
+        <main className="flex flex-1 flex-col gap-3 px-5 py-6">
+          <p className="text-[0.95rem] leading-relaxed text-foreground">
             あなたへの招待チケットが届きました。グループに参加して旅行の計画をしましょう。
           </p>
-          <p className="gate-note">参加するにはログインまたは新規登録が必要です。</p>
+          <p className="mb-2 text-[0.82rem] text-muted-foreground">参加するにはログインまたは新規登録が必要です。</p>
           <Link href={`/login?next=${encodeURIComponent(nextUrl)}`}>
             <Button variant="primary" block>ログイン</Button>
           </Link>
@@ -86,70 +98,71 @@ export default function JoinPage() {
             <Button variant="quiet" block>アカウントの新規登録はこちら</Button>
           </Link>
         </main>
-        <style jsx>{`
-          .ticket-header {
-            background: var(--teal-900);
-            color: var(--white);
-            padding: 32px 24px 28px;
-            text-align: center;
-          }
-          .ticket-eyebrow { font-size: 0.78rem; opacity: 0.8; margin-bottom: 8px; }
-          .ticket-name { font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; }
-          .ticket-dates { font-size: 0.85rem; opacity: 0.85; }
-          .body { flex: 1; padding: 24px 20px; display: flex; flex-direction: column; gap: 12px; }
-          .gate-message { color: var(--ink-900); font-size: 0.95rem; line-height: 1.6; }
-          .gate-note { color: var(--ink-600); font-size: 0.82rem; margin-bottom: 8px; }
-        `}</style>
       </div>
     );
   }
 
   return (
     <div className="screen">
-      <AppHeader eyebrow="招待参加" backHref="/" title={info.group_name} />
-      <main className="body">
-        <Card>
-          <p className="row">
-            <span>日程</span>
-            <b>
-              {info.start_date} 〜 {info.end_date}
-            </b>
-          </p>
-          <p className="row">
-            <span>参加人数</span>
-            <b>
-              {info.members} / {info.member_limit}人
-            </b>
-          </p>
-        </Card>
+      <header className="relative h-[213px] shrink-0 overflow-hidden">
+        <img src="/figma/invite-header.svg" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full" />
+        <div className="relative flex h-full flex-col px-5 pb-5 pt-3.5">
+          <a
+            href="/"
+            aria-label="戻る"
+            className="-ml-2.5 inline-flex size-11 items-center justify-center rounded-full text-background transition-transform duration-75 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background"
+          >
+            <BackIcon size={22} />
+          </a>
+          <p className="mt-1 text-[0.85rem] font-bold text-background/90">招待参加</p>
+          <h1 className="mt-1.5 text-[1.4rem] text-background">
+            「{info.group_name}」に
+            <br />
+            招待されています！
+          </h1>
+        </div>
+      </header>
+
+      <main className="flex flex-1 flex-col gap-4 pb-6">
+        {/* Figma 363:6567: チケット上端 y=151（ヘッダー h213 に 62px 重ねる） */}
+        <div className="-mt-[22px] flex flex-col">
+          <TicketCard
+            name={info.group_name}
+            start={info.start_date}
+            end={info.end_date}
+            tagline="一緒に旅行しましょう。"
+          />
+        </div>
+
+        <p className="text-center text-[0.95rem] text-muted-foreground">
+          参加人数 {info.members} / {info.member_limit}人
+        </p>
 
         {info.usable ? (
-          <form onSubmit={join} className="form">
+          <form onSubmit={(e) => { e.preventDefault(); void join(); }} className="flex flex-col gap-2.5 px-5">
             <TextField
               label="あなたのニックネーム"
+              hint="※必須"
               placeholder="例：ちり"
               maxLength={20}
+              required
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
             />
-            {error && <p className="error">{error}</p>}
+            {error && <p className="text-center font-bold text-destructive">{error}</p>}
             <Button type="submit" variant="primary" block disabled={!nickname.trim() || joining}>
               {joining ? "参加しています…" : "参加する"}
             </Button>
             <Button type="button" variant="quiet" block onClick={() => router.push("/")}>
-              参加しない
+              参加を辞退する
             </Button>
           </form>
         ) : (
-          <p className="error">このリンクはもう使えません。幹事に新しいリンクをもらってください。</p>
+          <p className="px-5 text-center font-bold text-destructive">
+            このリンクはもう使えません。幹事に新しいリンクをもらってください。
+          </p>
         )}
       </main>
-      <style jsx>{`
-        .body { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
-        .row { display: flex; justify-content: space-between; padding: 4px 0; }
-        .form { display: flex; flex-direction: column; gap: 10px; }
-        .error { color: var(--danger); font-weight: 700; text-align: center; }
-      `}</style>
     </div>
   );
 }

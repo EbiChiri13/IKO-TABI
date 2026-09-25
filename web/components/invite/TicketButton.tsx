@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { PlaneIcon } from "@/components/icons";
+import { cn } from "@/lib/utils";
 
 type TicketButtonProps = {
   readonly children: ReactNode;
@@ -15,6 +16,7 @@ type TicketButtonProps = {
  * 「チケットを切って出発する」ボタン（飛行機のチケットを切るUI）。
  * 幹事が全員そろわなくても先へ進めるとき（旧: 今いるメンバーの希望で行き先を探す）に使う。
  * 押すとミシン目に沿って切り離れるアニメーションをしてから onClick を呼ぶ。
+ * Figma の CTA と同じ ink-on-teal（--primary-foreground on --primary）。
  */
 export default function TicketButton({ children, onClick, disabled, busy }: TicketButtonProps) {
   const [tearing, setTearing] = useState(false);
@@ -28,41 +30,34 @@ export default function TicketButton({ children, onClick, disabled, busy }: Tick
   return (
     <button
       type="button"
-      className={`ticket-btn ${tearing ? "tearing" : ""}`}
       onClick={handleClick}
       disabled={disabled || busy}
       aria-busy={busy || tearing}
+      className={cn(
+        "grid min-h-[52px] w-full cursor-pointer grid-cols-[auto_auto_1fr] items-stretch overflow-hidden rounded-full",
+        "border border-foreground bg-primary text-primary-foreground shadow-pop",
+        "font-sans text-[0.98rem] font-extrabold transition-transform duration-75 active:scale-[0.98] disabled:active:scale-100",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground",
+        "disabled:cursor-not-allowed disabled:opacity-50",
+      )}
     >
-      <span className="stub left">
+      <span
+        className={cn(
+          "flex items-center justify-center bg-foreground/10 px-[18px] transition-[transform,opacity] duration-200 motion-reduce:transition-none",
+          tearing && "-translate-x-3.5 -rotate-6 opacity-0",
+        )}
+      >
         <PlaneIcon size={16} />
       </span>
-      <span className="perf" aria-hidden="true" />
-      <span className="stub right">{busy ? "出発しています…" : children}</span>
-      <style jsx>{`
-        .ticket-btn {
-          appearance: none; border: 0; cursor: pointer; width: 100%;
-          display: grid; grid-template-columns: auto auto 1fr; align-items: stretch;
-          min-height: 52px; border-radius: var(--radius-pill); overflow: hidden;
-          background: var(--teal-600); color: var(--white);
-          font: inherit; font-weight: 800; font-size: 0.98rem;
-          box-shadow: var(--shadow-pop);
-          transition: transform 0.18s ease, opacity 0.18s;
-        }
-        .ticket-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .stub { display: flex; align-items: center; justify-content: center; padding: 0 18px; }
-        .stub.left { background: color-mix(in srgb, var(--teal-900) 35%, var(--teal-600)); }
-        .perf {
-          width: 0; border-left: 2px dashed color-mix(in srgb, var(--white) 55%, transparent);
-        }
-        .tearing .stub.left {
-          transform: translateX(-14px) rotate(-6deg);
-          opacity: 0;
-        }
-        .tearing .stub.right {
-          transform: translateX(10px);
-        }
-        .stub.left, .stub.right { transition: transform 0.22s ease, opacity 0.22s ease; }
-      `}</style>
+      <span aria-hidden="true" className="w-0 border-l-2 border-dashed border-background/50" />
+      <span
+        className={cn(
+          "flex items-center justify-center px-[18px] transition-transform duration-200 motion-reduce:transition-none",
+          tearing && "translate-x-2.5",
+        )}
+      >
+        {busy ? "出発しています…" : children}
+      </span>
     </button>
   );
 }

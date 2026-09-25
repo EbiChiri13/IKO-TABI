@@ -7,15 +7,18 @@ type MemberWinsListProps = {
 /** 決定まとめ：メンバーごとに、かなった希望の数を表示する【Q2】 */
 export default function MemberWinsList({ members }: MemberWinsListProps) {
   return (
-    <ul className="list">
+    <ul className="m-0 list-none p-0">
       {members.map((m) => (
-        <li key={m.nickname} className="row">
-          <span className="wins">
-            <span className="num">{m.wins}</span>
-            <span className="unit">個かなった</span>
+        <li
+          key={m.nickname}
+          className="grid grid-cols-[auto_1fr] gap-x-3.5 gap-y-0.5 border-t border-dashed border-border py-2.5 first:border-t-0"
+        >
+          <span className="row-span-2 flex flex-col items-center justify-center">
+            <span className="text-[1.5rem] leading-none font-black text-foreground">{m.wins}</span>
+            <span className="text-[0.65rem] text-muted-foreground">個かなった</span>
           </span>
-          <span className="name">{m.nickname}</span>
-          <span className="detail">
+          <span className="self-end font-extrabold">{m.nickname}</span>
+          <span className="text-[0.8rem] text-muted-foreground">
             {m.detail.destination > 0 && "行き先"}
             {m.detail.lodging > 0 && " ・宿"}
             {m.detail.food > 0 && ` ・ごはん×${m.detail.food}`}
@@ -23,19 +26,6 @@ export default function MemberWinsList({ members }: MemberWinsListProps) {
           </span>
         </li>
       ))}
-      <style jsx>{`
-        .list { list-style: none; margin: 0; padding: 0; }
-        .row {
-          display: grid; grid-template-columns: auto 1fr; gap: 2px 14px;
-          padding: 10px 0; border-top: 1px dashed var(--line);
-        }
-        .row:first-child { border-top: 0; }
-        .wins { grid-row: span 2; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .num { font-size: 1.5rem; font-weight: 900; color: var(--teal-700); line-height: 1; }
-        .unit { font-size: 0.65rem; color: var(--ink-400); }
-        .name { font-weight: 800; align-self: end; }
-        .detail { font-size: 0.8rem; color: var(--ink-400); }
-      `}</style>
     </ul>
   );
 }

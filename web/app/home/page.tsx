@@ -2,21 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Button from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
+import HeroCarousel, { type HeroSlide } from "@/components/home/HeroCarousel";
 import GroupListItem from "@/components/home/GroupListItem";
-import TicketCard from "@/components/invite/TicketCard";
 import { api, myGroups } from "@/lib/api";
 import type { GroupView } from "@/lib/api";
 
 type GroupEntry = { readonly id: string; readonly g: GroupView };
 
-function formatDate(iso: string): string {
-  const [y, m, d] = iso.split("-");
-  return `${y}.${m}/${d}`;
-}
-
-/** ホーム画面（design: 完成版 node 473:5133）。参加中のグループをチケット風カードの横スクロールで見せる。 */
+/** ホーム画面（Figma 363:7079）：ロゴ・旅行チケットカルーセル・所属グループ一覧・作成CTA。 */
 export default function HomePage() {
   const [groups, setGroups] = useState<GroupEntry[] | null>(null); // null = 読み込み中
 
@@ -44,87 +38,62 @@ export default function HomePage() {
 
   if (groups === null) return <Spinner />;
 
+  const slides: HeroSlide[] = groups.map(({ id, g }) => ({
+    id,
+    groupId: id,
+    href: `/groups/${id}`,
+    name: g.name,
+    start: g.start_date,
+    end: g.end_date,
+  }));
+
   return (
-    <div className="screen">
-      <header className="brand">
-        <img className="wordmark" src="/splash/wordmark.svg" alt="いこ！たび" />
+    <div className="mx-auto flex min-h-dvh w-full max-w-[480px] flex-col bg-background text-foreground">
+      <header className="flex justify-center pt-[60px]">
+        <h1>
+          <img src="/splash/wordmark.svg" alt="いこ！たび" width={174} height={54} className="h-[54px] w-[174px]" />
+        </h1>
       </header>
 
-      {groups.length > 0 && (
-        <div className="carousel" role="list">
-          {groups.map(({ id, g }) => (
-            <Link key={id} href={`/groups/${id}`} className="carousel-item" role="listitem">
-              <TicketCard
-                size="lg"
-                width={279}
-                groupId={id}
-                name={g.name}
-                start={formatDate(g.start_date)}
-                end={formatDate(g.end_date)}
-                photoUrl={`https://picsum.photos/seed/ikotabi-group-${id}/640/480`}
-              />
-            </Link>
-          ))}
-        </div>
-      )}
+      <main className="flex flex-1 flex-col px-5 pb-[calc(24px+env(safe-area-inset-bottom))]">
+        {slides.length > 0 && (
+          <section className="mt-[11px]">
+            <h2 className="visually-hidden">直近の旅行</h2>
+            <HeroCarousel slides={slides} />
+          </section>
+        )}
 
-      <main className="body">
-        <section>
-          <h2 className="section-title">
-            <img className="pin" src="/home/pin.svg" alt="" aria-hidden="true" />
-            所属グループ
-          </h2>
+        <section className={slides.length > 0 ? "mt-[24px]" : "mt-10"}>
+          <h2 className="text-[15px] font-bold">所属グループ</h2>
           {groups.length === 0 ? (
-            <p className="empty">まだ参加しているグループがありません。招待リンクを開くか、新しくグループを作ってみましょう。</p>
+            <p className="mt-4 text-[13px] leading-relaxed text-muted-foreground">
+              まだ参加しているグループがありません。招待リンクを開くか、新しくグループを作ってみましょう。
+            </p>
           ) : (
-            <div className="list">
+            <ul className="mt-[15px] flex flex-col gap-[18px]">
               {groups.map(({ id, g }) => (
-                <GroupListItem
-                  key={id}
-                  groupId={id}
-                  name={g.name}
-                  dateLabel={`${g.start_date.slice(5)}-${g.end_date.slice(5)}`}
-                  memberNames={g.members.map((m) => m.nickname)}
-                  status={g.status}
-                />
+                <li key={id}>
+                  <GroupListItem
+                    groupId={id}
+                    name={g.name}
+                    dateLabel={`${g.start_date.slice(5)}-${g.end_date.slice(5)}`}
+                    memberNames={g.members.map((m) => m.nickname)}
+                  />
+                </li>
               ))}
-            </div>
+            </ul>
           )}
         </section>
 
-        <Link href="/groups/new">
-          <Button variant="primary" block>新規でグループを作成</Button>
-        </Link>
+        <div className="mt-12">
+          <Link
+            href="/groups/new"
+            className="inline-flex w-full min-h-[52px] items-center justify-center rounded-full border border-foreground bg-primary px-6 py-3 text-base font-sans font-medium text-primary-foreground shadow-pop transition-transform duration-75 hover:bg-primary/90 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          >
+            新規でグループを作成
+          </Link>
+        </div>
       </main>
-      <style jsx>{`
-        /* next/link は "use client" コンポーネントなので、直接付けたclassNameには
-           styled-jsxのスコープ用ハッシュが注入されない。:global にして確実に効かせる */
-        :global(.carousel-item) { text-decoration: none; color: inherit; display: block; }
-        .screen { background: var(--white); }
-        .brand {
-          padding: 26px 0 18px;
-          display: flex; justify-content: center;
-        }
-        .wordmark { width: 43%; height: auto; }
-        .carousel {
-          display: flex; gap: 20px;
-          overflow-x: auto; overflow-y: hidden;
-          scroll-snap-type: x proximity;
-          -webkit-overflow-scrolling: touch;
-          overscroll-behavior-x: contain;
-          padding: 0 20px 8px;
-          scrollbar-width: none;
-        }
-        .carousel::-webkit-scrollbar { display: none; }
-        .body { flex: 1; padding: 24px 20px calc(24px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 22px; }
-        .section-title {
-          display: flex; align-items: center; gap: 8px;
-          font-size: 1rem; margin-bottom: 10px; border-bottom: 2px solid var(--line); padding-bottom: 8px;
-        }
-        .pin { width: 20px; height: 20px; flex: none; }
-        .list { display: flex; flex-direction: column; }
-        .empty { color: var(--ink-400); font-size: 0.9rem; }
-      `}</style>
     </div>
   );
 }
