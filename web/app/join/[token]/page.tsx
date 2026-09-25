@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { BackIcon } from "@/components/icons";
 import TicketCard from "@/components/invite/TicketCard";
 import Button from "@/components/ui/Button";

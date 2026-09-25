@@ -33,7 +33,11 @@ export default function DemoJoinPage() {
   return (
     <div className="screen">
       <header className="relative flex h-[80px] shrink-0 items-center px-5">
-        <Link href="/" aria-label="戻る" className="-ml-2.5 inline-flex size-11 items-center justify-center rounded-full">
+        <Link
+          href="/"
+          aria-label="戻る"
+          className="-ml-2.5 inline-flex size-11 items-center justify-center rounded-full"
+        >
           <BackIcon size={22} />
         </Link>
       </header>
