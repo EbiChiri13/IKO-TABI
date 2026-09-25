@@ -12,3 +12,6 @@ pgdata/
 .commandcode/
 .playwright-mcp/
 .codegraph/
+
+# Figmaと実画面の比較用スクリーンショット（ローカルの確認用。リポジトリには入れない）
+.figma-ref/
