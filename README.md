@@ -29,6 +29,7 @@
 | DB | PostgreSQL 16 |
 | フロントエンド | Next.js 16 (App Router) / React 19 / TypeScript / Tailwind CSS v4 / Radix UI |
 | テスト | pytest / httpx |
+| リンタ / フォーマッタ | Ruff（バックエンド） / Biome（フロントエンド） |
 | インフラ | Railway（バックエンド + DB, Docker）/ Vercel（フロントエンド）/ Docker Compose（ローカル DB） |
 
 ## ディレクトリ構成
@@ -50,10 +51,12 @@ IKO-TABI/
 ├── web/                     # フロントエンド (Next.js)
 │   ├── app/                 #   画面（home / groups / join / login / register / styleguide）
 │   ├── components/          #   ui（基礎部品）/ layout（ヘッダー等）
+│   ├── biome.json           #   Biome（リンタ / フォーマッタ）の設定
 │   └── lib/api.ts           #   バックエンドを呼ぶ薄いクライアント
 ├── static/                  # ビルド不要の素の JS 版（初期プロトタイプ）
 ├── tests/                   # pytest（ロジック単体 + API 結合、計 11 件）
 ├── docs/                    # 仕様書（spec-b.md / spec-c.md）
+├── ruff.toml                # Ruff（リンタ / フォーマッタ）の設定
 ├── Dockerfile               # バックエンド用イメージ（BERT モデル焼き込み）
 ├── docker-compose.yml       # ローカル PostgreSQL
 ├── railway.json             # Railway ビルド/デプロイ設定
@@ -128,8 +131,27 @@ TEST_DATABASE_URL=postgresql://ikotabi:ikotabi@localhost:5432/ikotabi \
 # フロントエンド
 cd web
 npm run typecheck
-npm run lint
 ```
+
+## リンタ / フォーマッタ
+
+バックエンドは **Ruff**、フロントエンドは **Biome** を使います（設定は `ruff.toml` と `web/biome.json`）。
+
+```bash
+# バックエンド: Ruff（app / tests が対象）
+ruff check .          # 指摘のチェック
+ruff check --fix .    # 自動修正できる指摘を反映
+ruff format .         # フォーマット
+
+# フロントエンド: Biome（web 配下が対象）
+cd web
+npm run lint          # チェック（フォーマット + リンタ + import の整理）
+npm run lint:fix      # 自動修正できる指摘を反映
+npm run format        # フォーマットのみ
+```
+
+`ruff` は `requirements.txt` に含まれているので、セットアップの `pip install -r requirements.txt` で入ります。
+`biome` は `web` の devDependencies に含まれているので、`npm install` で入ります。
 
 ## 環境変数
 
