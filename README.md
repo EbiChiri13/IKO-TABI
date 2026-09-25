@@ -24,11 +24,11 @@
 
 | 領域 | 使用技術 |
 | --- | --- |
-| バックエンド | Python 3.12 / FastAPI / Uvicorn / psycopg (PostgreSQL) |
+| バックエンド | Python 3.12 / FastAPI / Uvicorn / psycopg (PostgreSQL) / uv（依存管理） |
 | マッチング | sentence-transformers + 日本語 Sentence-BERT (`sonoisa/sentence-bert-base-ja-mean-tokens-v2`) / NumPy |
 | DB | PostgreSQL 16 |
 | フロントエンド | Next.js 16 (App Router) / React 19 / TypeScript / Tailwind CSS v4 / Radix UI |
-| テスト | pytest / httpx |
+| テスト | pytest / httpx2 |
 | リンタ / フォーマッタ | Ruff（バックエンド） / Biome（フロントエンド） |
 | インフラ | Railway（バックエンド + DB, Docker）/ Vercel（フロントエンド）/ Docker Compose（ローカル DB） |
 
@@ -53,19 +53,19 @@ IKO-TABI/
 │   ├── components/          #   ui（基礎部品）/ layout（ヘッダー等）
 │   ├── biome.json           #   Biome（リンタ / フォーマッタ）の設定
 │   └── lib/api.ts           #   バックエンドを呼ぶ薄いクライアント
-├── static/                  # ビルド不要の素の JS 版（初期プロトタイプ）
-├── tests/                   # pytest（ロジック単体 + API 結合、計 11 件）
+├── tests/                   # pytest（ロジック単体 + API 結合、計 13 件）
 ├── docs/                    # 仕様書（spec-b.md / spec-c.md）
+├── pyproject.toml / uv.lock # バックエンドの依存管理（uv）
 ├── ruff.toml                # Ruff（リンタ / フォーマッタ）の設定
-├── Dockerfile               # バックエンド用イメージ（BERT モデル焼き込み）
+├── Dockerfile               # バックエンド用イメージ（uv / BERT モデル焼き込み・非 root 実行）
 ├── docker-compose.yml       # ローカル PostgreSQL
-├── railway.json             # Railway ビルド/デプロイ設定
-└── Procfile                 # 起動コマンド（Railway）
+└── railway.json             # Railway ビルド/デプロイ設定
 ```
 
 ## 必要な環境
 
 - Python **3.12**（`.python-version` 参照）
+- [uv](https://docs.astral.sh/uv/)（バックエンドの依存管理。`pip install uv` 等で導入してください）
 - Node.js **20 以上**（Next.js 16 の要件）
 - Docker / Docker Compose（ローカル DB 用。ローカルの PostgreSQL でも可）
 
@@ -93,21 +93,18 @@ postgresql://ikotabi:ikotabi@localhost:5432/ikotabi
 ### 3. バックエンドの起動
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate           # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+uv sync                              # pyproject.toml / uv.lock から依存を導入し .venv を作成
 
 cp .env.example .env                 # DATABASE_URL / BERT_MODEL を必要に応じて編集
 set -a && source .env && set +a      # Windows: $env:DATABASE_URL = "postgresql://ikotabi:ikotabi@localhost:5432/ikotabi"
 
-python -m uvicorn app.main:app --reload --port 8000
+uv run uvicorn app.main:app --reload --port 8000
 ```
 
 初回起動時にスキーマ作成・初期データ投入（ハッシュタグ / 423 件の行き先）と、BERT のベクトル計算が走ります。BERT の読み込み・計算には数十秒かかることがあります。
 
-- ヘルスチェック: http://localhost:8000/api/health
+- ヘルスチェック: http://localhost:8000/api/health （DB とモデルの準備状態まで確認します）
 - API ドキュメント: http://localhost:8000/docs
-- 素の JS 版プロトタイプ: http://localhost:8000/
 
 ### 4. フロントエンドの起動
 
@@ -124,9 +121,13 @@ http://localhost:3000 で開きます。`next.config.mjs` の `rewrites` によ�
 ## テスト
 
 ```bash
-# バックエンド（結合テストは実際の PostgreSQL を使う）
-TEST_DATABASE_URL=postgresql://ikotabi:ikotabi@localhost:5432/ikotabi \
-  python -m pytest -q
+# バックエンド（API 結合テストは実際の PostgreSQL を使います）
+# テストはスキーマを作り直すため、専用の DB を用意してください。
+docker compose exec db createdb -U ikotabi ikotabi_test
+
+TEST_DATABASE_URL=postgresql://ikotabi:ikotabi@localhost:5432/ikotabi_test \
+  uv run pytest -q
+# TEST_DATABASE_URL が未設定のときは、PostgreSQL を使うテストだけがスキップされます。
 
 # フロントエンド
 cd web
@@ -139,9 +140,9 @@ npm run typecheck
 
 ```bash
 # バックエンド: Ruff（app / tests が対象）
-ruff check .          # 指摘のチェック
-ruff check --fix .    # 自動修正できる指摘を反映
-ruff format .         # フォーマット
+uv run ruff check .          # 指摘のチェック
+uv run ruff check --fix .    # 自動修正できる指摘を反映
+uv run ruff format .         # フォーマット
 
 # フロントエンド: Biome（web 配下が対象）
 cd web
@@ -150,7 +151,7 @@ npm run lint:fix      # 自動修正できる指摘を反映
 npm run format        # フォーマットのみ
 ```
 
-`ruff` は `requirements.txt` に含まれているので、セットアップの `pip install -r requirements.txt` で入ります。
+`ruff` は `pyproject.toml` の dev 依存に含まれているので、`uv sync` で入ります。
 `biome` は `web` の devDependencies に含まれているので、`npm install` で入ります。
 
 ## 環境変数
@@ -183,12 +184,13 @@ Railway と GitHub を連携済みで、**`git push` するだけで自動デプ
 2. バックエンドサービスの環境変数を設定する（`BERT_MODEL`、`HF_TOKEN`、必要に応じて `CORS_ORIGINS`）。
 3. `railway.json` の設定でビルドします。
    - builder: `DOCKERFILE`（`Dockerfile` をビルド）
-   - `build.watchPatterns`: `app/**`, `static/**`, `requirements.txt`, `Dockerfile`, `railway.json` のみ
+   - `build.watchPatterns`: `app/**`, `pyproject.toml`, `uv.lock`, `Dockerfile`, `railway.json` のみ
      → **`web/` の変更ではバックエンドが再デプロイされない**
    - 起動コマンド: `sh -c 'uvicorn app.main:app --host 0.0.0.0 --port $PORT'`
+   - 死活確認: `GET /api/health`（`healthcheckPath`。DB とモデルの準備状態まで確認）
 4. `git push`（main ブランチ）で自動反映。
 
-> **ポイント**: `Dockerfile` ではビルド時に日本語 BERT モデルをイメージへ焼き込み、実行時は `HF_HUB_OFFLINE=1` / `TRANSFORMERS_OFFLINE=1` でネットワークに一切出ません。これによりコンテナ再起動ごとのモデル問い合わせが無くなり、起動が数十秒〜数分から数秒に短縮されます（ヘルスチェックのタイムアウト対策）。
+> **ポイント**: `Dockerfile` ではビルド時に日本語 BERT モデルをイメージへ焼き込み、実行時は `HF_HUB_OFFLINE=1` / `TRANSFORMERS_OFFLINE=1` でネットワークに一切出ません。これによりコンテナ再起動ごとのモデル問い合わせが無くなり、起動が数十秒〜数分から数秒に短縮されます（ヘルスチェックのタイムアウト対策）。イメージはビルド用と実行用の2段構成で、ビルド用のコンパイラは最終イメージに含めず、`ikotabi` ユーザー（非 root）で実行します。
 
 デプロイ直後は起動に時間がかかることがあり、一時的に 502 が返ることがあります。ログは次のコマンドで確認できます。
 
@@ -251,7 +253,7 @@ docker run --rm -p 8000:8000 \
 | POST | `/api/groups/{id}/votes` | 投票 |
 | POST | `/api/groups/{id}/decide` | 決定 |
 | GET | `/api/groups/{id}/summary` | 決定まとめ |
-| GET | `/api/health` | ヘルスチェック |
+| GET | `/api/health` | 死活確認（DB とモデルの準備状態を確認） |
 | WS | `/ws/groups/{id}?token=...` | 変更通知 |
 
 認証は 2 系統あります。グループ参加は `X-Member-Token` ヘッダー、アカウントは `X-User-Token` ヘッダー。WebSocket はブラウザの制約上トークンをクエリで渡します。

@@ -72,7 +72,7 @@ Figma の「完成版」セクション（file `i9wGtdI2N3ZJhjQlStMIIx` の node
 
 # ローカルで動かす
 docker compose up -d db
-python -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt   # または uv
+uv sync
 DATABASE_URL=postgresql://ikotabi:ikotabi@localhost:5432/ikotabi BERT_MODEL="" \
   python -m uvicorn app.main:app --port 8000     # BERT_MODEL を空にすると簡易類似度で速く起動する
 cd web && npm run dev

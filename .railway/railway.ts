@@ -8,7 +8,7 @@ export default defineRailway(() => {
     source: github("EbiChiri13/IKO-TABI", { checkSuites: false }),
     start: "sh -c 'uvicorn app.main:app --host 0.0.0.0 --port $PORT'",
     build: {
-      watchPatterns: ["app/**", "static/**", "requirements.txt", "Dockerfile", "railway.json"],
+      watchPatterns: ["app/**", "pyproject.toml", "uv.lock", "Dockerfile", "railway.json"],
     },
     replicas: { "sfo": 1 },
     env: { DATABASE_URL: preserve(), HF_TOKEN: preserve() },

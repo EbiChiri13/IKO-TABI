@@ -28,10 +28,14 @@ def close_pool() -> None:
 
 
 @contextmanager
-def tx():
-    """1リクエスト分のトランザクション。with を抜けるとコミット、例外ならロールバック。"""
+def tx(timeout: float | None = None):
+    """1リクエスト分のトランザクションです。with を抜けるとコミット、例外ならロールバックします。
+
+    timeout を渡すと、プールから接続を取り出すまでの待ち時間を制限できます
+    （死活確認のように、DB が応答しない場合でも早く戻したい用途で使います）。
+    """
     assert _pool is not None, "init_pool() を先に呼ぶ"
-    with _pool.connection() as conn, conn.transaction():
+    with _pool.connection(timeout=timeout) as conn, conn.transaction():
         yield conn
 
 

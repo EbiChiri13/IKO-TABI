@@ -403,8 +403,6 @@ export const api = {
       token,
       body: { type, target_ids: targetIds },
     }),
-  decide: (groupId: string, token: string) =>
-    request<{ ok: boolean }>(`/api/groups/${groupId}/decide`, { method: "POST", token }),
   summary: (groupId: string, token: string) => request<GroupSummary>(`/api/groups/${groupId}/summary`, { token }),
 };
 

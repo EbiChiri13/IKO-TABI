@@ -1,31 +1,10 @@
-"""API を通しで動かすテスト。PostgreSQL が必要。
+"""API を通しで動かすテストです。PostgreSQL が必要です。
 
   TEST_DATABASE_URL=postgresql://.../ikotabi_test pytest
 
-テスト用 DB のテーブルは毎回作り直す。BERT は読み込まず簡易類似度で動かす。
+テスト用 DB のテーブルは毎回作り直します。BERT は読み込まず簡易類似度で動かします。
+共通のクライアントは tests/conftest.py の client フィクスチャで用意します。
 """
-
-import os
-
-import psycopg
-import pytest
-
-TEST_DB = os.environ.get("TEST_DATABASE_URL")
-pytestmark = pytest.mark.skipif(not TEST_DB, reason="TEST_DATABASE_URL が未設定")
-
-
-@pytest.fixture(scope="module")
-def client():
-    with psycopg.connect(TEST_DB, autocommit=True) as conn:
-        conn.execute("DROP SCHEMA public CASCADE; CREATE SCHEMA public;")
-    os.environ["DATABASE_URL"] = TEST_DB
-    os.environ["BERT_MODEL"] = ""
-    from fastapi.testclient import TestClient
-
-    from app.main import app
-
-    with TestClient(app) as c:
-        yield c
 
 
 def h(token):
@@ -46,6 +25,13 @@ def answer(client, gid, tok, labels, share=False, must_have=None):
     )
     tag_id = tag_ids(client, [must_have or labels[0]])[0]
     return client.put(f"/api/groups/{gid}/selections/me/must-have", headers=h(tok), json={"tag_id": tag_id})
+
+
+def test_health(client):
+    r = client.get("/api/health")
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["ok"] is True and body["db"] is True and body["model"] is True
 
 
 def test_tags(client):

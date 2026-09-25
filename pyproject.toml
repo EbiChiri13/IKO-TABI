@@ -1,0 +1,32 @@
+[project]
+name = "ikotabi"
+version = "0.1.0"
+description = "グループ旅行の行き先・宿・ごはん・観光スポットを、全員の希望から自動でマッチングする Web アプリのバックエンドです。"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "psycopg[binary]>=3.2",
+    "psycopg-pool>=3.2",
+    "python-dotenv>=1.0",
+    "numpy>=1.26",
+    "sentence-transformers>=3.0",
+    "fugashi>=1.3",
+    "ipadic>=1.0",
+    "unidic-lite>=1.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "httpx2>=2.13",
+    "ruff>=0.6",
+]
+
+# このリポジトリは app/ を直接配置するアプリケーションであり、
+# ビルドして配布するパッケージではないため、プロジェクト自身のインストールは行いません。
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -67,8 +67,6 @@ def register_user(conn, display_name: str, email: str, password: str) -> dict:
     email = email.strip().lower()
     if not _EMAIL_RE.match(email):
         _fail(400, "メールアドレスの形式が正しくありません")
-    if len(password) < 8:
-        _fail(400, "パスワードは8文字以上にしてください")
     if conn.execute("SELECT id FROM users WHERE email = %s", (email,)).fetchone():
         _fail(409, "このメールアドレスは既に登録されています")
     token = new_token()

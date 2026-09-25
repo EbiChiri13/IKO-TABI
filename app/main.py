@@ -8,14 +8,12 @@ import logging
 import os
 from contextlib import asynccontextmanager
 from datetime import date
-from pathlib import Path
 from typing import Annotated, Literal
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Header, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, StringConstraints
 
 from app import db, service
@@ -25,8 +23,6 @@ from app.realtime import hub
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
-
-STATIC = Path(__file__).resolve().parent.parent / "static"
 
 
 @asynccontextmanager
@@ -257,7 +253,24 @@ def summary(group_id: str, token: Token = None):
 
 @app.get("/api/health")
 def health():
-    return {"ok": True, "embedding": service.engine.sim.embedder_name if service.engine else None}
+    """死活確認です。DB に到達でき、かつマッチング用のモデルが準備できているときだけ 200 を返します。"""
+    try:
+        with db.tx(timeout=2.0) as conn:
+            conn.execute("SELECT 1")
+        db_ok = True
+    except Exception:  # noqa: BLE001  DB に触れられない場合も 503 として返すため、ここでは握りつぶします
+        db_ok = False
+    model_ready = service.engine is not None
+    ok = db_ok and model_ready
+    return JSONResponse(
+        status_code=200 if ok else 503,
+        content={
+            "ok": ok,
+            "db": db_ok,
+            "model": model_ready,
+            "embedding": service.engine.sim.embedder_name if service.engine else None,
+        },
+    )
 
 
 # ───────── WebSocket ─────────
@@ -285,13 +298,3 @@ async def ws_group(ws: WebSocket, group_id: str, token: str = Query("")):
         pass
     finally:
         hub.leave(group_id, ws)
-
-
-# ───────── 画面 ─────────
-
-app.mount("/static", StaticFiles(directory=STATIC), name="static")
-
-
-@app.get("/")
-def index():
-    return FileResponse(STATIC / "index.html")
