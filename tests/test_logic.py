@@ -64,8 +64,10 @@ def test_must_have_lowers_fit_when_missing():
 
 
 def test_rank_destinations_relaxes_region():
-    cands = [Candidate("destination", i, frozenset(), band=1, region=r)
-             for i, r in enumerate(["沖縄", "九州", "関東", "関東"])]
+    cands = [
+        Candidate("destination", i, frozenset(), band=1, region=r)
+        for i, r in enumerate(["沖縄", "九州", "関東", "関東"])
+    ]
     m = MemberPrefs(1, {"what": ["温泉"]}, regions={"沖縄"})
     ranked, relaxed = rank_destinations(cands, [m], no_sim, n=3)
     assert relaxed and len(ranked) == 3

@@ -23,6 +23,7 @@ def client():
     from fastapi.testclient import TestClient
 
     from app.main import app
+
     with TestClient(app) as c:
         yield c
 
@@ -33,13 +34,16 @@ def h(token):
 
 def tag_ids(client, labels):
     by_label = {t["label"]: t["id"] for c in client.get("/api/tags").json() for t in c["tags"]}
-    return [by_label[l] for l in labels]
+    return [by_label[label] for label in labels]
 
 
 def answer(client, gid, tok, labels, share=False, must_have=None):
     """ハッシュタグ選定 → お気に入り選定（譲れないタグ）を1回で済ませるテスト用ヘルパー。"""
-    client.put(f"/api/groups/{gid}/selections/me", headers=h(tok),
-               json={"tag_ids": tag_ids(client, labels), "share_answers": share})
+    client.put(
+        f"/api/groups/{gid}/selections/me",
+        headers=h(tok),
+        json={"tag_ids": tag_ids(client, labels), "share_answers": share},
+    )
     tag_id = tag_ids(client, [must_have or labels[0]])[0]
     return client.put(f"/api/groups/{gid}/selections/me/must-have", headers=h(tok), json={"tag_id": tag_id})
 
@@ -78,8 +82,16 @@ def test_account_register_and_login(client):
 
 
 def test_full_flow(client):
-    r = client.post("/api/groups", json={"name": "卒業旅行", "start_date": "2026-11-01",
-                                         "end_date": "2026-11-02", "member_limit": 3, "nickname": "えび"})
+    r = client.post(
+        "/api/groups",
+        json={
+            "name": "卒業旅行",
+            "start_date": "2026-11-01",
+            "end_date": "2026-11-02",
+            "member_limit": 3,
+            "nickname": "えび",
+        },
+    )
     assert r.status_code == 200, r.text
     gid, host = r.json()["group_id"], r.json()["token"]
 
@@ -116,8 +128,12 @@ def test_full_flow(client):
 
     # お気に入り選定：自分が選んでいないタグは指定できない
     other_tag = tag_ids(client, ["雪遊び"])[0]
-    assert client.put(f"/api/groups/{gid}/selections/me/must-have", headers=h(host),
-                      json={"tag_id": other_tag}).status_code == 400
+    assert (
+        client.put(
+            f"/api/groups/{gid}/selections/me/must-have", headers=h(host), json={"tag_id": other_tag}
+        ).status_code
+        == 400
+    )
 
     # 公開を選んだ人のタグだけ見える【Q16】
     view = client.get(f"/api/groups/{gid}", headers=h(b)).json()
@@ -141,17 +157,29 @@ def test_full_flow(client):
 
     # 投票：全員が入れたら自動で決まる
     for tok in (host, a):
-        assert client.post(f"/api/groups/{gid}/votes", headers=h(tok),
-                           json={"type": "destination", "target_ids": [top]}).status_code == 200
-    assert client.post(f"/api/groups/{gid}/votes", headers=h(b),
-                       json={"type": "destination", "target_ids": [top, dest["items"][1]["id"]]}).status_code == 400
+        assert (
+            client.post(
+                f"/api/groups/{gid}/votes", headers=h(tok), json={"type": "destination", "target_ids": [top]}
+            ).status_code
+            == 200
+        )
+    assert (
+        client.post(
+            f"/api/groups/{gid}/votes",
+            headers=h(b),
+            json={"type": "destination", "target_ids": [top, dest["items"][1]["id"]]},
+        ).status_code
+        == 400
+    )
     client.post(f"/api/groups/{gid}/votes", headers=h(b), json={"type": "destination", "target_ids": [top]})
     assert client.get(f"/api/groups/{gid}", headers=h(b)).json()["status"] == "lodging"
 
     # 宿：幹事が締め切る
     lodging = client.get(f"/api/groups/{gid}/candidates?type=lodging", headers=h(a)).json()
     assert len(lodging["items"]) == 2
-    client.post(f"/api/groups/{gid}/votes", headers=h(a), json={"type": "lodging", "target_ids": [lodging["items"][1]["id"]]})
+    client.post(
+        f"/api/groups/{gid}/votes", headers=h(a), json={"type": "lodging", "target_ids": [lodging["items"][1]["id"]]}
+    )
     assert client.post(f"/api/groups/{gid}/decide", headers=h(a)).status_code == 403
     assert client.post(f"/api/groups/{gid}/decide", headers=h(host)).status_code == 200
 
@@ -181,13 +209,27 @@ def test_full_flow(client):
     assert all(m["wins"] >= 1 for m in s["members"])  # 全員の希望が1つはかなう
 
     # 開始後は参加も回答変更もできない
-    assert client.put(f"/api/groups/{gid}/selections/me", headers=h(a),
-                      json={"tag_ids": tag_ids(client, ["節約", "近場", "温泉", "旅館"])}).status_code == 409
+    assert (
+        client.put(
+            f"/api/groups/{gid}/selections/me",
+            headers=h(a),
+            json={"tag_ids": tag_ids(client, ["節約", "近場", "温泉", "旅館"])},
+        ).status_code
+        == 409
+    )
 
 
 def test_host_can_start_early_and_invites_expire(client):
-    r = client.post("/api/groups", json={"name": "家族旅行", "start_date": "2026-12-28",
-                                         "end_date": "2026-12-30", "member_limit": 4, "nickname": "父"}).json()
+    r = client.post(
+        "/api/groups",
+        json={
+            "name": "家族旅行",
+            "start_date": "2026-12-28",
+            "end_date": "2026-12-30",
+            "member_limit": 4,
+            "nickname": "父",
+        },
+    ).json()
     gid, host = r["group_id"], r["token"]
     inv = client.post(f"/api/groups/{gid}/invites", headers=h(host)).json()["token"]
     spare = client.post(f"/api/groups/{gid}/invites", headers=h(host)).json()["token"]

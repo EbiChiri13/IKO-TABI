@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 .env
 .pytest_cache/
+.ruff_cache/
 .cache/
 pgdata/
 

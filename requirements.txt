@@ -11,3 +11,5 @@ unidic-lite
 # テスト
 pytest
 httpx
+# リンタ / フォーマッタ
+ruff

@@ -1,0 +1,37 @@
+# バックエンド（app / tests）のリンタ・フォーマッタ設定。
+# 実行例: ruff check . / ruff check --fix . / ruff format .
+line-length = 120
+target-version = "py312"
+
+[format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+[lint]
+select = [
+  "E",    # pycodestyle
+  "F",    # pyflakes
+  "W",    # pycodestyle の警告
+  "I",    # import の並び替え（フロントの organizeImports と同じ役割）
+  "UP",   # pyupgrade
+  "B",    # flake8-bugbear
+  "BLE",  # flake8-blind-except（except Exception の見逃し防止）
+  "C4",   # flake8-comprehensions
+  "SIM",  # flake8-simplify
+  "PERF", # perflint
+  "RUF",  # Ruff 固有
+]
+ignore = [
+  # Ruff は全角文字を2桁ぶんとして数えるため、日本語の説明文やデータ行で行長が誤検知される。
+  # コードの折り返しは formatter が揃えるので、行長チェックは無効にしている。
+  "E501",
+  # 日本語で使う全角記号（：（）「」など）を「紛らわしい文字」として指摘してくる。意図的なので無効。
+  "RUF001",
+  "RUF002",
+  "RUF003",
+]
+
+[lint.flake8-bugbear]
+# FastAPI では Query(...) をデフォルト引数に置くのが正しい書き方なので、B008 の対象から外す。
+extend-immutable-calls = ["fastapi.Query"]

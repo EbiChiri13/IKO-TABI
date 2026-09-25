@@ -1,18 +1,18 @@
 """マッチング（仕様書B 5.2【Q9・Q10】）。DB に依存しない純粋な計算だけを置く。"""
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from statistics import mean
-from typing import Callable
 
 from app.data.hashtags import CATEGORIES_FOR_TARGET
 
 # 重みはすべて初期値。使いながら調整する（仕様書B 11章）
 W_TAG, W_REGION, W_BUDGET = 0.60, 0.25, 0.15
 W_MEAN, W_MIN, W_SPREAD = 0.5, 0.3, 0.2
-EXACT_SCORE = 1.0      # 候補に同じタグが付いている
-SEMANTIC_MAX = 0.7     # 付いていないときの上限（意味の近さに比例）
-TOP_K = 3              # タグをたくさん選んだ人が不利にならないよう、近い順に上位3つで平均する
-MUST_HAVE_PENALTY = 0.5      # 「絶対に譲れない」タグが外れている候補への掛け目
+EXACT_SCORE = 1.0  # 候補に同じタグが付いている
+SEMANTIC_MAX = 0.7  # 付いていないときの上限（意味の近さに比例）
+TOP_K = 3  # タグをたくさん選んだ人が不利にならないよう、近い順に上位3つで平均する
+MUST_HAVE_PENALTY = 0.5  # 「絶対に譲れない」タグが外れている候補への掛け目
 MUST_HAVE_SEMANTIC_OK = 0.6  # これ以上意味が近ければ「かなっている」とみなす
 
 # (タグ, 候補の種類, 候補の id) -> コサイン類似度
@@ -22,10 +22,10 @@ Similarity = Callable[[str, str, int], float]
 @dataclass
 class MemberPrefs:
     member_id: int
-    semantic: dict[str, list[str]]           # 質問の key -> 選んだ semantic タグ
-    regions: set[str] = field(default_factory=set)   # 地域名 と "near"
-    budgets: set[int] = field(default_factory=set)   # 予算帯 0〜3
-    must_have: str | None = None             # 「今回の旅行で譲れないこと」（選んだタグの中から1つ）
+    semantic: dict[str, list[str]]  # 質問の key -> 選んだ semantic タグ
+    regions: set[str] = field(default_factory=set)  # 地域名 と "near"
+    budgets: set[int] = field(default_factory=set)  # 予算帯 0〜3
+    must_have: str | None = None  # 「今回の旅行で譲れないこと」（選んだタグの中から1つ）
 
     def tags_for(self, target_type: str) -> list[str]:
         return [t for key in CATEGORIES_FOR_TARGET[target_type] for t in self.semantic.get(key, [])]
@@ -33,10 +33,10 @@ class MemberPrefs:
 
 @dataclass
 class Candidate:
-    type: str                # destination / lodging / food / spot
+    type: str  # destination / lodging / food / spot
     id: int
     tags: frozenset[str]
-    band: int                # 予算帯 0〜3
+    band: int  # 予算帯 0〜3
     region: str | None = None
     near: bool = False
 
@@ -44,15 +44,17 @@ class Candidate:
 @dataclass
 class Ranked:
     candidate: Candidate
-    score: float             # 0〜1。×100 がマッチ度（％）
-    matched_count: int       # 「N人中M人の希望にマッチ」の M
-    fits: dict[int, float]   # member_id -> 適合度
+    score: float  # 0〜1。×100 がマッチ度（％）
+    matched_count: int  # 「N人中M人の希望にマッチ」の M
+    fits: dict[int, float]  # member_id -> 適合度
 
 
 def tag_closeness(member: MemberPrefs, c: Candidate, sim: Similarity) -> float:
     scores = sorted(
-        (EXACT_SCORE if t in c.tags else SEMANTIC_MAX * min(1.0, max(0.0, sim(t, c.type, c.id)))
-         for t in member.tags_for(c.type)),
+        (
+            EXACT_SCORE if t in c.tags else SEMANTIC_MAX * min(1.0, max(0.0, sim(t, c.type, c.id)))
+            for t in member.tags_for(c.type)
+        ),
         reverse=True,
     )[:TOP_K]
     return mean(scores) if scores else 0.0
@@ -84,9 +86,7 @@ def must_have_fit(member: MemberPrefs, c: Candidate, sim: Similarity) -> float:
 
 
 def member_fit(member: MemberPrefs, c: Candidate, sim: Similarity) -> float:
-    base = (W_TAG * tag_closeness(member, c, sim)
-            + W_REGION * region_fit(member, c)
-            + W_BUDGET * budget_fit(member, c))
+    base = W_TAG * tag_closeness(member, c, sim) + W_REGION * region_fit(member, c) + W_BUDGET * budget_fit(member, c)
     return base * must_have_fit(member, c, sim)
 
 
@@ -98,28 +98,33 @@ def group_score(fits: list[float]) -> float:
 
 def is_matched(member: MemberPrefs, c: Candidate) -> bool:
     """選んだタグが候補にそのまま付いていて、地域と予算も外れていない。譲れないタグがある場合はそれも必須。"""
-    return (any(t in c.tags for t in member.tags_for(c.type))
-            and region_fit(member, c) == 1.0
-            and budget_fit(member, c) > 0.0
-            and (not member.must_have or member.must_have in c.tags))
+    return (
+        any(t in c.tags for t in member.tags_for(c.type))
+        and region_fit(member, c) == 1.0
+        and budget_fit(member, c) > 0.0
+        and (not member.must_have or member.must_have in c.tags)
+    )
 
 
 def rank(candidates: list[Candidate], members: list[MemberPrefs], sim: Similarity) -> list[Ranked]:
     out = []
     for c in candidates:
         fits = {m.member_id: member_fit(m, c, sim) for m in members}
-        out.append(Ranked(
-            candidate=c,
-            score=group_score(list(fits.values())),
-            matched_count=sum(is_matched(m, c) for m in members),
-            fits=fits,
-        ))
+        out.append(
+            Ranked(
+                candidate=c,
+                score=group_score(list(fits.values())),
+                matched_count=sum(is_matched(m, c) for m in members),
+                fits=fits,
+            )
+        )
     out.sort(key=lambda r: (-r.score, -r.matched_count, r.candidate.id))
     return out
 
 
-def rank_destinations(candidates: list[Candidate], members: list[MemberPrefs], sim: Similarity,
-                      n: int = 3) -> tuple[list[Ranked], bool]:
+def rank_destinations(
+    candidates: list[Candidate], members: list[MemberPrefs], sim: Similarity, n: int = 3
+) -> tuple[list[Ranked], bool]:
     """誰かが選んだ地域の中から上位 n 件。足りなければ地域の条件を外す【Q10】。
 
     戻り値の2つ目は「地域の条件を外したか」。

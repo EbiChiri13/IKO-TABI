@@ -35,7 +35,9 @@ async def lifespan(app: FastAPI):
     db.create_schema()
     db.seed()
     await asyncio.to_thread(db.backfill_destination_images)
-    embedder = await asyncio.to_thread(Embedder, os.environ.get("BERT_MODEL", "sonoisa/sentence-bert-base-ja-mean-tokens-v2"))
+    embedder = await asyncio.to_thread(
+        Embedder, os.environ.get("BERT_MODEL", "sonoisa/sentence-bert-base-ja-mean-tokens-v2")
+    )
     # BERTのベクトル計算（数十秒かかることがある）はDB接続を閉じてから行う。
     # 開いたまま行うと、リモートDB（Railway等）で接続が切られることがある。
     with db.tx() as conn:
@@ -110,6 +112,7 @@ class VoteIn(BaseModel):
 
 
 # ───────── REST ─────────
+
 
 @app.post("/api/auth/register")
 def register(body: RegisterIn):
@@ -258,6 +261,7 @@ def health():
 
 
 # ───────── WebSocket ─────────
+
 
 @app.websocket("/ws/groups/{group_id}")
 async def ws_group(ws: WebSocket, group_id: str, token: str = Query("")):

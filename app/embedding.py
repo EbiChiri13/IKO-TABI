@@ -56,7 +56,7 @@ def _bigram_vector(text: str, dim: int = 2048) -> np.ndarray:
     v = np.zeros(dim, dtype=np.float32)
     s = f" {text} "
     for i in range(len(s) - 1):
-        h = int.from_bytes(hashlib.md5(s[i:i + 2].encode()).digest()[:4], "little")
+        h = int.from_bytes(hashlib.md5(s[i : i + 2].encode()).digest()[:4], "little")
         v[h % dim] += 1.0
     return v
 

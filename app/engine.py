@@ -26,15 +26,17 @@ class Engine:
         for d in destination_rows:
             self.destinations[d["id"]] = d
             key = ("destination", d["id"])
-            self.candidates[key] = Candidate("destination", d["id"], frozenset(d["tags"]), d["band"],
-                                             region=d["region"], near=d["near"])
+            self.candidates[key] = Candidate(
+                "destination", d["id"], frozenset(d["tags"]), d["band"], region=d["region"], near=d["near"]
+            )
             texts[key] = f"{d['prefecture']}（{d['area']}）。{d['description']}{'、'.join(d['tags'])}"
 
         for p in place_rows:
             self.places[p["id"]] = p
             key = (p["type"], p["id"])
-            self.candidates[key] = Candidate(p["type"], p["id"], frozenset(p["tags"]),
-                                             place_band(p["type"], p["price"]))
+            self.candidates[key] = Candidate(
+                p["type"], p["id"], frozenset(p["tags"]), place_band(p["type"], p["price"])
+            )
             texts[key] = f"{p['name']}。{'、'.join(p['tags'])}"
 
         semantic = [label for c in CATEGORIES for label, kind, _ in c["tags"] if kind == "semantic"]
@@ -45,5 +47,8 @@ class Engine:
         return [c for (t, _), c in self.candidates.items() if t == "destination"]
 
     def place_candidates(self, destination_id: int, place_type: str) -> list[Candidate]:
-        return [self.candidates[(place_type, pid)] for pid, p in self.places.items()
-                if p["destination_id"] == destination_id and p["type"] == place_type]
+        return [
+            self.candidates[(place_type, pid)]
+            for pid, p in self.places.items()
+            if p["destination_id"] == destination_id and p["type"] == place_type
+        ]

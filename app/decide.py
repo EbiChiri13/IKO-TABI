@@ -11,7 +11,7 @@ def choose(votes: dict[int, set[int]], scores: dict[int, float], k: int) -> list
     1. まだ「いいね」が1つも選ばれていない人を、なるべく多くカバーする候補から選ぶ
     2. 全員カバーできたら、残りを票数順（同数ならスコア順）で埋める
     """
-    count = {c: 0 for c in scores}
+    count = dict.fromkeys(scores, 0)
     for picked in votes.values():
         for c in picked:
             if c in count:

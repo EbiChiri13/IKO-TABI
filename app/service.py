@@ -23,6 +23,8 @@ TARGETS = ["destination", "lodging", "food", "spot"]
 def placeholder_image(target_type: str, target_id: int) -> str:
     """写真素材がまだ無いので、IDから決まるダミー画像を返す（同じ候補なら毎回同じ画像になる）。"""
     return f"https://picsum.photos/seed/ikotabi-{target_type}-{target_id}/640/480"
+
+
 NEXT_STATUS = {"destination": "lodging", "lodging": "food", "food": "spot", "spot": "done"}
 MIN_MEMBERS_TO_START = 2
 
@@ -98,6 +100,7 @@ def auth_user(conn, token: str | None) -> dict:
 
 # ───────── 本人確認・権限 ─────────
 
+
 def auth_member(conn, group_id: str, token: str | None) -> dict:
     """グループのメンバー以外はグループの情報を見られない。"""
     if not token:
@@ -125,6 +128,7 @@ def _lock_group(conn, group_id: str) -> dict:
 
 
 # ───────── グループ・招待 ─────────
+
 
 def create_group(conn, name: str, start: date, end: date, member_limit: int, nickname: str) -> dict:
     if end < start:
@@ -219,9 +223,7 @@ def join(conn, token: str, nickname: str) -> tuple[dict, list[str]]:
 
 def group_view(conn, group_id: str, me: dict) -> dict:
     group = conn.execute("SELECT * FROM groups WHERE id = %s", (group_id,)).fetchone()
-    members = conn.execute(
-        "SELECT * FROM group_members WHERE group_id = %s ORDER BY id", (group_id,)
-    ).fetchall()
+    members = conn.execute("SELECT * FROM group_members WHERE group_id = %s ORDER BY id", (group_id,)).fetchall()
     shared = _shared_tags(conn, group_id)
     n = _counts(conn, group_id)
 
@@ -283,12 +285,18 @@ def _shared_tags(conn, group_id: str) -> dict[int, list[str]]:
 
 # ───────── ハッシュタグ ─────────
 
+
 def list_tags(conn) -> list[dict]:
     cats = conn.execute("SELECT * FROM hashtag_categories ORDER BY sort").fetchall()
     tags = conn.execute("SELECT * FROM hashtags ORDER BY category_id, sort").fetchall()
     return [
-        {"key": c["key"], "label": c["label"],
-         "tags": [{"id": t["id"], "label": t["label"], "kind": t["kind"]} for t in tags if t["category_id"] == c["id"]]}
+        {
+            "key": c["key"],
+            "label": c["label"],
+            "tags": [
+                {"id": t["id"], "label": t["label"], "kind": t["kind"]} for t in tags if t["category_id"] == c["id"]
+            ],
+        }
         for c in cats
     ]
 
@@ -366,9 +374,10 @@ def save_must_have(conn, group_id: str, member: dict, tag_id: int) -> tuple[dict
     if group["status"] != "collecting":
         _fail(409, "行き先選びが始まったので、希望はもう変えられません")
 
-    mine = {r["hashtag_id"] for r in conn.execute(
-        "SELECT hashtag_id FROM user_hashtag_selections WHERE member_id = %s", (member["id"],)
-    )}
+    mine = {
+        r["hashtag_id"]
+        for r in conn.execute("SELECT hashtag_id FROM user_hashtag_selections WHERE member_id = %s", (member["id"],))
+    }
     if tag_id not in mine:
         _fail(400, "自分が選んだタグの中から選んでください")
 
@@ -387,6 +396,7 @@ def save_must_have(conn, group_id: str, member: dict, tag_id: int) -> tuple[dict
 
 
 # ───────── マッチング ─────────
+
 
 def _prefs(conn, group_id: str) -> list[MemberPrefs]:
     rows = conn.execute(
@@ -472,6 +482,7 @@ def start(conn, group_id: str, member: dict) -> list[str]:
 
 # ───────── 候補・投票・決定 ─────────
 
+
 def candidates(conn, group_id: str, member: dict, target_type: str) -> dict:
     if target_type not in TARGETS:
         _fail(400, "type は destination / lodging / food / spot のどれかです")
@@ -509,13 +520,23 @@ def candidates(conn, group_id: str, member: dict, target_type: str) -> dict:
         }
         if target_type == "destination":
             d = engine.destinations[r["target_id"]]
-            item.update(name=d["prefecture"], area=d["area"], region=d["region"],
-                        description=d["description"], tags=d["tags"],
-                        image=d["image_url"] or placeholder_image(target_type, r["target_id"]))
+            item.update(
+                name=d["prefecture"],
+                area=d["area"],
+                region=d["region"],
+                description=d["description"],
+                tags=d["tags"],
+                image=d["image_url"] or placeholder_image(target_type, r["target_id"]),
+            )
         else:
             p = engine.places[r["target_id"]]
-            item.update(name=p["name"], tags=p["tags"], price=p["price"], ticket=p["ticket"],
-                        image=placeholder_image(target_type, r["target_id"]))
+            item.update(
+                name=p["name"],
+                tags=p["tags"],
+                price=p["price"],
+                ticket=p["ticket"],
+                image=placeholder_image(target_type, r["target_id"]),
+            )
         items.append(item)
 
     return {
@@ -537,10 +558,13 @@ def vote(conn, group_id: str, member: dict, target_type: str, target_ids: list[i
     target_ids = sorted(set(target_ids))
     if not 1 <= len(target_ids) <= VOTE_LIMIT[target_type]:
         _fail(400, f"1〜{VOTE_LIMIT[target_type]}つ選んで投票してください")
-    valid = {r["target_id"] for r in conn.execute(
-        "SELECT target_id FROM matching_results WHERE group_id = %s AND target_type = %s",
-        (group_id, target_type),
-    )}
+    valid = {
+        r["target_id"]
+        for r in conn.execute(
+            "SELECT target_id FROM matching_results WHERE group_id = %s AND target_type = %s",
+            (group_id, target_type),
+        )
+    }
     if not set(target_ids) <= valid:
         _fail(400, "候補にないものには投票できません")
 
@@ -574,10 +598,13 @@ def decide(conn, group_id: str, member: dict) -> list[str]:
 
 
 def _decide(conn, group_id: str, target_type: str) -> None:
-    scores = {r["target_id"]: r["score"] for r in conn.execute(
-        "SELECT target_id, score FROM matching_results WHERE group_id = %s AND target_type = %s",
-        (group_id, target_type),
-    )}
+    scores = {
+        r["target_id"]: r["score"]
+        for r in conn.execute(
+            "SELECT target_id, score FROM matching_results WHERE group_id = %s AND target_type = %s",
+            (group_id, target_type),
+        )
+    }
     votes: dict[int, set[int]] = {}
     for r in conn.execute(
         "SELECT member_id, target_id FROM votes WHERE group_id = %s AND target_type = %s",
@@ -599,6 +626,7 @@ def _decide(conn, group_id: str, target_type: str) -> None:
 
 # ───────── 決定まとめ ─────────
 
+
 def summary(conn, group_id: str) -> dict:
     group = conn.execute("SELECT * FROM groups WHERE id = %s", (group_id,)).fetchone()
     decided: dict[str, list[int]] = {t: [] for t in TARGETS}
@@ -613,14 +641,25 @@ def summary(conn, group_id: str) -> dict:
 
     def place(pid: int) -> dict:
         p = engine.places[pid]
-        return {"id": pid, "name": p["name"], "tags": p["tags"], "price": p["price"], "ticket": p["ticket"],
-                "image": placeholder_image(p["type"], pid)}
+        return {
+            "id": pid,
+            "name": p["name"],
+            "tags": p["tags"],
+            "price": p["price"],
+            "ticket": p["ticket"],
+            "image": placeholder_image(p["type"], pid),
+        }
 
     dest = None
     if decided["destination"]:
         d = engine.destinations[decided["destination"][0]]
-        dest = {"id": d["id"], "name": d["prefecture"], "area": d["area"], "description": d["description"],
-                "image": d["image_url"] or placeholder_image("destination", d["id"])}
+        dest = {
+            "id": d["id"],
+            "name": d["prefecture"],
+            "area": d["area"],
+            "description": d["description"],
+            "image": d["image_url"] or placeholder_image("destination", d["id"]),
+        }
 
     # メンバーごとに、かなった希望の数を数える【Q2】
     members = conn.execute("SELECT * FROM group_members WHERE group_id = %s ORDER BY id", (group_id,)).fetchall()

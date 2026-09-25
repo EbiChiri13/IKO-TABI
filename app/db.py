@@ -31,9 +31,8 @@ def close_pool() -> None:
 def tx():
     """1リクエスト分のトランザクション。with を抜けるとコミット、例外ならロールバック。"""
     assert _pool is not None, "init_pool() を先に呼ぶ"
-    with _pool.connection() as conn:
-        with conn.transaction():
-            yield conn
+    with _pool.connection() as conn, conn.transaction():
+        yield conn
 
 
 def create_schema() -> None:
@@ -97,14 +96,12 @@ def backfill_destination_images() -> None:
     from app.wikipedia_images import fetch_thumbnail
 
     with tx() as conn:
-        rows = conn.execute(
-            "SELECT id, prefecture FROM destinations WHERE image_url IS NULL"
-        ).fetchall()
+        rows = conn.execute("SELECT id, prefecture FROM destinations WHERE image_url IS NULL").fetchall()
         if not rows:
             return
         with ThreadPoolExecutor(max_workers=5) as pool:
             urls = list(pool.map(lambda r: fetch_thumbnail(r["prefecture"]), rows))
         with conn.cursor() as cur:
-            for r, url in zip(rows, urls):
+            for r, url in zip(rows, urls, strict=True):
                 if url:
                     cur.execute("UPDATE destinations SET image_url = %s WHERE id = %s", (url, r["id"]))
