@@ -6,6 +6,13 @@
 共通のクライアントは tests/conftest.py の client フィクスチャで用意します。
 """
 
+import json
+
+import pytest
+from starlette.websockets import WebSocketDisconnect
+
+pytestmark = pytest.mark.integration
+
 
 def h(token):
     return {"X-Member-Token": token}
@@ -378,3 +385,80 @@ def test_reconsider_only_host_and_only_current_phase(client):
     assert client.post(f"/api/groups/{gid}/candidates/reconsider?type=lodging", headers=h(host)).status_code == 409
 
 
+def test_host_can_revoke_only_unused_invites(client):
+    """招待の失効は幹事だけが行え、参加済みの招待は残る。"""
+    group = client.post(
+        "/api/groups",
+        json={"name": "招待の失効", "start_date": "2026-11-01", "end_date": "2026-11-02", "member_limit": 3, "nickname": "幹事"},
+    ).json()
+    gid, host = group["group_id"], group["token"]
+    used_invite = client.post(f"/api/groups/{gid}/invites", headers=h(host)).json()["token"]
+    unused_invite = client.post(f"/api/groups/{gid}/invites", headers=h(host)).json()["token"]
+    guest = client.post(f"/api/invites/{used_invite}/join", json={"nickname": "参加者"}).json()["token"]
+
+    assert client.delete(f"/api/groups/{gid}/invites", headers=h(guest)).status_code == 403
+
+    response = client.delete(f"/api/groups/{gid}/invites", headers=h(host))
+    assert response.status_code == 200, response.text
+    assert response.json() == {"revoked": 1}
+    assert client.get(f"/api/invites/{unused_invite}").status_code == 404
+    assert client.get(f"/api/invites/{used_invite}").json()["usable"] is True
+
+
+def test_websocket_notifies_authorized_member_of_changes(client):
+    """認可済み WebSocket だけが、グループ内の変更種別を受け取る。"""
+    group = client.post(
+        "/api/groups",
+        json={"name": "通知", "start_date": "2026-11-01", "end_date": "2026-11-02", "member_limit": 2, "nickname": "幹事"},
+    ).json()
+    gid, host = group["group_id"], group["token"]
+
+    with client.websocket_connect(f"/ws/groups/{gid}?token={host}") as websocket:
+        response = client.put(
+            f"/api/groups/{gid}/selections/me",
+            headers=h(host),
+            json={"tag_ids": tag_ids(client, ["温泉", "のんびり", "関東", "温泉付き"]), "share_answers": False},
+        )
+        assert response.status_code == 200, response.text
+        assert json.loads(websocket.receive_text()) == {"changed": ["answers"]}
+
+
+def test_websocket_rejects_invalid_member_token(client):
+    """WebSocket はグループのメンバートークンなしには接続できない。"""
+    group = client.post(
+        "/api/groups",
+        json={"name": "通知認可", "start_date": "2026-11-01", "end_date": "2026-11-02", "member_limit": 2, "nickname": "幹事"},
+    ).json()
+
+    with pytest.raises(WebSocketDisconnect) as exc_info, client.websocket_connect(
+        f"/ws/groups/{group['group_id']}?token=invalid"
+    ):
+        pass
+    assert exc_info.value.code == 4403
+
+
+def test_health_reports_unready_model(client, monkeypatch):
+    """モデルが未準備なら、DB が正常でも readiness は 503 になる。"""
+    from app import main
+
+    monkeypatch.setattr(main.service, "engine", None)
+    response = client.get("/api/health")
+
+    assert response.status_code == 503
+    assert response.json() == {"ok": False, "db": True, "model": False, "embedding": None}
+
+
+def test_health_reports_database_failure(client, monkeypatch):
+    """DB 接続が失敗したときは例外を漏らさず 503 を返す。"""
+    from app import main
+
+    def fail_tx(*_args, **_kwargs):
+        raise RuntimeError("database unavailable")
+
+    monkeypatch.setattr(main.db, "tx", fail_tx)
+    response = client.get("/api/health")
+
+    assert response.status_code == 503
+    assert response.json()["ok"] is False
+    assert response.json()["db"] is False
+    assert response.json()["model"] is True

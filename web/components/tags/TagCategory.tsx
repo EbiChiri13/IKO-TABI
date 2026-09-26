@@ -10,20 +10,9 @@ type TagCategoryProps = Pick<ApiTagCategory, "label" | "tags"> & {
 
 /** 4つの質問のうち1つぶん（Figma 473:4521 の白い選択カード・33pxチップ）。1つ以上選ぶと ok 表示になる【F-04】 */
 export default function TagCategory({ label, tags, selectedIds, onToggle }: TagCategoryProps) {
-  const count = tags.filter((t) => selectedIds.has(t.id)).length;
   return (
     <Card as="section">
-      <div className="flex items-baseline justify-between gap-2">
-        <h3 className="text-[15px] font-bold">{label}</h3>
-        <span
-          className={cn(
-            "whitespace-nowrap text-[12px]",
-            count > 0 ? "font-bold text-foreground" : "text-muted-foreground",
-          )}
-        >
-          {count > 0 ? `${count}個選択中` : "1つ以上選んでください"}
-        </span>
-      </div>
+      <h3 className="text-[15px] font-bold">{label}</h3>
       <div className="mt-2.5 flex flex-wrap gap-1.5">
         {tags.map((t) => {
           const selected = selectedIds.has(t.id);

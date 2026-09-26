@@ -7,7 +7,6 @@ import TagCategory from "@/components/tags/TagCategory";
 import BottomBar from "@/components/ui/BottomBar";
 import Button from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
-import Switch from "@/components/ui/Switch";
 import Toast from "@/components/ui/Toast";
 import type { Tag, TagCategory as TagCategoryData } from "@/lib/api";
 import { api, tokenFor } from "@/lib/api";
@@ -79,16 +78,10 @@ export default function TagsPage() {
             <TagCategory key={c.key} label={c.label} tags={c.tags} selectedIds={selected} onToggle={toggle} />
           ))}
         </div>
-        <section className="mx-auto mt-3 w-full max-w-[337px] py-1">
-          <Switch
-            checked={share}
-            onChange={setShare}
-            label="選んだタグをメンバーに見せる"
-            sub="オフのままだと「回答済み」とだけ表示されます"
-          />
-        </section>
       </main>
-      <BottomBar note={allAnswered ? undefined : "それぞれの質問で1つ以上選んでください"}>
+      {/* CTA はコンテンツの末尾に置く。スクロール中にカードの途中へ
+          固定表示されないため、モバイルでも選択肢を隠さない。 */}
+      <BottomBar>
         <Button
           variant="primary"
           block
