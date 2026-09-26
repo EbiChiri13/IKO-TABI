@@ -70,13 +70,7 @@ export default function TagsPage() {
         left="home"
         href="/home"
         title="今回の旅行でやりたいことは？"
-        subtitle={
-          <>
-            気になるものを選んでみましょう（あとから変更できます）
-            <br />
-            <span className="text-[15px]">たくさん選ぶと反映しやすくなります！</span>
-          </>
-        }
+        subtitle="気になるものを選んでみましょう（あとから変更できます）"
       />
       <main className="flex-1 px-5 pt-7 pb-6">
         <div className="mx-auto flex w-full max-w-[337px] flex-col gap-5">
