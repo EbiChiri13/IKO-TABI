@@ -20,6 +20,11 @@ from app.reason import reason_text
 TARGETS = ["destination", "lodging", "food", "spot"]
 
 
+def _required_status(target_type: str) -> str:
+    """destination は専用のフェーズ、宿・ごはん・スポットはまとめて「places」フェーズで並行投票する。"""
+    return "destination" if target_type == "destination" else "places"
+
+
 def placeholder_image(target_type: str, target_id: int) -> str:
     """写真素材がまだ無いので、IDから決まるダミー画像を返す（同じ候補なら毎回同じ画像になる）。"""
     return f"https://picsum.photos/seed/ikotabi-{target_type}-{target_id}/640/480"
@@ -41,7 +46,7 @@ def place_image(engine: Engine, place: dict) -> tuple[str, str | None]:
     return placeholder_image(place["type"], place["id"]), None
 
 
-NEXT_STATUS = {"destination": "lodging", "lodging": "food", "food": "spot", "spot": "done"}
+PLACE_TYPES = {"lodging", "food", "spot"}
 
 engine: Engine | None = None  # main.py の起動時に入れる
 
@@ -487,8 +492,12 @@ def reconsider(conn, group_id: str, member: dict, target_type: str) -> list[str]
         _fail(400, "type は destination / lodging / food / spot のどれかです")
     group = _lock_group(conn, group_id)
     _require_host(member)
-    if group["status"] != target_type:
+    if group["status"] != _required_status(target_type):
         _fail(409, "いまはこの項目の投票中ではありません")
+    if conn.execute(
+        "SELECT 1 FROM decisions WHERE group_id = %s AND target_type = %s", (group_id, target_type)
+    ).fetchone():
+        _fail(409, "この項目はもう決まりました")
 
     members = _prefs(conn, group_id)
     if target_type == "destination":
@@ -568,9 +577,10 @@ def candidates(conn, group_id: str, member: dict, target_type: str) -> dict:
             )
         items.append(item)
 
+    decided = any(r["decided"] for r in rows)
     return {
         "type": target_type,
-        "open": group["status"] == target_type,
+        "open": group["status"] == _required_status(target_type) and not decided,
         "relaxed": bool(rows) and rows[0]["relaxed"],
         "vote_limit": VOTE_LIMIT[target_type],
         "pick_count": PICK_COUNT[target_type],
@@ -582,8 +592,12 @@ def candidates(conn, group_id: str, member: dict, target_type: str) -> dict:
 
 def vote(conn, group_id: str, member: dict, target_type: str, target_ids: list[int]) -> list[str]:
     group = _lock_group(conn, group_id)
-    if group["status"] != target_type:
+    if group["status"] != _required_status(target_type):
         _fail(409, "いまはこの項目の投票はできません")
+    if conn.execute(
+        "SELECT 1 FROM decisions WHERE group_id = %s AND target_type = %s", (group_id, target_type)
+    ).fetchone():
+        _fail(409, "この項目はもう決まりました")
     target_ids = sorted(set(target_ids))
     if not 1 <= len(target_ids) <= VOTE_LIMIT[target_type]:
         _fail(400, f"1〜{VOTE_LIMIT[target_type]}つ選んで投票してください")
@@ -640,7 +654,19 @@ def _decide(conn, group_id: str, target_type: str) -> None:
         )
     if target_type == "destination":
         _start_places(conn, group_id, chosen[0])
-    conn.execute("UPDATE groups SET status = %s WHERE id = %s", (NEXT_STATUS[target_type], group_id))
+        conn.execute("UPDATE groups SET status = 'places' WHERE id = %s", (group_id,))
+        return
+
+    # 宿・ごはん・スポットは並行して投票が進むため、3つとも決まってから次に進む
+    decided_types = {
+        r["target_type"]
+        for r in conn.execute(
+            "SELECT DISTINCT target_type FROM decisions WHERE group_id = %s AND target_type = ANY(%s)",
+            (group_id, list(PLACE_TYPES)),
+        )
+    }
+    if PLACE_TYPES <= decided_types:
+        conn.execute("UPDATE groups SET status = 'done' WHERE id = %s", (group_id,))
 
 
 # ───────── 決定まとめ ─────────

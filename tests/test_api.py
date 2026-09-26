@@ -165,9 +165,9 @@ def test_full_flow(client):
         == 400
     )
     client.post(f"/api/groups/{gid}/votes", headers=h(b), json={"type": "destination", "target_ids": [top]})
-    assert client.get(f"/api/groups/{gid}", headers=h(b)).json()["status"] == "lodging"
+    assert client.get(f"/api/groups/{gid}", headers=h(b)).json()["status"] == "places"
 
-    # 宿：全員が投票すると自動で決まる
+    # 宿・ごはん・スポットは互いに待たずに並行して投票できる（全員が入れたら項目ごとに自動で決まる）
     lodging = client.get(f"/api/groups/{gid}/candidates?type=lodging", headers=h(a)).json()
     assert len(lodging["items"]) == 2
     lodging_pick = lodging["items"][1]["id"]
@@ -178,7 +178,8 @@ def test_full_flow(client):
             ).status_code
             == 200
         )
-    assert client.get(f"/api/groups/{gid}", headers=h(b)).json()["status"] == "food"
+    # 宿が決まっても、まだ食事・スポットが残っているので次には進まない
+    assert client.get(f"/api/groups/{gid}", headers=h(b)).json()["status"] == "places"
 
     # ごはん：2人がXとY、1人がZ → Z も必ず入る【Q2】
     food = client.get(f"/api/groups/{gid}/candidates?type=food", headers=h(a)).json()

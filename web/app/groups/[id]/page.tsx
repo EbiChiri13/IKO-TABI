@@ -9,9 +9,8 @@ import { useLiveGroup } from "@/lib/useLiveGroup";
 const DESTINATION_FOR_STATUS = {
   collecting: (group: GroupView, id: string) => (group.me.answered ? `/groups/${id}/waiting` : `/groups/${id}/tags`),
   destination: (_group: GroupView, id: string) => `/groups/${id}/vote/destination`,
-  lodging: (_group: GroupView, id: string) => `/groups/${id}/vote/lodging`,
-  food: (_group: GroupView, id: string) => `/groups/${id}/vote/food`,
-  spot: (_group: GroupView, id: string) => `/groups/${id}/vote/spot`,
+  // 宿・ごはん・スポットは並行して投票できる。どこまで進んだかは vote/[type] 側で判定して自動で振り分ける。
+  places: (_group: GroupView, id: string) => `/groups/${id}/vote/lodging`,
   done: (_group: GroupView, id: string) => `/groups/${id}/summary`,
 } satisfies Record<GroupStatus, (group: GroupView, id: string) => string>;
 

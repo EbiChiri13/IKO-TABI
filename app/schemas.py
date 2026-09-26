@@ -12,7 +12,7 @@ from typing import Literal
 from pydantic import BaseModel
 
 TargetType = Literal["destination", "lodging", "food", "spot"]
-GroupStatus = Literal["collecting", "destination", "lodging", "food", "spot", "done"]
+GroupStatus = Literal["collecting", "destination", "places", "done"]
 MemberRole = Literal["host", "member"]
 TagKind = Literal["semantic", "region", "budget"]
 

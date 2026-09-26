@@ -1362,9 +1362,7 @@
             "enum": [
               "collecting",
               "destination",
-              "lodging",
-              "food",
-              "spot",
+              "places",
               "done"
             ],
             "title": "Status"
@@ -1449,9 +1447,7 @@
             "enum": [
               "collecting",
               "destination",
-              "lodging",
-              "food",
-              "spot",
+              "places",
               "done"
             ],
             "title": "Status"

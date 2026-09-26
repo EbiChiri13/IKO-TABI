@@ -21,6 +21,9 @@ const META = {
 
 const STEP_OF = { destination: 3, lodging: 4, food: 5, spot: 6 } satisfies Record<TargetType, number>;
 
+/** 宿泊・食事・観光地は互いに待たずに、この順で進む。 */
+const PLACE_ORDER = ["lodging", "food", "spot"] as const;
+
 function isTargetType(value: string): value is TargetType {
   return value === "destination" || value === "lodging" || value === "food" || value === "spot";
 }
@@ -47,9 +50,31 @@ export default function VoteTypePage() {
     setData(candidates);
     setSelected(new Set(candidates.items.filter((i) => i.my_vote).map((i) => i.id)));
 
-    if (group.status !== type) {
-      const path = group.status === "done" ? `/groups/${groupId}/summary` : `/groups/${groupId}/vote/${group.status}`;
-      router.replace(path);
+    const myVote = candidates.items.some((i) => i.my_vote);
+    if (type === "destination") {
+      if (group.status !== "destination") {
+        router.replace(group.status === "done" ? `/groups/${groupId}/summary` : `/groups/${groupId}/vote/lodging`);
+        return;
+      }
+      // 投票済みなら、全員が揃うまでは投票待ち画面で待ってもらう（そのまま進めるのは自分の分だけ）
+      if (myVote) {
+        router.replace(`/groups/${groupId}/destination-waiting`);
+      }
+      return;
+    }
+
+    if (group.status === "collecting" || group.status === "destination") {
+      router.replace(`/groups/${groupId}`);
+      return;
+    }
+    if (group.status === "done") {
+      router.replace(`/groups/${groupId}/summary`);
+      return;
+    }
+    // group.status === "places": 宿泊・食事・観光地は互いに待たずに進める
+    if (myVote) {
+      const next = PLACE_ORDER[PLACE_ORDER.indexOf(type as (typeof PLACE_ORDER)[number]) + 1];
+      router.replace(next ? `/groups/${groupId}/vote/${next}` : `/groups/${groupId}/places-waiting`);
     }
   }, [groupId, token, type, router]);
 

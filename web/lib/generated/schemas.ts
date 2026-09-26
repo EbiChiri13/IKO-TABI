@@ -102,7 +102,7 @@ export const GetGroupApiGroupsGroupIdGetResponse = zod.object({
   "start_date": zod.string(),
   "end_date": zod.string(),
   "member_limit": zod.int(),
-  "status": zod.enum(['collecting', 'destination', 'lodging', 'food', 'spot', 'done']),
+  "status": zod.enum(['collecting', 'destination', 'places', 'done']),
   "me": zod.object({
   "id": zod.int(),
   "nickname": zod.string(),
@@ -411,7 +411,7 @@ export const SummaryApiGroupsGroupIdSummaryGetResponse = zod.object({
   "name": zod.string(),
   "start_date": zod.string(),
   "end_date": zod.string(),
-  "status": zod.enum(['collecting', 'destination', 'lodging', 'food', 'spot', 'done']),
+  "status": zod.enum(['collecting', 'destination', 'places', 'done']),
   "destination": zod.union([zod.object({
   "id": zod.int(),
   "name": zod.string(),
