@@ -32,17 +32,14 @@ export default function VoteTypePage() {
   const token = tokenFor(groupId);
 
   const [data, setData] = useState<CandidatesView | null>(null);
-  const [isHost, setIsHost] = useState(false);
   const [selected, setSelected] = useState<Set<CandidateItem["id"]>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [reconsidering, setReconsidering] = useState(false);
 
   const load = useCallback(async () => {
     if (!token || !type) return;
     const [group, candidates] = await Promise.all([api.getGroup(groupId, token), api.candidates(groupId, token, type)]);
     setData(candidates);
-    setIsHost(group.me.role === "host");
     setSelected(new Set(candidates.items.filter((i) => i.my_vote).map((i) => i.id)));
 
     if (group.status !== type) {
@@ -77,27 +74,12 @@ export default function VoteTypePage() {
     });
   }
 
-  async function reconsider() {
-    if (!token || !type) return;
-    setReconsidering(true);
-    setError(null);
-    try {
-      await api.reconsider(groupId, token, type);
-      setSelected(new Set());
-      await load();
-    } catch (e) {
-      setError(e instanceof Error ? e.message || "再計算できませんでした" : "再計算できませんでした");
-    } finally {
-      setReconsidering(false);
-    }
-  }
-
-  async function submit() {
+  async function submit(targetIds: CandidateItem["id"][] = [...selected]) {
     if (!token || !type) return;
     setBusy(true);
     setError(null);
     try {
-      await api.vote(groupId, token, type, [...selected]);
+      await api.vote(groupId, token, type, targetIds);
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message || "投票できませんでした" : "投票できませんでした");
@@ -116,48 +98,62 @@ export default function VoteTypePage() {
     <div className="screen">
       <StepHeader
         step={STEP_OF[type]}
-        left="back"
-        href={`/groups/${groupId}`}
+        left="none"
         title={meta.title}
         subtitle={meta.subtitle}
+        contentClassName={type === "destination" ? "translate-x-[17px] -translate-y-[9px]" : undefined}
       />
-      <div className="bg-map-band px-5 pt-2 pb-2">
+      <section
+        className={`relative h-[395px] shrink-0 ${type === "destination" ? "mt-[11px] bg-[#bde3ff]" : "mt-0 bg-map-band"}`}
+        aria-label="候補地の地図"
+      >
         <div
           aria-hidden="true"
-          className="mx-auto aspect-square w-full max-w-[373px] bg-contain bg-center bg-no-repeat"
+          className="absolute top-[18px] left-1/2 aspect-square w-[373px] max-w-full -translate-x-1/2 bg-contain bg-center bg-no-repeat"
           style={{ backgroundImage: "url(/figma/japan-map.svg)" }}
         />
-      </div>
-      <main className="flex flex-1 flex-col px-5 pt-4 pb-5">
+        {type === "destination" &&
+          data.items.slice(0, 2).map((item, index) => (
+            <span
+              key={item.id}
+              aria-hidden="true"
+              className={`absolute z-10 grid size-[24px] rotate-[-45deg] place-items-center rounded-full rounded-bl-none border-2 border-white bg-primary text-[10px] font-bold text-foreground shadow ${index === 0 ? "top-[69%] left-[52%]" : "top-[8%] left-[59%]"}`}
+            >
+              <span className="grid size-[14px] rotate-[45deg] place-items-center rounded-full bg-white text-[10px] leading-none text-primary">
+                {index + 1}
+              </span>
+            </span>
+          ))}
+        {type === "destination" && (
+          <div aria-hidden="true" className="absolute inset-x-0 top-[355px] h-[335px] rounded-t-[23px] bg-background" />
+        )}
+      </section>
+      <main
+        className={`relative z-10 flex flex-1 flex-col pb-5 ${type === "destination" ? "-mt-[9px] px-[11px]" : "px-5 pt-4"}`}
+      >
         <div className="mx-auto w-full max-w-[380px]">
-          {data.relaxed && type === "destination" && (
-            <p className="mb-3.5 rounded-sm bg-muted px-3.5 py-2.5 text-[0.85rem] text-foreground/80">
-              選んだ地域だけでは3件そろわなかったので、地域の条件を外して選んでいます。
+          {type !== "destination" && (
+            <p className="mb-3.5 text-[0.85rem] font-bold text-muted-foreground">
+              投票済み {data.voted_count} / {data.member_total} 人 ・ {selected.size}/{data.vote_limit} 個選択中
             </p>
           )}
-          <div className="mb-3.5 flex flex-col gap-2 rounded-sm bg-muted px-3.5 py-2.5">
-            <p className="text-[0.8rem] text-foreground/80">
-              候補が少なすぎる・合わないと感じたら、地域や予算の条件を外して選び直せます。
-            </p>
-            {isHost ? (
-              <Button variant="quiet" size="sm" disabled={reconsidering} onClick={reconsider}>
-                {reconsidering ? "再計算しています…" : "条件を外して再考慮する"}
-              </Button>
-            ) : (
-              <p className="text-[0.75rem] text-muted-foreground">※幹事だけが操作できます</p>
-            )}
-          </div>
-          <p className="mb-3! text-[0.85rem] font-bold text-muted-foreground">
-            投票済み {data.voted_count} / {data.member_total} 人 ・ {selected.size}/{data.vote_limit} 個選択中
-          </p>
-          <CandidateList items={data.items} type={type} onToggle={toggle} locked={!data.open} selectedIds={selected} />
+          <CandidateList
+            items={data.items}
+            type={type}
+            onToggle={toggle}
+            onVote={type === "destination" ? (id) => submit([id]) : undefined}
+            locked={!data.open || busy}
+            selectedIds={selected}
+          />
         </div>
       </main>
-      <BottomBar>
-        <Button variant="primary" block disabled={selected.size === 0 || busy} onClick={submit}>
-          {busy ? "送信しています…" : alreadyVoted ? "投票を変更する" : "投票する"}
-        </Button>
-      </BottomBar>
+      {type !== "destination" && (
+        <BottomBar>
+          <Button variant="primary" block disabled={selected.size === 0 || busy} onClick={() => submit()}>
+            {busy ? "送信しています…" : alreadyVoted ? "投票を変更する" : "投票する"}
+          </Button>
+        </BottomBar>
+      )}
       <Toast message={error} />
     </div>
   );

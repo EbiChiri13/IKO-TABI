@@ -322,19 +322,27 @@ export function connectRealtime(groupId: string, token: string, onChange: (msg: 
   if (typeof window === "undefined") return () => {};
   const proto = window.location.protocol === "https:" ? "wss" : "ws";
   const apiHost = process.env.NEXT_PUBLIC_API_WS_HOST || window.location.host;
-  const ws = new WebSocket(`${proto}://${apiHost}/ws/groups/${groupId}?token=${encodeURIComponent(token)}`);
-  ws.onmessage = (ev) => {
-    try {
-      onChange(JSON.parse(ev.data as string) as RealtimeMessage);
-    } catch {
-      /* ignore */
-    }
-  };
-  const ping = setInterval(() => {
-    if (ws.readyState === WebSocket.OPEN) ws.send("ping");
-  }, 25000);
+  let ws: WebSocket | null = null;
+  let ping: number | undefined;
+  // React Strict Mode remounts effects once in development. Deferring connection
+  // lets the first cleanup cancel before the browser opens a socket that is
+  // immediately closed (which otherwise logs a misleading connection error).
+  const connectTimer = window.setTimeout(() => {
+    ws = new WebSocket(`${proto}://${apiHost}/ws/groups/${groupId}?token=${encodeURIComponent(token)}`);
+    ws.onmessage = (ev) => {
+      try {
+        onChange(JSON.parse(ev.data as string) as RealtimeMessage);
+      } catch {
+        /* ignore */
+      }
+    };
+    ping = window.setInterval(() => {
+      if (ws?.readyState === WebSocket.OPEN) ws.send("ping");
+    }, 25000);
+  }, 0);
   return () => {
-    clearInterval(ping);
-    ws.close();
+    window.clearTimeout(connectTimer);
+    if (ping !== undefined) window.clearInterval(ping);
+    ws?.close();
   };
 }

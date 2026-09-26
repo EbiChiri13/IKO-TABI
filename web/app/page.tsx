@@ -1,22 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { myGroups } from "@/lib/api";
 
 /**
  * スプラッシュ画面（起動画面）。Figma node 473:4356（402x874）のトプ画。
  * 素材（吹き出し・ワードマーク・後光・人物）は public/splash に配置済み。
  * 人物はシート（y691）をまたいで足元 y710 まで見えるため、シートより上のレイヤーに置く。
- * 参加中のグループがあればホームへ促す。参加はすべて招待リンク経由【Q3】。
+ * ログイン導線は常にログイン画面へ。参加はすべて招待リンク経由【Q3】。
  */
 export default function WelcomePage() {
-  const [hasGroups, setHasGroups] = useState(false);
-
-  useEffect(() => {
-    setHasGroups(Object.keys(myGroups()).length > 0);
-  }, []);
-
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[480px] flex-col bg-primary">
       {/* アート領域（Figma 402x691）。座標はこの領域に対する百分率 */}
@@ -77,10 +69,10 @@ export default function WelcomePage() {
           新規登録
         </Link>
         <Link
-          href={hasGroups ? "/home" : "/login"}
+          href="/login"
           className="flex h-[46px] w-full max-w-[315px] items-center justify-center rounded-full border border-foreground bg-background text-base font-medium text-foreground no-underline transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
-          {hasGroups ? "参加中のグループを見る" : "ログイン"}
+          ログイン
         </Link>
 
         {/* ハッカソンのデモ用。アカウント登録を飛ばして進められる導線 */}

@@ -2,6 +2,10 @@
 const API_ORIGIN = process.env.IKOTABI_API_ORIGIN || "http://localhost:8000";
 
 const nextConfig = {
+  // Rewrites は WebSocket の Upgrade を proxy しないため、クライアントから API へ直結する。
+  env: {
+    NEXT_PUBLIC_API_WS_HOST: process.env.NEXT_PUBLIC_API_WS_HOST || new URL(API_ORIGIN).host,
+  },
   // リポジトリ直下の別 lockfile を拾って ワークスペースルートを誤検出しないよう、
   // このアプリのディレクトリを明示する（web/ がアプリのルート）。
   turbopack: {
