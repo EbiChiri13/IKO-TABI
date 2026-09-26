@@ -12,8 +12,11 @@ CREATE TABLE IF NOT EXISTS groups (
     CHECK (end_date >= start_date)
 );
 -- 宿・ごはん・スポットを並行投票の1フェーズ（places）に統合した移行（既存DBにも毎起動時に安全に適用）。
-UPDATE groups SET status = 'places' WHERE status IN ('lodging', 'food', 'spot');
+-- 1) 制約を外す → 2) 古い値をplacesへ寄せる → 3) 新しい制約を張り直す、の順で行う。
+-- UPDATEを先にすると旧制約に、ALTER ADDを先にすると未移行の行に新制約が引っかかり、
+-- どちらの順を間違えてもアプリごと起動できなくなる。
 ALTER TABLE groups DROP CONSTRAINT IF EXISTS groups_status_check;
+UPDATE groups SET status = 'places' WHERE status IN ('lodging', 'food', 'spot');
 ALTER TABLE groups ADD CONSTRAINT groups_status_check
     CHECK (status IN ('collecting', 'destination', 'places', 'done'));
 
