@@ -42,7 +42,7 @@ export default function CreateGroupForm({ onSubmit, submitting, error }: CreateG
     >
       <TextField
         label="部屋の名前"
-        placeholder="例：卒業旅行メンバー"
+        placeholder="例：同期旅行メンバー"
         maxLength={20}
         className="min-h-[47px] py-2"
         value={name}

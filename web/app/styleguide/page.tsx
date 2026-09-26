@@ -94,7 +94,7 @@ export default function StyleguidePage() {
 
       <Section title="TextField / DateRangeField / Stepper">
         <div className="max-w-[360px]">
-          <TextField label="部屋の名前" placeholder="例：卒業旅行メンバー" hint="20文字まで" />
+          <TextField label="部屋の名前" placeholder="例：同期旅行メンバー" hint="20文字まで" />
           <TextField label="エラー例" defaultValue="12345" error="正しい形式で入力してください" />
           <DateRangeField start={start} end={end} onChangeStart={setStart} onChangeEnd={setEnd} />
           <Stepper label="人数" value={stepper} onChange={setStepper} />
