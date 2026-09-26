@@ -146,13 +146,46 @@ function JoinForm() {
 
       <main className="flex flex-1 flex-col gap-4 pb-6">
         {/* Figma 473:4612: チケット上端 y=151（ヘッダー h213 に 62px 重ねる） */}
-        <div className="-mt-[22px] flex flex-col items-center [&>div]:-rotate-[8deg]">
-          <TicketCard
-            name={info.group_name}
-            start={info.start_date}
-            end={info.end_date}
-            tagline="Let's invite someone to go with you."
-          />
+        <div className="-mt-[22px] flex flex-col items-center">
+          <div className="relative">
+            <div className="-rotate-[8deg]">
+              <TicketCard
+                name={info.group_name}
+                start={info.start_date}
+                end={info.end_date}
+                tagline="Let's invite someone to go with you."
+              />
+            </div>
+            {/* チケット周りの星の飾り（元デザインの座標をチケット比率に合わせて配置） */}
+            <img
+              src="/figma/invite-star.svg"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute w-[24px] -translate-x-1/2 -translate-y-1/2"
+              style={{ left: "0%", top: "57%" }}
+            />
+            <img
+              src="/figma/invite-star.svg"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute w-[33px] -translate-x-1/2 -translate-y-1/2"
+              style={{ left: "-6%", top: "90%" }}
+            />
+            <img
+              src="/figma/invite-star.svg"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute w-[34px] -translate-x-1/2 -translate-y-1/2"
+              style={{ left: "99%", top: "31%" }}
+            />
+            <img
+              src="/figma/invite-star.svg"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute w-[49px] -translate-x-1/2 -translate-y-1/2"
+              style={{ left: "103%", top: "88%" }}
+            />
+          </div>
         </div>
 
         <p className="px-5 text-center text-[0.95rem] leading-relaxed text-foreground">
