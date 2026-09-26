@@ -11,6 +11,46 @@ IKO-TABI への貢献ありがとうございます。この文書は、複数�
 - API 契約: バックエンドの Pydantic モデルが正。変更時は OpenAPI とフロントエンドの生成スキーマを同期する。
 - 仕様: `docs/` の仕様書と実装が食い違う変更は、仕様の更新要否を変更共有時に記載する。
 
+## Git worktree を使った開発
+
+同時並行の作業では、作業ブランチごとに Git worktree を作成します。worktree ごとにファイルと未コミット変更が分かれるため、別タスクの作業ツリーを汚さずに開発できます。なお、同じブランチを複数の worktree で同時にチェックアウトすることはできません。
+
+メインのリポジトリ（対象ブランチを最新化する場所）から、次のように作業用ディレクトリとブランチを作成します。`../IKO-TABI-member-progress` はリポジトリ外の、分かりやすい場所に読み替えてください。
+
+```bash
+# メインのリポジトリで実行
+git switch main
+git pull --ff-only origin main
+git worktree add -b feat/member-progress ../IKO-TABI-member-progress main
+
+# 作成した worktree へ移動して作業
+cd ../IKO-TABI-member-progress
+```
+
+既存ブランチを使う場合は、`-b <新ブランチ名>` を省きます。
+
+```bash
+git worktree add ../IKO-TABI-api-validation fix/api-validation
+```
+
+各 worktree では README の手順に従って依存関係と環境変数を準備し、その worktree 内で開発・検証・コミットします。`node_modules`、仮想環境、`.env`、ローカル DB などの扱いはプロジェクトの設定に従い、別 worktree と共有する場合は同時実行時の競合に注意してください。
+
+作業終了後は、対象ブランチの変更をコミットまたは退避し、worktree を削除します。未コミット変更がある状態で削除を強制しないでください。
+
+```bash
+# どの worktree があるか確認
+git worktree list
+
+# メインのリポジトリで実行
+git worktree remove ../IKO-TABI-member-progress
+git worktree prune
+
+# ブランチが不要になった場合のみ（マージ後など）
+git branch -d feat/member-progress
+```
+
+削除済みディレクトリが `git worktree list` に残った場合は、`git worktree prune` で管理情報を整理します。
+
 ## 複数人での進め方
 
 1. Issue・タスク単位で目的と担当範囲を明確にし、最新の対象ブランチから作業ブランチを作成します。例: `feat/member-progress`、`fix/api-validation`。
