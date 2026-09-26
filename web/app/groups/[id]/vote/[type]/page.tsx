@@ -117,18 +117,7 @@ export default function VoteTypePage() {
           className="absolute top-[18px] left-1/2 aspect-square w-[373px] max-w-full -translate-x-1/2 bg-contain bg-center bg-no-repeat"
           style={{ backgroundImage: "url(/figma/japan-map.svg)" }}
         />
-        {type === "destination" &&
-          data.items.slice(0, 2).map((item, index) => (
-            <span
-              key={item.id}
-              aria-hidden="true"
-              className={`absolute z-10 grid size-[24px] rotate-[-45deg] place-items-center rounded-full rounded-bl-none border-2 border-white bg-primary text-[10px] font-bold text-foreground shadow ${index === 0 ? "top-[69%] left-[52%]" : "top-[8%] left-[59%]"}`}
-            >
-              <span className="grid size-[14px] rotate-[45deg] place-items-center rounded-full bg-white text-[10px] leading-none text-primary">
-                {index + 1}
-              </span>
-            </span>
-          ))}
+        {/* 行き先候補の地図ピンは、実際の都道府県の位置と対応していなかったため削除（地図イラスト自体は残す） */}
         {type === "destination" && (
           <div aria-hidden="true" className="absolute inset-x-0 top-[355px] h-[335px] rounded-t-[23px] bg-background" />
         )}
