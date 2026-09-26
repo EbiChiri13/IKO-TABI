@@ -58,7 +58,6 @@ export default function SummaryPage() {
           /* ヘッダーに重ねる（Figma: チケット上端 y=151 → 62px オーバーラップ） */
           <div className="-mt-[22px] flex flex-col">
             <TicketCard
-              groupId={groupId}
               name={`${summary.name}（${summary.destination.name}）`}
               start={summary.start_date}
               end={summary.end_date}

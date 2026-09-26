@@ -41,7 +41,6 @@ export default function HomePage() {
 
   const slides: HeroSlide[] = groups.map(({ id, g }) => ({
     id,
-    groupId: id,
     href: `/groups/${id}`,
     name: g.name,
     start: g.start_date,

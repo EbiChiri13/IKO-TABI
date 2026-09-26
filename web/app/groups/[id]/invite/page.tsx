@@ -87,7 +87,7 @@ export default function InvitePage() {
       <main className="flex flex-1 flex-col pb-[34px]">
         {/* Figma 473:4566: チケット上端 y=151（ヘッダー h213 に 62px 重ねる） */}
         <div className="-mt-[22px] flex flex-col">
-          <TicketCard groupId={groupId} name={group.name} start={group.start_date} end={group.end_date} />
+          <TicketCard name={group.name} start={group.start_date} end={group.end_date} />
         </div>
 
         {full && !link && <p className="mt-6 text-center text-sm text-muted-foreground">定員に達しました。</p>}

@@ -1,13 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { CheckIcon, CopyIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 type TicketCardProps = {
-  /** 公開グループID。招待トークンは能力トークンなので渡さない（ID表示・コピーは実在時のみ） */
-  readonly groupId?: string;
   readonly name: string;
   readonly start: string;
   readonly end: string;
@@ -24,7 +20,6 @@ type TicketCardProps = {
  * 写真が無いときは ticket-photo-placeholder.svg を表示する。
  */
 export default function TicketCard({
-  groupId,
   name,
   start,
   end,
@@ -33,19 +28,6 @@ export default function TicketCard({
   href,
   overlap = true,
 }: TicketCardProps) {
-  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "failed">("idle");
-
-  async function copyId() {
-    if (!groupId) return;
-    try {
-      await navigator.clipboard.writeText(groupId);
-      setCopyStatus("copied");
-      setTimeout(() => setCopyStatus("idle"), 1500);
-    } catch {
-      setCopyStatus("failed");
-    }
-  }
-
   return (
     <div
       className={cn(
@@ -80,30 +62,6 @@ export default function TicketCard({
             <img src="/figma/ticket-date-dots.svg" alt="" aria-hidden="true" className="w-[68px] shrink-0" />
             <span className="shrink-0">{end}</span>
           </p>
-          {groupId && (
-            <>
-              <button
-                type="button"
-                onClick={copyId}
-                className="relative z-20 inline-flex max-w-full items-center gap-1.5 rounded-full px-2 py-1 text-[0.78rem] text-background/85 transition-colors duration-150 hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-background"
-              >
-                <span className="max-w-[170px] truncate" title={groupId}>
-                  ID：{groupId}
-                </span>
-                {copyStatus === "copied" ? <CheckIcon size={14} /> : <CopyIcon size={14} />}
-              </button>
-              <span
-                aria-live="polite"
-                className={copyStatus === "failed" ? "text-[0.72rem] font-bold text-background" : "sr-only"}
-              >
-                {copyStatus === "copied"
-                  ? "IDをコピーしました"
-                  : copyStatus === "failed"
-                    ? "コピーできませんでした。IDを選択してコピーしてください"
-                    : ""}
-              </span>
-            </>
-          )}
         </div>
 
         <div className="relative h-[134px] shrink-0">
