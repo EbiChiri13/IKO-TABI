@@ -39,7 +39,7 @@ export default function NewGroupPage() {
       */}
       <header className="relative h-[213px] shrink-0 bg-panel-dark text-background">
         <Link
-          href="/"
+          href="/home"
           className="absolute top-[72px] left-[27px] inline-flex text-inherit no-underline"
           aria-label="戻る"
         >
