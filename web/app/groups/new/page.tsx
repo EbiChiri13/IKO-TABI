@@ -55,20 +55,15 @@ export default function NewGroupPage() {
         >
           <div className="relative aspect-[316/98]">
             <img src="/figma/create-mini-ticket.svg" alt="" className="absolute inset-0 h-full w-full" />
-            {/* 切り欠き（チケット内 x219-235、中心 x227）から右端までを、ミシン目・文言・バーコードが
-                等間隔になるよう space-between で並べる */}
-            <div className="absolute inset-y-[10px] left-[227px] right-[10px] flex items-center justify-between">
-              <div className="h-[74px] w-0 border-l border-dashed border-background" />
-              <p className="w-0 origin-center -rotate-90 text-[4px] leading-none whitespace-nowrap text-background">
-                let&apos;s invite someone to go with you.
-              </p>
-              <div className="relative h-[46px] w-[29px]">
-                <img
-                  src="/figma/create-stub-barcode-b.svg"
-                  alt=""
-                  className="absolute top-1/2 left-1/2 h-[27px] w-[46px] -translate-x-1/2 -translate-y-1/2 -rotate-90"
-                />
-              </div>
+            {/* ミシン目。切り欠き中心 x227 をチケットの上下ほぼ全高で貫く縦の破線 */}
+            <div className="absolute inset-y-1 left-[227px] w-0 border-l border-dashed border-background" />
+            {/* 招待文言。ミシン目とバーコードのあいだ x249 を中心に、縦書き（反時計回り90度）で配置 */}
+            <p className="absolute top-1/2 left-[249px] w-0 origin-center -translate-y-1/2 -rotate-90 text-[4px] leading-none whitespace-nowrap text-background">
+              Let&apos;s invite someone to go with you.
+            </p>
+            {/* バーコード。Figma 横棒（チケット内 x270-299 / 高さ46）に合わせて配置 */}
+            <div className="absolute top-[26px] left-[270px] flex h-[46px] w-[29px] items-center justify-center">
+              <img src="/figma/create-stub-barcode-b.svg" alt="" className="h-[27px] w-[46px] -rotate-90" />
             </div>
           </div>
         </div>
