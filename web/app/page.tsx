@@ -19,15 +19,11 @@ export default function WelcomePage() {
           alt=""
           aria-hidden="true"
         />
-        <p className="absolute left-[13.9%] top-[27.8%] whitespace-nowrap text-[clamp(13px,3.6vw,16px)] font-extrabold leading-none text-background">
-          みんなの
-        </p>
-        <p className="absolute left-[38%] top-[27.1%] origin-left rotate-[-6.37deg] whitespace-nowrap text-[24px] font-bold leading-none text-background">
-          行きたい
-        </p>
-        <p className="absolute left-[65.2%] top-[27.8%] whitespace-nowrap text-[clamp(13px,3.6vw,16px)] font-extrabold leading-none text-background">
-          を叶える
-        </p>
+        <img
+          className="absolute inset-x-0 top-0 h-auto w-full pointer-events-none"
+          src="/splash/hero-phrase.svg"
+          alt="みんなの行きたいを叶える"
+        />
         <img className="absolute left-[13.93%] top-[31.69%] w-[74.88%]" src="/splash/wordmark.svg" alt="いこ！たび" />
 
         {/* 後光だけは横にはみ出すためこの枠で切る */}
