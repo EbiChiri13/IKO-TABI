@@ -279,13 +279,6 @@ function JoinForm() {
                 </Button>
               </Link>
             )}
-            <button
-              type="button"
-              onClick={() => router.push("/")}
-              className="min-h-[40px] cursor-pointer bg-transparent text-sm text-foreground hover:text-foreground/70"
-            >
-              参加を辞退する
-            </button>
           </div>
         ) : (
           <p className="px-5 text-center font-bold text-destructive">
