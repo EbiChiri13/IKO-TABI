@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BackIcon, HomeIcon } from "@/components/icons";
+import { BackIcon } from "@/components/icons";
 import ProgressPill from "@/components/members/ProgressPill";
 import TagChipList from "@/components/tags/TagChipList";
 import BottomBar from "@/components/ui/BottomBar";
@@ -59,7 +59,7 @@ export default function WaitingPage() {
           しばらくお待ちください
         </h1>
       </header>
-      <main className="flex flex-1 flex-col gap-[18px] px-5 pt-[51px] pb-5 text-center">
+      <main className="flex flex-col gap-[18px] px-5 pt-[51px] pb-5 text-center">
         <ProgressPill current={group.answered_count} total={group.member_limit} unit="回答" />
         <p className="-mt-2 text-[0.82rem] text-muted-foreground">みんなの行きたいがそろうまで、もう少しです</p>
 
@@ -69,18 +69,6 @@ export default function WaitingPage() {
             <TagChipList labels={myTags.map((t) => t.label)} highlight={myMustHave} />
           </Card>
         )}
-
-        <Button variant="quiet" block onClick={() => router.push(`/groups/${groupId}/tags`)}>
-          希望を直す
-        </Button>
-
-        <Link
-          href="/home"
-          className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full border border-border bg-background px-6 py-3 font-sans text-base font-medium text-foreground no-underline hover:bg-foreground/5"
-        >
-          <HomeIcon size={24} />
-          ホームへ戻る
-        </Link>
       </main>
 
       <BottomBar note="全員の投票が完了すると結果を見ることが出来ます。">
