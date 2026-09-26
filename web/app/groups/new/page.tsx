@@ -82,7 +82,7 @@ export default function NewGroupPage() {
             />
           </svg>
         </div>
-        <h1 className="absolute top-[190px] left-[59px] z-[1] text-[1.25rem]! leading-[1.5]">
+        <h1 className="absolute top-[190px] left-[74px] z-[1] text-[1.25rem]! leading-[1.5]">
           <span className="inline-block bg-panel-dark px-[7px]">旅行のグループを</span>
           <br />
           <span className="inline-block bg-panel-dark px-[7px]">作りましょう！</span>
