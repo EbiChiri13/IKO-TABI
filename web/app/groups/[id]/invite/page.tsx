@@ -4,9 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CalendarIcon, ShareIcon } from "@/components/icons";
 import InviteHero from "@/components/invite/InviteHero";
-import InviteLinkBox from "@/components/invite/InviteLinkBox";
 import TicketCard from "@/components/invite/TicketCard";
-import BottomBar from "@/components/ui/BottomBar";
 import Button from "@/components/ui/Button";
 import Spinner from "@/components/ui/Spinner";
 import Toast from "@/components/ui/Toast";
@@ -19,18 +17,21 @@ export default function InvitePage() {
   const router = useRouter();
   const token = tokenFor(groupId);
 
+  const [hydrated, setHydrated] = useState(false);
   const [group, setGroup] = useState<GroupView | null>(null);
   const [link, setLink] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
+  useEffect(() => setHydrated(true), []);
+
   useEffect(() => {
-    if (!token) return;
+    if (!hydrated || !token) return;
     api
       .getGroup(groupId, token)
       .then(setGroup)
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "読み込みに失敗しました"));
-  }, [groupId, token]);
+  }, [groupId, hydrated, token]);
 
   useEffect(() => {
     setLink(inviteLinkFor(groupId));
@@ -74,6 +75,7 @@ export default function InvitePage() {
     }
   }
 
+  if (!hydrated) return <Spinner />;
   if (!token) return <Spinner label="このグループの情報が見つかりません" />;
   if (!group) return <Spinner />;
 
@@ -81,47 +83,48 @@ export default function InvitePage() {
 
   return (
     <div className="screen">
-      <InviteHero backHref="/home" groupName={group.name} />
-      <main className="flex flex-1 flex-col gap-3.5 pb-5">
+      <InviteHero backHref="/home" />
+      <main className="flex flex-1 flex-col pb-[34px]">
         {/* Figma 473:4566: チケット上端 y=151（ヘッダー h213 に 62px 重ねる） */}
         <div className="-mt-[22px] flex flex-col">
           <TicketCard groupId={groupId} name={group.name} start={group.start_date} end={group.end_date} />
         </div>
 
-        <div className="flex flex-col gap-2.5 px-5">
-          {link ? (
-            <InviteLinkBox url={link} />
-          ) : full ? (
-            <p className="text-center text-muted-foreground">定員に達しました。</p>
-          ) : (
-            <Button variant="ghost" block onClick={createLink} disabled={creating}>
-              {creating ? "作っています…" : "招待リンクを作る"}
-            </Button>
-          )}
+        {full && !link && <p className="mt-6 text-center text-sm text-muted-foreground">定員に達しました。</p>}
+        <div className="mt-[69px] px-[44px]">
+          <Button
+            variant="primary"
+            block
+            className="h-[50px] min-h-0"
+            onClick={share}
+            disabled={creating || (full && !link)}
+          >
+            <ShareIcon size={16} />
+            {creating ? "作っています…" : "リンクを共有する"}
+          </Button>
         </div>
 
-        {/* Figma 473:4566 は「リンクを共有する」→「あとで」→「計画を始める」の順に縦に並ぶ */}
-        <div className="mt-auto flex flex-col items-center gap-1 px-5">
+        {/* Figma 473:4566: share → later → divider → plan */}
+        <div className="mt-[10px] flex flex-col items-center px-[28px]">
           <button
             type="button"
             onClick={() => router.push(`/groups/${groupId}/tags`)}
-            className="cursor-pointer py-2 text-[14px] text-muted-foreground hover:text-foreground"
+            className="min-h-[43px] cursor-pointer text-[14px] text-foreground hover:text-foreground/70"
           >
             あとで
           </button>
-          <Button variant="ghost" block onClick={() => router.push(`/groups/${groupId}/tags`)}>
+          <div className="w-full border-t border-dashed border-foreground" aria-hidden="true" />
+          <Button
+            variant="primary"
+            block
+            className="mx-auto mt-6 h-[50px] min-h-0 w-[315px] max-w-full"
+            onClick={() => router.push(`/groups/${groupId}/tags`)}
+          >
             <CalendarIcon size={18} />
             計画を始める
           </Button>
         </div>
       </main>
-
-      <BottomBar note="このリンクをそのままみんなに共有すればOKです（人ごとに変える必要はありません）">
-        <Button variant="primary" block onClick={share} disabled={creating || (full && !link)}>
-          <ShareIcon size={16} />
-          リンクを共有する
-        </Button>
-      </BottomBar>
       <Toast message={error} />
     </div>
   );
