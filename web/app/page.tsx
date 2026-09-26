@@ -22,7 +22,7 @@ export default function WelcomePage() {
         <p className="absolute left-[13.9%] top-[27.8%] whitespace-nowrap text-[clamp(13px,3.6vw,16px)] font-extrabold text-background">
           みんなの
         </p>
-        <p className="absolute left-[38%] top-[25.8%] origin-left rotate-[-6.37deg] whitespace-nowrap text-[clamp(19px,5.2vw,24px)] font-extrabold text-background">
+        <p className="absolute left-[38%] top-[25.66%] origin-left rotate-[-6.37deg] whitespace-nowrap text-[24px] font-bold text-background">
           行きたい
         </p>
         <p className="absolute left-[65.2%] top-[27.8%] whitespace-nowrap text-[clamp(13px,3.6vw,16px)] font-extrabold text-background">
