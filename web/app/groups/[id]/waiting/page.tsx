@@ -49,7 +49,11 @@ export default function WaitingPage() {
     <div className="screen">
       <header className="px-5 pt-4">
         <div className="flex h-8 items-center">
-          <Link href={`/groups/${groupId}`} aria-label="戻る" className="inline-flex text-foreground no-underline">
+          <Link
+            href={`/groups/${groupId}/favorite`}
+            aria-label="戻る"
+            className="inline-flex text-foreground no-underline"
+          >
             <BackIcon size={32} />
           </Link>
         </div>
@@ -59,7 +63,7 @@ export default function WaitingPage() {
           しばらくお待ちください
         </h1>
       </header>
-      <main className="flex flex-1 flex-col gap-[18px] px-5 pt-[51px] pb-5 text-center">
+      <main className="flex flex-col gap-[18px] px-5 pt-[51px] pb-5 text-center">
         <ProgressPill current={group.answered_count} total={group.member_limit} unit="回答" />
         <p className="-mt-2 text-[0.82rem] text-muted-foreground">みんなの行きたいがそろうまで、もう少しです</p>
 
@@ -69,18 +73,6 @@ export default function WaitingPage() {
             <TagChipList labels={myTags.map((t) => t.label)} highlight={myMustHave} />
           </Card>
         )}
-
-        <Button variant="quiet" block onClick={() => router.push(`/groups/${groupId}/tags`)}>
-          希望を直す
-        </Button>
-
-        <Link
-          href="/home"
-          className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full border border-border bg-background px-6 py-3 font-sans text-base font-medium text-foreground no-underline hover:bg-foreground/5"
-        >
-          <HomeIcon size={24} />
-          ホームへ戻る
-        </Link>
       </main>
 
       <BottomBar note="全員の投票が完了すると結果を見ることが出来ます。">
@@ -88,6 +80,15 @@ export default function WaitingPage() {
           結果を見る
         </Button>
       </BottomBar>
+      <div className="flex flex-col gap-3 px-5 pb-[calc(20px_+_env(safe-area-inset-bottom))]">
+        <Button variant="ghost" block onClick={() => router.push(`/groups/${groupId}/tags`)}>
+          希望を直す
+        </Button>
+        <Button variant="ghost" block onClick={() => router.push("/home")}>
+          <HomeIcon size={24} />
+          ホームに戻る
+        </Button>
+      </div>
       <Toast message={(error instanceof Error ? error.message : null) || actionError} />
     </div>
   );

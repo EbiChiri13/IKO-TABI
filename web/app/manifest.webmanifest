@@ -1,0 +1,36 @@
+{
+  "name": "いこたび",
+  "short_name": "いこたび",
+  "description": "みんなの「行きたい」を叶える、グループ旅行の希望集めサービス",
+  "lang": "ja",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#48bfae",
+  "theme_color": "#48bfae",
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/maskable-icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/maskable-icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

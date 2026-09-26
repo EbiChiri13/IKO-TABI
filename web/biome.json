@@ -26,6 +26,12 @@
       "preset": "recommended",
       "a11y": {
         "useSemanticElements": "off"
+      },
+      "complexity": {
+        "noImportantStyles": "off"
+      },
+      "performance": {
+        "noImgElement": "off"
       }
     }
   },
