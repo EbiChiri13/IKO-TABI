@@ -45,7 +45,9 @@ export default function NewGroupPage() {
         >
           <BackIcon size={30} />
         </Link>
-        <p className="pointer-events-none absolute top-[75px] left-0 w-full text-center text-[1rem]! font-bold opacity-90">グループ作成</p>
+        <p className="pointer-events-none absolute top-[75px] left-0 w-full text-center text-[1rem]! font-bold opacity-90">
+          グループ作成
+        </p>
         {/* 右上の飛行機＋飛行機雲。元SVGの実測バウンディングボックス x235.74-386.87 / y79.86-144.03 に合わせる */}
         <PlaneTrail className="top-[80px] left-[236px] h-[64px] w-[151px] text-background/25" />
         {/* ティールのミニチケット＋ミシン目＋招待文言＋バーコード。元SVGのパスをそのまま使用（viewBoxで原点をチケット位置にオフセット） */}
