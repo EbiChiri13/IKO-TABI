@@ -72,7 +72,7 @@ function LoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <Link href="#" className="forgot-link">
+        <Link href="/forgot-password" className="forgot-link">
           パスワードをお忘れですか？
         </Link>
 
