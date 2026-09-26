@@ -156,35 +156,88 @@ function JoinForm() {
                 tagline="Let's invite someone to go with you."
               />
             </div>
-            {/* チケット周りの星の飾り（元デザインの座標をチケット比率に合わせて配置） */}
+            {/*
+              チケット周りの星と軌跡（元デザイン「グループ招待.svg」の座標を、
+              チケット外形（ticket-silhouette, 279×443）の実寸コーナーから算出した
+              回転+等倍スケール変換（回転 約-8.17°, スケール 1.0900, 原点=チケット中心）で
+              このチケットのローカル座標系(0,0)-(279,443)へ写像した値。目視での近似は行わない。
+            */}
             <img
               src="/figma/invite-star.svg"
               alt=""
               aria-hidden="true"
-              className="pointer-events-none absolute w-[24px] -translate-x-1/2 -translate-y-1/2"
-              style={{ left: "0%", top: "57%" }}
+              className="pointer-events-none absolute"
+              style={{
+                left: "-29.58px",
+                top: "255.53px",
+                width: "30.16px",
+                transform: "translate(-50%, -50%) rotate(10.81deg)",
+              }}
             />
             <img
               src="/figma/invite-star.svg"
               alt=""
               aria-hidden="true"
-              className="pointer-events-none absolute w-[33px] -translate-x-1/2 -translate-y-1/2"
-              style={{ left: "-6%", top: "90%" }}
+              className="pointer-events-none absolute"
+              style={{
+                left: "-43.91px",
+                top: "409.79px",
+                width: "41.42px",
+                transform: "translate(-50%, -50%) rotate(-26.15deg)",
+              }}
             />
             <img
               src="/figma/invite-star.svg"
               alt=""
               aria-hidden="true"
-              className="pointer-events-none absolute w-[34px] -translate-x-1/2 -translate-y-1/2"
-              style={{ left: "99%", top: "31%" }}
+              className="pointer-events-none absolute"
+              style={{ left: "301.03px", top: "135.54px", width: "41.42px", transform: "translate(-50%, -50%)" }}
             />
             <img
               src="/figma/invite-star.svg"
               alt=""
               aria-hidden="true"
-              className="pointer-events-none absolute w-[49px] -translate-x-1/2 -translate-y-1/2"
-              style={{ left: "103%", top: "88%" }}
+              className="pointer-events-none absolute"
+              style={{
+                left: "314.76px",
+                top: "401.13px",
+                width: "58.80px",
+                transform: "translate(-50%, -50%) rotate(19.49deg)",
+              }}
             />
+            {/* 星の軌跡（元デザインの stroke #0C3239, width 2 の線・曲線をそのまま座標変換） */}
+            <svg
+              aria-hidden="true"
+              className="pointer-events-none absolute"
+              style={{ left: "-19.80px", top: "267.54px", width: "33.60px", height: "45px" }}
+              viewBox="0 0 33.6 45"
+              fill="none"
+            >
+              <line x1="1.2" y1="1.2" x2="32.4" y2="43.8" stroke="#0C3239" strokeWidth="2.18" strokeLinecap="round" />
+            </svg>
+            <svg
+              aria-hidden="true"
+              className="pointer-events-none absolute"
+              style={{ left: "-17.03px", top: "418.14px", width: "42.18px", height: "41.09px" }}
+              viewBox="0 0 42.18 41.09"
+              fill="none"
+            >
+              <path
+                d="M40.98 39.89C37.71 25.18 19.18 5.01 1.2 1.2"
+                stroke="#0C3239"
+                strokeWidth="2.18"
+                strokeLinecap="round"
+              />
+            </svg>
+            <svg
+              aria-hidden="true"
+              className="pointer-events-none absolute"
+              style={{ left: "285.64px", top: "149.98px", width: "14.17px", height: "61.14px" }}
+              viewBox="0 0 14.17 61.14"
+              fill="none"
+            >
+              <line x1="1.2" y1="59.94" x2="12.97" y2="1.2" stroke="#0C3239" strokeWidth="2.18" strokeLinecap="round" />
+            </svg>
           </div>
         </div>
 
