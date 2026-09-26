@@ -41,3 +41,7 @@ torch = [{ index = "pytorch-cpu" }]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+    "integration: PostgreSQL を必要とする API 結合テスト",
+]

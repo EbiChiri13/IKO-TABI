@@ -9,34 +9,33 @@ import os
 import psycopg
 import pytest
 
-TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL")
 
-
-def _reset_schema() -> None:
-    with psycopg.connect(TEST_DATABASE_URL, autocommit=True) as conn:
+def _reset_schema(database_url: str) -> None:
+    with psycopg.connect(database_url, autocommit=True) as conn:
         conn.execute("DROP SCHEMA public CASCADE; CREATE SCHEMA public;")
 
 
-@pytest.fixture(scope="session")
-def client():
+@pytest.fixture
+def client(monkeypatch):
     """API 結合テスト用のクライアントです。
 
     次の3点をテスト用に切り替え、実行結果がネットワークや外部状態に左右されないようにします。
 
-    - テスト用 DB のスキーマを開始時と終了時に作り直します（後始末を残しません）。
+    - テストごとに DB のスキーマを作り直し、テスト間の状態を共有しません。
     - BERT_MODEL を空にして、モデルのダウンロードとベクトル計算を行いません。
     - 起動時の Wikipedia への画像取得を無効化します。
     """
-    if not TEST_DATABASE_URL:
+    database_url = os.environ.get("TEST_DATABASE_URL")
+    if not database_url:
         pytest.skip("TEST_DATABASE_URL が未設定のため、PostgreSQL を使うテストを省略します")
 
-    _reset_schema()
-    os.environ["DATABASE_URL"] = TEST_DATABASE_URL
-    os.environ["BERT_MODEL"] = ""
+    _reset_schema(database_url)
+    monkeypatch.setenv("DATABASE_URL", database_url)
+    monkeypatch.setenv("BERT_MODEL", "")
 
     from app import db as db_module
 
-    db_module.backfill_destination_images = lambda: None
+    monkeypatch.setattr(db_module, "backfill_destination_images", lambda: None)
 
     from fastapi.testclient import TestClient
 
@@ -45,4 +44,4 @@ def client():
     with TestClient(app) as c:
         yield c
 
-    _reset_schema()
+    _reset_schema(database_url)
