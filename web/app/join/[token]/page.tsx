@@ -122,6 +122,11 @@ function JoinForm() {
               アカウントの新規登録はこちら
             </Button>
           </Link>
+          <Link href={`${nextUrl}?demo=1`}>
+            <Button variant="quiet" block>
+              デモ版で参加（ログインなし）
+            </Button>
+          </Link>
         </main>
       </div>
     );
