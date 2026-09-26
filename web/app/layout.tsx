@@ -1,3 +1,4 @@
+import type { Metadata, Viewport } from "next";
 import { Noto_Sans_JP, Yomogi } from "next/font/google";
 import type { ReactNode } from "react";
 import "./globals.css";
@@ -18,12 +19,27 @@ const logo = Yomogi({
   display: "swap",
 });
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "いこたび",
   description: "みんなの「行きたい」を叶える、グループ旅行の希望集めサービス",
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/pwa-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/pwa-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      {
+        url: "/apple-touch-icon-180x180.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
+  },
 };
 
-export const viewport = {
+export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: "#48bfae",
