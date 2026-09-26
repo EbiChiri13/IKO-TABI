@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
         <p className="tagline">
           みんなの <span className="tagline-pill">行きたい</span> を叶える
         </p>
-        <h1 className="ikotabi-logo">いこ！たび</h1>
+        <img className="mx-auto block h-auto w-[240px] max-w-full" src="/splash/wordmark.svg" alt="いこ！たび" />
       </div>
 
       {sent ? (
@@ -81,10 +81,6 @@ export default function ForgotPasswordPage() {
           border-radius: var(--radius-pill);
           padding: 2px 12px;
           transform: rotate(-4deg);
-        }
-        .ikotabi-logo {
-          font-size: 3rem;
-          margin: 0;
         }
         .description {
           margin: 0 0 16px;
