@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BackIcon } from "@/components/icons";
+import { BackIcon, HomeIcon } from "@/components/icons";
 import ProgressPill from "@/components/members/ProgressPill";
 import TagChipList from "@/components/tags/TagChipList";
 import BottomBar from "@/components/ui/BottomBar";
@@ -80,6 +80,15 @@ export default function WaitingPage() {
           結果を見る
         </Button>
       </BottomBar>
+      <div className="flex flex-col gap-3 px-5 pb-[calc(20px_+_env(safe-area-inset-bottom))]">
+        <Button variant="ghost" block onClick={() => router.push(`/groups/${groupId}/tags`)}>
+          希望を直す
+        </Button>
+        <Button variant="ghost" block onClick={() => router.push("/home")}>
+          <HomeIcon size={24} />
+          ホームに戻る
+        </Button>
+      </div>
       <Toast message={(error instanceof Error ? error.message : null) || actionError} />
     </div>
   );
