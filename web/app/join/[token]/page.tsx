@@ -182,7 +182,7 @@ function JoinForm() {
               className="pointer-events-none absolute"
               style={{
                 left: "-43.91px",
-                top: "409.79px",
+                top: "389.79px",
                 width: "41.42px",
                 transform: "translate(-50%, -50%) rotate(-26.15deg)",
               }}
@@ -219,7 +219,7 @@ function JoinForm() {
             <svg
               aria-hidden="true"
               className="pointer-events-none absolute"
-              style={{ left: "-17.03px", top: "418.14px", width: "42.18px", height: "41.09px" }}
+              style={{ left: "-17.03px", top: "398.14px", width: "42.18px", height: "41.09px" }}
               viewBox="0 0 42.18 41.09"
               fill="none"
             >
