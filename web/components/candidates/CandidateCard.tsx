@@ -89,9 +89,11 @@ export default function CandidateCard({ item, type, onToggle, onVote, locked, se
 
         {!compactDestination && (
           <div className="mt-2.5 mb-3.5 flex flex-wrap items-center gap-2.5 text-xs text-muted-foreground">
-            <span className="rounded-full bg-secondary px-2.5 py-0.5 font-bold text-secondary-foreground">
-              {item.member_count}人中{item.matched_count}人の希望にマッチ
-            </span>
+            {item.matched_count > 0 && (
+              <span className="rounded-full bg-secondary px-2.5 py-0.5 font-bold text-secondary-foreground">
+                {item.member_count}人中{item.matched_count}人の希望にマッチ
+              </span>
+            )}
             {item.price != null && (
               <span>{item.price > 0 ? `1人あたり ${item.price.toLocaleString()}円〜` : "無料"}</span>
             )}
