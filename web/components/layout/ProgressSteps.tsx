@@ -8,9 +8,7 @@ const STEPS = ["ハッシュタグ", "お気に入り", "行き先", "宿泊", "
 const STEP_INDEX: Record<GroupStatus, number> = {
   collecting: 0,
   destination: 2,
-  lodging: 3,
-  food: 4,
-  spot: 5,
+  places: 3,
   done: 5,
 };
 
