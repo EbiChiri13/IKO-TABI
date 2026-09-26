@@ -7,10 +7,15 @@ CREATE TABLE IF NOT EXISTS groups (
     end_date      DATE NOT NULL,
     member_limit  SMALLINT NOT NULL CHECK (member_limit BETWEEN 2 AND 4),
     status        TEXT NOT NULL DEFAULT 'collecting'
-                  CHECK (status IN ('collecting', 'destination', 'lodging', 'food', 'spot', 'done')),
+                  CHECK (status IN ('collecting', 'destination', 'places', 'done')),
     created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
     CHECK (end_date >= start_date)
 );
+-- 宿・ごはん・スポットを並行投票の1フェーズ（places）に統合した移行（既存DBにも毎起動時に安全に適用）。
+UPDATE groups SET status = 'places' WHERE status IN ('lodging', 'food', 'spot');
+ALTER TABLE groups DROP CONSTRAINT IF EXISTS groups_status_check;
+ALTER TABLE groups ADD CONSTRAINT groups_status_check
+    CHECK (status IN ('collecting', 'destination', 'places', 'done'));
 
 CREATE TABLE IF NOT EXISTS group_members (
     id             SERIAL PRIMARY KEY,
