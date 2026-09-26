@@ -77,3 +77,31 @@ def test_rank_destinations_relaxes_region():
     ranked, relaxed = rank_destinations(cands, [m, m2], no_sim, n=3)
     assert not relaxed
     assert {r.candidate.region for r in ranked} <= {"沖縄", "九州", "関東"}
+
+
+def test_rank_destinations_fills_hokkaido_and_okinawa_from_neighbor_region():
+    # 北海道・沖縄は候補が1件しかないので、単独で選ばれても全国緩和させず
+    # 近い地方（東北・九州）で残りを埋める。
+    cands = [
+        Candidate("destination", 1, frozenset(), band=1, region="北海道"),
+        Candidate("destination", 2, frozenset(), band=1, region="東北"),
+        Candidate("destination", 3, frozenset(), band=1, region="東北"),
+        Candidate("destination", 4, frozenset(), band=1, region="関東"),
+    ]
+    m = MemberPrefs(1, {"what": ["温泉"]}, regions={"北海道"})
+    ranked, relaxed = rank_destinations(cands, [m], no_sim, n=3)
+    assert not relaxed
+    assert {r.candidate.region for r in ranked} == {"北海道", "東北"}
+    assert ranked[0].candidate.region == "北海道"
+
+    cands_okinawa = [
+        Candidate("destination", 1, frozenset(), band=1, region="沖縄"),
+        Candidate("destination", 2, frozenset(), band=1, region="九州"),
+        Candidate("destination", 3, frozenset(), band=1, region="九州"),
+        Candidate("destination", 4, frozenset(), band=1, region="関東"),
+    ]
+    m_okinawa = MemberPrefs(1, {"what": ["温泉"]}, regions={"沖縄"})
+    ranked, relaxed = rank_destinations(cands_okinawa, [m_okinawa], no_sim, n=3)
+    assert not relaxed
+    assert {r.candidate.region for r in ranked} == {"沖縄", "九州"}
+    assert ranked[0].candidate.region == "沖縄"

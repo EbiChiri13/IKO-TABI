@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { GroupView, RealtimeMessage } from "./api";
 import { api, connectRealtime, tokenFor } from "./api";
 
@@ -22,17 +22,23 @@ export function useLiveGroup(groupId: string | null | undefined): UseLiveGroupRe
   const [group, setGroup] = useState<GroupView | null>(null);
   const [error, setError] = useState<unknown>(null);
   const [loading, setLoading] = useState(true);
+  // 他メンバーの回答・投票のたびに refresh() が重複起動しうるため、
+  // 古いリクエストが後から返ってきて新しい状態を巻き戻さないよう、最新のリクエストだけ反映する。
+  const requestIdRef = useRef(0);
 
   const refresh = useCallback(async () => {
     if (!groupId || !token) return;
+    const requestId = ++requestIdRef.current;
     try {
       const g = await api.getGroup(groupId, token);
+      if (requestId !== requestIdRef.current) return;
       setGroup(g);
       setError(null);
     } catch (e) {
+      if (requestId !== requestIdRef.current) return;
       setError(e);
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) setLoading(false);
     }
   }, [groupId, token]);
 

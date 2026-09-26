@@ -67,8 +67,12 @@ def hotel_photo(prefecture: str) -> str | None:
     return _cached(f"hotel:{prefecture}", fetch)
 
 
-def food_photo(prefecture: str) -> str | None:
-    """ホットペッパーグルメAPIで、都道府県名をキーワードに飲食店写真を1件取る。"""
+def food_photo(prefecture: str, name: str) -> str | None:
+    """ホットペッパーグルメAPIで、都道府県名＋料理名をキーワードに飲食店写真を1件取る。
+
+    都道府県名だけで検索すると同じ県の料理がすべて同じ1件の店にヒットしてしまうため、
+    候補ごとの料理名（例: もんじゃ・焼肉・鍋）も検索語に含め、候補ごとにキャッシュを分ける。
+    """
     api_key = os.environ.get("RECRUIT_API_KEY")
     if not api_key:
         return None
@@ -76,7 +80,7 @@ def food_photo(prefecture: str) -> str | None:
     def fetch() -> str | None:
         params = {
             "key": api_key,
-            "keyword": prefecture,
+            "keyword": f"{prefecture} {name}",
             "count": 1,
             "format": "json",
         }
@@ -89,4 +93,4 @@ def food_photo(prefecture: str) -> str | None:
         except (TypeError, KeyError, IndexError):
             return None
 
-    return _cached(f"food:{prefecture}", fetch)
+    return _cached(f"food:{prefecture}:{name}", fetch)

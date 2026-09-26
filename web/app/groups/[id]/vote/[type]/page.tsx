@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import CandidateList from "@/components/candidates/CandidateList";
 import StepHeader from "@/components/layout/StepHeader";
 import BottomBar from "@/components/ui/BottomBar";
@@ -35,10 +35,15 @@ export default function VoteTypePage() {
   const [selected, setSelected] = useState<Set<CandidateItem["id"]>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // 他メンバーが投票するたびに load() が重複起動しうるため、
+  // 古いリクエストが後から返ってきて投票済み人数を巻き戻さないよう、最新のリクエストだけ反映する。
+  const requestIdRef = useRef(0);
 
   const load = useCallback(async () => {
     if (!token || !type) return;
+    const requestId = ++requestIdRef.current;
     const [group, candidates] = await Promise.all([api.getGroup(groupId, token), api.candidates(groupId, token, type)]);
+    if (requestId !== requestIdRef.current) return;
     setData(candidates);
     setSelected(new Set(candidates.items.filter((i) => i.my_vote).map((i) => i.id)));
 

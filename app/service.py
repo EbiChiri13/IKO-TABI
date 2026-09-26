@@ -35,7 +35,7 @@ def place_image(engine: Engine, place: dict) -> tuple[str, str | None]:
         if url:
             return url, "Powered by 楽天トラベル"
     elif place["type"] == "food":
-        url = food_photo(prefecture)
+        url = food_photo(prefecture, place["name"])
         if url:
             return url, "Powered by ホットペッパー"
     return placeholder_image(place["type"], place["id"]), None

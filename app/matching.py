@@ -15,6 +15,10 @@ TOP_K = 3  # タグをたくさん選んだ人が不利にならないよう、�
 MUST_HAVE_PENALTY = 0.5  # 「絶対に譲れない」タグが外れている候補への掛け目
 MUST_HAVE_SEMANTIC_OK = 0.6  # これ以上意味が近ければ「かなっている」とみなす
 
+# 候補が1件しかない地域（北海道・沖縄）だけが選ばれたとき、n件に届かず
+# 地域条件ごと全国に緩和してしまわないよう、近い地方から補う。
+NEIGHBOR_REGIONS = {"北海道": "東北", "沖縄": "九州"}
+
 # (タグ, 候補の種類, 候補の id) -> コサイン類似度
 Similarity = Callable[[str, str, int], float]
 
@@ -136,6 +140,16 @@ def rank_destinations(
     pool = candidates
     if choosers:
         pool = [c for c in candidates if any(region_fit(m, c) == 1.0 for m in choosers)]
+        if len(pool) < n:
+            # 北海道・沖縄は候補が1件しかないので、近い地方（東北・九州）を補って
+            # 全国緩和を避ける【Hokkaido→東北 / 沖縄→九州で残りを埋める】。
+            neighbor_regions = {NEIGHBOR_REGIONS[r] for m in choosers for r in m.regions if r in NEIGHBOR_REGIONS}
+            if neighbor_regions:
+                pool = [
+                    c
+                    for c in candidates
+                    if any(region_fit(m, c) == 1.0 for m in choosers) or c.region in neighbor_regions
+                ]
     relaxed = len(pool) < n
     if relaxed:
         pool = candidates
