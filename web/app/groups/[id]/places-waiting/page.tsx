@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BackIcon, HomeIcon } from "@/components/icons";
+import { HomeIcon } from "@/components/icons";
 import ProgressPill from "@/components/members/ProgressPill";
 import BottomBar from "@/components/ui/BottomBar";
 import Button from "@/components/ui/Button";
@@ -54,12 +54,8 @@ export default function PlacesWaitingPage() {
     <div className="screen">
       <header className="px-5 pt-4">
         <div className="flex h-8 items-center">
-          <Link
-            href={`/groups/${groupId}/vote/spot`}
-            aria-label="戻る"
-            className="inline-flex text-foreground no-underline"
-          >
-            <BackIcon size={32} />
+          <Link href="/home" aria-label="ホームへ戻る" className="inline-flex text-foreground no-underline">
+            <HomeIcon size={32} />
           </Link>
         </div>
         <h1 className="pt-[65px] text-left text-[20px] font-black text-foreground">
@@ -89,12 +85,6 @@ export default function PlacesWaitingPage() {
           結果を見る
         </Button>
       </BottomBar>
-      <div className="flex flex-col gap-3 px-5 pb-[calc(20px_+_env(safe-area-inset-bottom))]">
-        <Button variant="ghost" block onClick={() => router.push("/home")}>
-          <HomeIcon size={24} />
-          ホームに戻る
-        </Button>
-      </div>
       <Toast message={(error instanceof Error ? error.message : null) || actionError} />
     </div>
   );

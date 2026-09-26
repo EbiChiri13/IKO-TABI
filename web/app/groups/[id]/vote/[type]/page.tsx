@@ -128,7 +128,8 @@ export default function VoteTypePage() {
     <div className="screen">
       <StepHeader
         step={STEP_OF[type]}
-        left="none"
+        left="home"
+        href="/home"
         title={meta.title}
         subtitle={meta.subtitle}
         contentClassName={type === "destination" ? "translate-x-[17px] -translate-y-[9px]" : undefined}
@@ -151,29 +152,24 @@ export default function VoteTypePage() {
         className={`relative z-10 flex flex-1 flex-col pb-5 ${type === "destination" ? "-mt-[9px] px-[11px]" : "px-5 pt-4"}`}
       >
         <div className="mx-auto w-full max-w-[380px]">
-          {type !== "destination" && (
-            <p className="mb-3.5 text-[0.85rem] font-bold text-muted-foreground">
-              投票済み {data.voted_count} / {data.member_total} 人 ・ {selected.size}/{data.vote_limit} 個選択中
-            </p>
-          )}
+          <p className="mb-3.5 text-[0.85rem] font-bold text-muted-foreground">
+            投票済み {data.voted_count} / {data.member_total} 人 ・ {selected.size}/{data.vote_limit} 個選択中
+          </p>
           <CandidateList
             items={data.items}
             type={type}
             onToggle={toggle}
-            onVote={type === "destination" ? (id) => submit([id]) : undefined}
             locked={!data.open || busy}
             selectedIds={selected}
             voteLimit={data.vote_limit}
           />
         </div>
       </main>
-      {type !== "destination" && (
-        <BottomBar>
-          <Button variant="primary" block disabled={selected.size === 0 || busy} onClick={() => submit()}>
-            {busy ? "送信しています…" : alreadyVoted ? "投票を変更する" : "投票する"}
-          </Button>
-        </BottomBar>
-      )}
+      <BottomBar>
+        <Button variant="primary" block disabled={selected.size === 0 || busy} onClick={() => submit()}>
+          {busy ? "送信しています…" : alreadyVoted ? "投票を変更する" : "投票する"}
+        </Button>
+      </BottomBar>
       <Toast message={error} />
     </div>
   );
