@@ -108,7 +108,7 @@ export default function InvitePage() {
         <div className="mt-[10px] flex flex-col items-center px-[28px]">
           <button
             type="button"
-            onClick={() => router.push(`/groups/${groupId}/tags`)}
+            onClick={() => router.push("/home")}
             className="min-h-[43px] cursor-pointer text-[14px] text-foreground hover:text-foreground/70"
           >
             あとで
