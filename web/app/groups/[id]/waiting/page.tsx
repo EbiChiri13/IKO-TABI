@@ -49,7 +49,11 @@ export default function WaitingPage() {
     <div className="screen">
       <header className="px-5 pt-4">
         <div className="flex h-8 items-center">
-          <Link href={`/groups/${groupId}`} aria-label="戻る" className="inline-flex text-foreground no-underline">
+          <Link
+            href={`/groups/${groupId}/favorite`}
+            aria-label="戻る"
+            className="inline-flex text-foreground no-underline"
+          >
             <BackIcon size={32} />
           </Link>
         </div>
