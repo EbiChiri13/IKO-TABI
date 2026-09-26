@@ -55,18 +55,21 @@ export default function NewGroupPage() {
         >
           <div className="relative aspect-[316/98]">
             <img src="/figma/create-mini-ticket.svg" alt="" className="absolute inset-0 h-full w-full" />
-            {/* ミシン目。Figma は切り欠き（チケット内 x219-235）に重なる縦の破線なので、横線の素材を90度回す */}
-            <img
-              src="/figma/create-stub-line.svg"
-              alt=""
-              className="absolute top-1/2 left-[70.6%] w-[74px] -translate-x-1/2 -translate-y-1/2 rotate-90"
-            />
-            {/* バーコード。Figma は横棒（チケット内 x270-299 / 高さ46）なので縦棒の素材を90度回す */}
-            <img
-              src="/figma/create-stub-barcode-b.svg"
-              alt=""
-              className="absolute top-1/2 left-[90%] h-[27px] w-[46px] -translate-x-1/2 -translate-y-1/2 rotate-90"
-            />
+            {/* 切り欠き（チケット内 x219-235、中心 x227）から右端までを、ミシン目・文言・バーコードが
+                等間隔になるよう space-between で並べる */}
+            <div className="absolute inset-y-[10px] left-[227px] right-[10px] flex items-center justify-between">
+              <div className="h-[74px] w-0 border-l border-dashed border-background" />
+              <p className="w-0 origin-center -rotate-90 text-[4px] leading-none whitespace-nowrap text-background">
+                let&apos;s invite someone to go with you.
+              </p>
+              <div className="relative h-[46px] w-[29px]">
+                <img
+                  src="/figma/create-stub-barcode-b.svg"
+                  alt=""
+                  className="absolute top-1/2 left-1/2 h-[27px] w-[46px] -translate-x-1/2 -translate-y-1/2 -rotate-90"
+                />
+              </div>
+            </div>
           </div>
         </div>
         <h1 className="absolute top-[190px] left-[59px] z-[1] text-[1.25rem]! leading-[1.5]">
