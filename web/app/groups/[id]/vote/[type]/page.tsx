@@ -128,8 +128,7 @@ export default function VoteTypePage() {
     <div className="screen">
       <StepHeader
         step={STEP_OF[type]}
-        left="home"
-        href="/home"
+        left="none"
         title={meta.title}
         subtitle={meta.subtitle}
         contentClassName={type === "destination" ? "translate-x-[17px] -translate-y-[9px]" : undefined}
