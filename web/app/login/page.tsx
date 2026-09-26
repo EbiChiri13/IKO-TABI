@@ -51,10 +51,12 @@ function LoginForm() {
   return (
     <div className="screen">
       <div className="hero">
-        <p className="tagline">
-          みんなの <span className="tagline-pill">行きたい</span> を叶える
-        </p>
-        <img className="mx-auto block h-auto w-[240px] max-w-full" src="/splash/wordmark.svg" alt="いこ！たび" />
+        <div className="tagline-art">
+          <img className="tagline-bubble" src="/splash/tag-bubble.svg" alt="" aria-hidden="true" />
+          <img className="tagline-copy" src="/splash/hero-phrase.svg" alt="みんなの行きたいを叶える" />
+          <img className="tagline-copy-highlight" src="/splash/hero-phrase.svg" alt="" aria-hidden="true" />
+        </div>
+        <img className="wordmark" src="/splash/wordmark.svg" alt="いこ！たび" />
       </div>
 
       <form className="form" onSubmit={handleSubmit}>
@@ -88,24 +90,48 @@ function LoginForm() {
 
       <style jsx>{`
         .screen {
-          padding: 56px 24px 32px;
+          padding: 155px 24px 32px;
         }
         .hero {
-          text-align: center;
-          margin-bottom: 32px;
+          width: min(100%, 301px);
+          margin: 0 auto 25px;
+          transform: translateX(5px);
         }
-        .tagline {
-          margin: 0 0 8px;
-          font-weight: 800;
-          font-size: 0.95rem;
-          color: var(--ink-900);
+        .tagline-art {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 301 / 72;
+          overflow: hidden;
         }
-        .tagline-pill {
-          display: inline-block;
-          background: var(--mint-300);
-          border-radius: var(--radius-pill);
-          padding: 2px 12px;
-          transform: rotate(-4deg);
+        .tagline-art img.tagline-bubble {
+          position: absolute;
+          z-index: 2;
+          top: 0;
+          left: 23.26%;
+          width: 47.24%;
+          height: auto;
+        }
+        .tagline-art img {
+          position: absolute;
+          top: -215.28%;
+          left: -18.605%;
+          width: 133.555%;
+          max-width: none;
+          height: auto;
+        }
+        .tagline-copy {
+          z-index: 1;
+          filter: brightness(0);
+        }
+        .tagline-copy-highlight {
+          z-index: 3;
+          clip-path: inset(24.3% 39.5% 69.2% 35.5%);
+        }
+        .wordmark {
+          display: block;
+          width: 100%;
+          height: auto;
+          margin-top: -8px;
         }
         .form :global(.field) {
           margin-bottom: 16px;
