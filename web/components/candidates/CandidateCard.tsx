@@ -10,18 +10,21 @@ type CandidateCardProps = {
   readonly onVote?: (id: CandidateItem["id"]) => void;
   readonly locked: boolean;
   readonly selected: boolean;
+  /** 他の候補が選択上限まで選ばれていて、この候補（未選択・未決定）はもう選べない状態 */
+  readonly dimmed: boolean;
 };
 
 /** 行き先・宿・ごはん・スポットに共通の候補カード（Figma投票カード：写真＋タイトル＋タグ＋teal/ink投票CTA） */
-export default function CandidateCard({ item, type, onToggle, onVote, locked, selected }: CandidateCardProps) {
-  const selectable = !locked && !item.decided;
+export default function CandidateCard({ item, type, onToggle, onVote, locked, selected, dimmed }: CandidateCardProps) {
+  const selectable = !locked && !item.decided && !dimmed;
   const compactDestination = type === "destination" && onVote !== undefined;
   return (
     <Card
       className={cn(
         "w-full max-w-[380px] gap-0 overflow-hidden p-0",
         compactDestination && "rounded-[32px] shadow-card",
-        !compactDestination && (selected || item.decided) && "bg-primary/10",
+        (selected || item.decided) && "bg-primary/10",
+        !selected && dimmed && "opacity-55 grayscale-[0.5]",
       )}
     >
       {!compactDestination && <div className="mx-auto mt-2.5 h-1 w-9 rounded-full bg-border" aria-hidden="true" />}
@@ -109,18 +112,25 @@ export default function CandidateCard({ item, type, onToggle, onVote, locked, se
           }}
           className={cn(
             compactDestination && "mt-4 h-[43px] min-h-0",
-            !compactDestination && selected && "border-foreground bg-foreground text-background hover:bg-foreground/90",
+            selected && "border-foreground bg-foreground text-background hover:bg-foreground/90",
+            !selected && dimmed && "border-border bg-muted text-muted-foreground hover:bg-muted",
           )}
         >
           {compactDestination
-            ? "この行き先に投票する"
+            ? selected
+              ? "投票済み"
+              : dimmed
+                ? "他の行き先に投票済みです"
+                : "この行き先に投票する"
             : item.decided
               ? "この候補に決定しました"
               : selected
                 ? locked
                   ? "投票済み"
                   : "選択中（タップで取り消す）"
-                : "この行き先に投票する"}
+                : dimmed
+                  ? "選択できません（上限に達しました）"
+                  : "この行き先に投票する"}
           {!compactDestination && <span className="text-sm font-bold opacity-85">{item.votes}票</span>}
         </Button>
       </div>

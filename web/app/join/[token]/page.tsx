@@ -148,7 +148,8 @@ function JoinForm() {
         {/* Figma 473:4612: チケット上端 y=151（ヘッダー h213 に 62px 重ねる） */}
         <div className="-mt-[22px] flex flex-col items-center">
           <div className="relative">
-            <div className="-rotate-[8deg]">
+            {/* チケット本体だけを少し縮小し、外側の星・軌跡（下記、位置は不変）と重ならない余白を作る */}
+            <div className="-rotate-[8deg] scale-[0.9]">
               <TicketCard
                 name={info.group_name}
                 start={info.start_date}

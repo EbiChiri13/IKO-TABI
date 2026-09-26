@@ -70,7 +70,13 @@ export default function FavoritePage() {
       <main className="flex-1 px-5 pt-7 pb-6">
         <div className="mx-auto grid w-full max-w-[337px] grid-cols-2 gap-x-[29px] gap-y-[14px]">
           {tags.map((t) => (
-            <FavoritePill key={t.id} label={t.label} selected={pickedId === t.id} onClick={() => setPickedId(t.id)} />
+            <FavoritePill
+              key={t.id}
+              label={t.label}
+              selected={pickedId === t.id}
+              dimmed={pickedId !== null && pickedId !== t.id}
+              onClick={() => setPickedId((prev) => (prev === t.id ? null : t.id))}
+            />
           ))}
         </div>
       </main>

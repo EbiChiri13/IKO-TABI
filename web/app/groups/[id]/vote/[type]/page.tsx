@@ -149,6 +149,7 @@ export default function VoteTypePage() {
             onVote={type === "destination" ? (id) => submit([id]) : undefined}
             locked={!data.open || busy}
             selectedIds={selected}
+            voteLimit={data.vote_limit}
           />
         </div>
       </main>
